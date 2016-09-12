@@ -1,0 +1,29 @@
+.sortHandle{
+    cursor: ns-resize;
+    margin-top: 15px;
+}
+.enabledSwitch{
+    margin-top: 8px;
+}
+.clickable{
+    cursor: pointer;
+}
+.align-right{
+    text-align: right;
+}
+.bootstrap input[type="number"] {
+    display: block;
+    width: 100%;
+    height: 31px;
+    padding: 6px 8px;
+    font-size: 12px;
+    line-height: 1.42857;
+    color: #555;
+    background-color: #F5F8F9;
+    background-image: none;
+    border: 1px solid #C7D6DB;
+    border-radius: 3px;
+    -webkit-transition: border-color ease-in-out 0.15s,box-shadow ease-in-out 0.15s;
+    -o-transition: border-color ease-in-out 0.15s,box-shadow ease-in-out 0.15s;
+    transition: border-color ease-in-out 0.15s,box-shadow ease-in-out 0.15s;
+}
