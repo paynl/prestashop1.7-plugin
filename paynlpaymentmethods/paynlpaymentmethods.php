@@ -226,19 +226,6 @@ class PaynlPaymentMethods extends PaymentModule
             /**
              * @var $order OrderCore
              */
-            $shippingId = $order->id_address_delivery;
-            $invoiceId = $order->id_address_invoice;
-            $shippingAddres = new Address($shippingId);
-            $invoiceAddres = new Address($invoiceId);
-            /**
-             * @var $shippingAddres AddressCore
-             */
-            /**
-             * @var $invoiceAddres AddressCore
-             */
-            // Todo Adressen meesturen
-
-
             if ($order->hasBeenPaid() && !$transaction->isRefunded(false)) {
                 $message = 'Order is already paid | OrderRefercene: ' . $order->reference;
                 return $transaction;
@@ -287,14 +274,89 @@ class PaynlPaymentMethods extends PaymentModule
         return $transaction;
     }
 
+    private function _getAddressData(Cart $cart){
+        /** @var CartCore $cart */
+        $shippingAddressId = $cart->id_address_delivery;
+        $invoiceAddressId = $cart->id_address_invoice;
+        $customerId = $cart->id_customer;
+        $objShippingAddress = new Address($shippingAddressId);
+        $objInvoiceAddress = new Address($invoiceAddressId);
+        $customer = new Customer($customerId);
+        /** @var AddressCore $objShippingAddress */
+        /** @var AddressCore $objInvoiceAddress */
+        /** @var CustomerCore $customer */
+        $enduser = array();
+        $enduser['initials'] = substr($objShippingAddress->firstname,0,1);
+        $enduser['lastname'] = $objShippingAddress->lastname;
+        $enduser['dob'] = $customer->birthday;
+        $enduser['phone'] = $objShippingAddress->phone?$objShippingAddress->phone:$objShippingAddress->phone_mobile;
+        $enduser['email'] = $customer->email;
+
+        list($shipStreet, $shipHousenr) = Paynl\Helper::splitAddress(trim($objShippingAddress->address1.' '.$objShippingAddress->address2));
+        list($invoiceStreet, $invoiceHousenr) = Paynl\Helper::splitAddress(trim($objInvoiceAddress->address1.' '.$objInvoiceAddress->address2));
+
+        /** @var CountryCore $shipCountry */
+        $shipCountry = new Country($objShippingAddress->id_country);
+        $address = array(
+            'streetName' => @$shipStreet,
+            'houseNumber' => @$shipHousenr,
+            'zipCode' => $objShippingAddress->postcode,
+            'city' => $objShippingAddress->city,
+            'country' => $shipCountry->iso_code
+        );
+
+        /** @var CountryCore $invoiceCountry */
+        $invoiceCountry = new Country($objInvoiceAddress->id_country);
+        $invoiceAddress = array(
+            'initials' => substr($objInvoiceAddress->firstname, 0, 1),
+            'lastName' => $objInvoiceAddress->lastname,
+            'streetName' => @$invoiceStreet,
+            'houseNumber' => @$invoiceHousenr,
+            'zipcode' => $objInvoiceAddress->postcode,
+            'city' => $objInvoiceAddress->city,
+            'country' => $invoiceCountry->iso_code
+        );
+        return array(
+            'enduser' => $enduser,
+            'address' => $address,
+            'invoiceAddress' => $invoiceAddress
+        );
+    }
+    private function _getProductData(Cart $cart){
+        /** @var CartCore $cart */
+        $products = $cart->getProducts();
+        $arrResult = array();
+        foreach($products as $product){
+            $arrResult[] = array(
+                'id' => $product['id_product'],
+                'name' => $product['name'],
+                'price' => $product['price_wt'],
+                'tax' => $product['price_wt']-$product['price'],
+                'qty' => $product['cart_quantity']
+            );
+        }
+        $shippingCost_wt = $cart->getTotalShippingCost();
+        $shippingCost = $cart->getTotalShippingCost(null, false);
+        $arrResult[] = array(
+            'id' => 'shipping',
+            'name' => $this->l('Shipping costs'),
+            'price' => $shippingCost_wt,
+            'tax' => $shippingCost_wt - $shippingCost,
+            'qty' => 1,
+        );
+
+        return $arrResult;
+    }
     public function startPayment(Cart $cart, $payment_option_id, $extra_data = array())
     {
+        /** @var CartCore $cart */
         $this->sdkLogin();
 
         $currency = new Currency($cart->id_currency);
-        /**
-         * @var $currency CurrencyCore
-         */
+        /** @var CurrencyCore $currency */
+
+        // todo Productdata meesturen
+        $products = $this->_getProductData($cart);
 
         $startData = array('amount' => $cart->getOrderTotal(true, Cart::BOTH),
             'currency' => $currency->iso_code,
@@ -304,7 +366,11 @@ class PaynlPaymentMethods extends PaymentModule
             'description' => $cart->id,
             'testmode' =>  Configuration::get('PAYNL_TEST_MODE'),
             'extra1' => $cart->id,
-            'language' => Language::getIsoById($cart->id_lang));
+            'language' => Language::getIsoById($cart->id_lang),
+            'products' => $products
+            );
+        $addressData = $this->_getAddressData($cart);
+        $startData = array_merge($startData, $addressData);
 
         if (isset($extra_data['bank'])) {
             $startData['bank'] = $extra_data['bank'];
@@ -362,7 +428,7 @@ class PaynlPaymentMethods extends PaymentModule
             //call api to check if the credentials are correct
             \Paynl\Paymentmethods::getList();
             $loggedin = true;
-        } catch (\Paynl\Error\Error  $e){
+        } catch (\Exception  $e){
 
         }
 
@@ -394,7 +460,7 @@ class PaynlPaymentMethods extends PaymentModule
                     'enabled' => false,
                 );
             }
-        } catch (\Paynl\Error\Error  $e){
+        } catch (\Exception  $e){
 
         }
         return $resultArray;

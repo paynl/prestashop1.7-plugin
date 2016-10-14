@@ -24,15 +24,14 @@
 *}
 
 <form action="{$action}" method="POST" id="payment-form">
-  <input type="hidden" name="payment_option_id" value="{$payment_option_id}" />
-  <p>
-    <label>{l s='Select your bank'}</label>
-    <select id="bank" name="bank">
-      {foreach from=$banks item=bank}
-        <option value="{$bank['id']}">{$bank['name']}</option>
-      {/foreach}
-    </select>
-  </p>
-
+    <input type="hidden" name="payment_option_id" value="{$payment_option_id}"/>
+    <p>
+        <label>{l s='Select your bank'}</label>
+        <select id="bank" name="bank">
+            {foreach from=$banks item=bank}
+                <option value="{$bank['id']}">{$bank['name']}</option>
+            {/foreach}
+        </select>
+    </p>
 
 </form>
