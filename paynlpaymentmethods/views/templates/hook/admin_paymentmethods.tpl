@@ -71,7 +71,7 @@
     </ul>
 
     <div class="panel-footer">
-        <button type="submit" value="1" id="module_form_submit_btn2" name="btnSubmit"
+        <button onclick="submit_form()" type="submit" value="1" id="module_form_submit_btn2" name="btnSubmit"
                 class="btn btn-default pull-right">
             <i class="process-icon-save"></i> {l s='Save'}
         </button>
@@ -79,6 +79,12 @@
 </div>
 <div id="test"></div>
 <script type="text/javascript">
+    function submit_form(){
+        var form = document.getElementById('module_form');
+        form.submit();
+        return false;
+    }
+
     var app = angular.module('paynlApp', ['ui.sortable', 'uiSwitch']);
     app.controller('paymentmethodsCtrl', function ($scope) {
         $scope.toggleSettings = function (paymentmethod) {
