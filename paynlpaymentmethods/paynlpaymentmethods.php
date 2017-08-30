@@ -354,10 +354,10 @@ class PaynlPaymentMethods extends PaymentModule
         /** @var CustomerCore $customer */
         $enduser = array();
         $enduser['initials'] = substr($objShippingAddress->firstname, 0, 1);
-        $enduser['lastname'] = $objShippingAddress->lastname;
-        $enduser['dob'] = $customer->birthday;
-        $enduser['phone'] = $objShippingAddress->phone ? $objShippingAddress->phone : $objShippingAddress->phone_mobile;
-        $enduser['email'] = $customer->email;
+        $enduser['lastName'] = $objShippingAddress->lastname;
+        $enduser['birthDate'] = $customer->birthday;
+        $enduser['phoneNumber'] = $objShippingAddress->phone ? $objShippingAddress->phone : $objShippingAddress->phone_mobile;
+        $enduser['emailAddress'] = $customer->email;
 
         list($shipStreet, $shipHousenr) = Paynl\Helper::splitAddress(trim($objShippingAddress->address1 . ' ' . $objShippingAddress->address2));
         list($invoiceStreet, $invoiceHousenr) = Paynl\Helper::splitAddress(trim($objInvoiceAddress->address1 . ' ' . $objInvoiceAddress->address2));
