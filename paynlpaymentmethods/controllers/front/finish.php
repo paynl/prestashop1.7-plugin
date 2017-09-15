@@ -41,7 +41,7 @@ class PaynlPaymentMethodsFinishModuleFrontController extends ModuleFrontControll
          * @var $module PaynlPaymentMethods
          */
 
-        $transaction = $module->processPayment($transactionId);
+        $transaction = $module->getTransaction($transactionId);
 
         if ($transaction->isPaid() || $transaction->isPending() || $transaction->isBeingVerified()) {
             // naar success

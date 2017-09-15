@@ -23,7 +23,13 @@
 *  @license    http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
 *  International Registered Trademark & Property of PrestaShop SA
 */
-require_once __DIR__ . '/vendor/autoload.php';
+//check if the SDK nieeds to be loaded
+if(!class_exists('\Paynl\Paymentmethods')){
+    $autoload_location = __DIR__ . '/vendor/autoload.php';
+    if(file_exists($autoload_location)){
+        require_once $autoload_location;
+    }
+}
 use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
 
 if (!defined('_PS_VERSION_')) {
@@ -47,7 +53,7 @@ class PaynlPaymentMethods extends PaymentModule
     {
         $this->name = 'paynlpaymentmethods';
         $this->tab = 'payments_gateways';
-        $this->version = '4.0.0';
+        $this->version = '4.0.1';
         $this->ps_versions_compliancy = array('min' => '1.7', 'max' => _PS_VERSION_);
         $this->author = 'Pay.nl';
         $this->controllers = array('startPayment', 'finish', 'exchange');
@@ -69,6 +75,7 @@ class PaynlPaymentMethods extends PaymentModule
         if (!count(Currency::checkPaymentCurrencies($this->id))) {
             $this->warning = $this->l('No currency has been set for this module.');
         }
+
     }
 
     public function install()
@@ -110,7 +117,7 @@ class PaynlPaymentMethods extends PaymentModule
         return false;
     }
 
-    private function getPaymentMethods($cart)
+    private function getPaymentMethods($cart = null)
     {
         /**
          * @var $cart CartCore
@@ -148,9 +155,11 @@ class PaynlPaymentMethods extends PaymentModule
         /**
          * @var $cart CartCore
          */
-        $cartTotal = $cart->getOrderTotal(true, Cart::BOTH);
-        $paymentMethods = json_decode(Configuration::get('PAYNL_PAYMENTMETHODS'));
 
+        $paymentMethods = json_decode(Configuration::get('PAYNL_PAYMENTMETHODS'));
+        if($cart === null) return $paymentMethods;
+
+        $cartTotal = $cart->getOrderTotal(true, Cart::BOTH);
         $result = array();
         foreach ($paymentMethods as $paymentMethod) {
             if (isset($paymentMethod->enabled) && $paymentMethod->enabled == true) {
@@ -190,17 +199,21 @@ class PaynlPaymentMethods extends PaymentModule
         \Paynl\Config::setServiceId($serviceId);
     }
 
+    public function getTransaction($transactionId){
+	    $this->sdkLogin();
+
+	    $transaction = \Paynl\Transaction::get($transactionId);
+
+	    return $transaction;
+    }
+
     public function processPayment($transactionId, &$message = null)
     {
-        $this->sdkLogin();
-
-        $transaction = \Paynl\Transaction::get($transactionId);
+		$transaction = $this->getTransaction($transactionId);
 
         $order_state = $this->statusPending;
         if ($transaction->isPaid()) {
             $order_state = $this->statusPaid;
-
-
         } elseif ($transaction->isCanceled()) {
             $order_state = $this->statusCanceled;
             $status = 'CANCELED';
@@ -214,13 +227,16 @@ class PaynlPaymentMethods extends PaymentModule
          * @var $orderState OrderStateCore
          */
         $orderState = new OrderState($order_state);
-
+        $orderStateName = $orderState->name;
+        if(is_array($orderStateName)){
+            $orderStateName = array_pop($orderStateName);
+        }
         $cart = new Cart($transaction->getExtra1());
         /**
          * @var $cart CartCore
          */
 
-        if ($orderId = Order::getOrderByCartId($transaction->getExtra1())) {
+        if ($orderId = Order::getIdByCartId($transaction->getExtra1())) {
             $order = new Order($orderId);
 
             /**
@@ -230,10 +246,15 @@ class PaynlPaymentMethods extends PaymentModule
                 $message = 'Order is already paid | OrderRefercene: ' . $order->reference;
                 return $transaction;
             }
-            /**
-             * @var $history OrderHistoryCore
-             */
-            $orderPayment = OrderPayment::getByOrderReference($order->reference);
+
+            $orderPayment = null;
+            $arrOrderPayment = OrderPayment::getByOrderReference($order->reference);
+            foreach($arrOrderPayment as $objOrderPayment){
+				if($objOrderPayment->transaction_id == $transactionId){
+					$orderPayment = $objOrderPayment;
+				}
+            }
+
             /**
              * @var $orderPayment OrderPaymentCore
              */
@@ -257,7 +278,7 @@ class PaynlPaymentMethods extends PaymentModule
             $history->changeIdOrderState($order_state, $order->id, true);
             $history->addWs();
 
-            $message = "Updated order (" . $order->reference . ") to: " . $orderState->name;
+            $message = "Updated order (" . $order->reference . ") to: " . $orderStateName;
 
         } else {
             if ($transaction->isPaid()) {
@@ -268,7 +289,7 @@ class PaynlPaymentMethods extends PaymentModule
                 $orderId = Order::getOrderByCartId($transaction->getExtra1());
                 $order = new Order($orderId);
 
-                $message = "Validated order (" . $order->reference . ") with status: " . $orderState->name;
+                $message = "Validated order (" . $order->reference . ") with status: " . $orderStateName;
             }
         }
         return $transaction;
@@ -427,6 +448,10 @@ class PaynlPaymentMethods extends PaymentModule
             $this->_html .= '<br />';
         }
         $loggedin = false;
+        if(!class_exists('\Paynl\Paymentmethods')){
+            $this->adminDisplayWarning($this->l('Cannot find Pay.nl SDK, did you install the source code instead of the package?'));
+            return;
+        }
         try {
             $this->sdkLogin();
             //call api to check if the credentials are correct

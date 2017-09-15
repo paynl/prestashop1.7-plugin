@@ -1,5 +1,5 @@
 {
-  "name": "paynl/prestashop-plugin",
+  "name": "paynl/paynlpaymentmethods",
   "description": "PrestaShop module paymentexample",
   "homepage": "https://github.com/Paynl/prestashop-plugin",
   "license": "AFL - Academic Free License (AFL 3.0)",
