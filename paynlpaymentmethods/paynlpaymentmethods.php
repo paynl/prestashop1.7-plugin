@@ -53,7 +53,7 @@ class PaynlPaymentMethods extends PaymentModule
     {
         $this->name = 'paynlpaymentmethods';
         $this->tab = 'payments_gateways';
-        $this->version = '4.0.1';
+        $this->version = '4.0.2';
         $this->ps_versions_compliancy = array('min' => '1.7', 'max' => _PS_VERSION_);
         $this->author = 'Pay.nl';
         $this->controllers = array('startPayment', 'finish', 'exchange');
@@ -236,7 +236,14 @@ class PaynlPaymentMethods extends PaymentModule
          * @var $cart CartCore
          */
 
-        if ($orderId = Order::getIdByCartId($transaction->getExtra1())) {
+        if(version_compare(_PS_VERSION_, '1.7.1.0', '>=')){
+            $orderId = Order::getIdByCartId($transaction->getExtra1());
+        } else {
+            //Deprecated since prestashop 1.7.1.0
+	    $orderId = Order::getOrderByCartId($transaction->getExtra1());
+        }
+
+        if ($orderId) {
             $order = new Order($orderId);
 
             /**
