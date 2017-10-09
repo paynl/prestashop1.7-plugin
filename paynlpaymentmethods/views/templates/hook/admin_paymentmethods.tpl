@@ -1,7 +1,7 @@
 <div ng-app="paynlApp" ng-controller="paymentmethodsCtrl" class="panel" id="fieldset_1">
 
     <div class="panel-heading">
-        <i class="icon-euro"></i> {l s='Payment methods'}
+        <i class="icon-euro"></i> {l s='Payment methods' mod='paynlpaymentmethods'}
     </div>
     <ul ui-sortable="{literal}{handle: '>>> .sortHandle'}{/literal}" ng-model="paymentmethods"
         id="sortable_paymentmethods" class="list-group">
@@ -29,39 +29,39 @@
             <div class="row" ng-show="showSettings == paymentmethod.id">
                 <div class="formHorizontal">
                     <div class="form-group">
-                        <label class="control-label col-lg-3 align-right">{l s='Name'}</label>
+                        <label class="control-label col-lg-3 align-right">{l s='Name' mod='paynlpaymentmethods'}</label>
                         <div class="col-lg-9">
                             <input type="text" ng-model="paymentmethod.name">
                             <p class="help-block">
-                                {l s='The name of the payment method'}
+                                {l s='The name of the payment method' mod='paynlpaymentmethods'}
                             </p>
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label class="control-label col-lg-3 align-right">{l s='Description'}</label>
+                        <label class="control-label col-lg-3 align-right">{l s='Description' mod='paynlpaymentmethods'}</label>
                         <div class="col-lg-9">
                             <input type="text" ng-model="paymentmethod.description">
                             <p class="help-block">
-                                {l s='Short description for the paymentmethod, Will be shown on selection of the payment method'}
+                                {l s='Short description for the paymentmethod, Will be shown on selection of the payment method' mod='paynlpaymentmethods'}
                             </p>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="control-label col-lg-3 align-right">{l s='Minimum amount'}</label>
+                        <label class="control-label col-lg-3 align-right">{l s='Minimum amount' mod='paynlpaymentmethods'}</label>
                         <div class="col-lg-9">
                             <input style="width:150px;" type="number" ng-model="paymentmethod.min_amount">
                             <p class="help-block">
-                                {l s='The minimum amount for this payment method'}
+                                {l s='The minimum amount for this payment method' mod='paynlpaymentmethods'}
                             </p>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="control-label col-lg-3 align-right">{l s='Maximum amount'}</label>
+                        <label class="control-label col-lg-3 align-right">{l s='Maximum amount' mod='paynlpaymentmethods'}</label>
                         <div class="col-lg-9">
                             <input style="width:150px;" type="number" ng-model="paymentmethod.max_amount">
                             <p class="help-block">
-                                {l s='The maximum amount for this payment method'}
+                                {l s='The maximum amount for this payment method' mod='paynlpaymentmethods'}
                             </p>
                         </div>
                     </div>
