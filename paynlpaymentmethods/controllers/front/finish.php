@@ -63,8 +63,10 @@ class PaynlPaymentMethodsFinishModuleFrontController extends ModuleFrontControll
             unset($this->context->cart);
             unset($this->context->cookie->id_cart);
 
+            $cartId = $transaction->getExtra1();
+            $orderId = Order::getIdByCartId($cartId);
 
-            Tools::redirect('index.php?controller=order-confirmation&'.$slow.'id_cart=' . $cart->id . '&id_module=' . $this->module->id . '&id_order=' . $this->module->currentOrder . '&key=' . $customer->secure_key);
+            Tools::redirect('index.php?controller=order-confirmation&'.$slow.'id_cart=' . $cartId . '&id_module=' . $this->module->id . '&id_order=' . $orderId . '&key=' . $customer->secure_key);
         } else {
             // naar checkout
             Tools::redirect('index.php?controller=order&step=1');
