@@ -48,6 +48,7 @@ class PaynlPaymentMethods extends PaymentModule
     private $statusPending;
     private $statusPaid;
     private $statusCanceled;
+    private $statusRefund;
 
     public function __construct()
     {
@@ -139,7 +140,7 @@ class PaynlPaymentMethods extends PaymentModule
                 ])
                 ->setLogo('https://www.pay.nl/images/payment_profiles/50x32/' . $paymentMethod->id . '.png');
             if (isset($paymentMethod->description)) {
-                $objPaymentMethod->setAdditionalInformation($paymentMethod->description);
+                $objPaymentMethod->setAdditionalInformation('<p>'.$paymentMethod->description.'</p>');
             }
 
             if ($paymentMethod->id == 10) {
@@ -216,11 +217,9 @@ class PaynlPaymentMethods extends PaymentModule
             $order_state = $this->statusPaid;
         } elseif ($transaction->isCanceled()) {
             $order_state = $this->statusCanceled;
-            $status = 'CANCELED';
         }
         if ($transaction->isRefunded(false)) {
             $order_state = $this->statusRefund;
-            $status = 'REFUND';
         }
 
         /**
@@ -250,7 +249,7 @@ class PaynlPaymentMethods extends PaymentModule
              * @var $order OrderCore
              */
             if ($order->hasBeenPaid() && !$transaction->isRefunded(false)) {
-                $message = 'Order is already paid | OrderRefercene: ' . $order->reference;
+                $message = 'Order is already paid | OrderReference: ' . $order->reference;
                 return $transaction;
             }
 

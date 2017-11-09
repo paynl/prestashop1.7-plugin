@@ -22,6 +22,7 @@ $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_b9f5c797ebbf55adc
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_c9cc8cce247e49bae79f15173ce97354'] = 'Opslaan';
 $_MODULE['<{paynlpaymentmethods}prestashop>startpayment_e2b7dec8fa4b498156dfee6e4c84b156'] = 'Deze betaalmethode is niet beschikbaar';
 $_MODULE['<{paynlpaymentmethods}prestashop>payment_form_ideal_c5ddab2a7bb11a7ee8f5a131db40bfae'] = 'Kies uw bank';
+$_MODULE['<{paynlpaymentmethods}prestashop>payment_form_ideal_3ee7960dc804545cf3cc91a1fbc155ca'] = 'Kies uw bank a.u.b.';
 $_MODULE['<{paynlpaymentmethods}prestashop>admin_paymentmethods_0da8d9a75492046bea7f314521e07cae'] = 'Betaalmethoden';
 $_MODULE['<{paynlpaymentmethods}prestashop>admin_paymentmethods_49ee3087348e8d44e1feda1917443987'] = 'Naam';
 $_MODULE['<{paynlpaymentmethods}prestashop>admin_paymentmethods_9444baf5ee361fb18f91039baab7df9c'] = 'De naam van de betaalmethode';

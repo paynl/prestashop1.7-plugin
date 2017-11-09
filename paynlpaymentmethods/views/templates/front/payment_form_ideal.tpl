@@ -22,16 +22,17 @@
 *  @license    http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
 *  International Registered Trademark & Property of PrestaShop SA
 *}
-
 <form action="{$action}" method="POST" id="payment-form">
     <input type="hidden" name="payment_option_id" value="{$payment_option_id}"/>
-    <p>
-        <label>{l s='Select your bank' mod='paynlpaymentmethods'}</label>
-        <select id="bank" name="bank">
-            {foreach from=$banks item=bank}
-                <option value="{$bank['id']}">{$bank['name']}</option>
-            {/foreach}
-        </select>
-    </p>
-
+    <div class="form-group row">
+        <label for="bank" class="col-md-3 form-control-label">{l s='Bank' mod='paynlpaymentmethods'}</label>
+        <div class="col-md-6">
+            <select class="form-control form-control-select" id="bank" name="bank">
+                <option value="">{l s='Please select your bank' mod='paynlpaymentmethods'}</option>
+                {foreach from=$banks item=bank}
+                    <option value="{$bank['id']}">{$bank['name']}</option>
+                {/foreach}
+            </select>
+        </div>
+    </div>
 </form>
