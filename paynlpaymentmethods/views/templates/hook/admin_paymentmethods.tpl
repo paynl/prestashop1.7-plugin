@@ -65,6 +65,26 @@
                             </p>
                         </div>
                     </div>
+                    <div class="form-group">
+                        <label class="control-label col-lg-3 align-right">{l s='Use fee as percentage' mod='paynlpaymentmethods'}</label>
+                        <div class="col-lg-9">
+                            <div class="btn-group">
+                                <switch ng-model="paymentmethod.fee_percentage" class="enabledSwitch blue"></switch>
+                            </div>
+                            <p class="help-block">
+                                {l s='The type of payment fee for this payment method' mod='paynlpaymentmethods'}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-lg-3 align-right">{l s='Value of the fee' mod='paynlpaymentmethods'}</label>
+                        <div class="col-lg-9">
+                            <input style="width:150px;" type="number" class="from-control" ng-model="paymentmethod.fee_value"/>
+                            <p class="help-block">
+                                {l s='Value of the fee' mod='paynlpaymentmethods'}
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </li>
@@ -95,6 +115,7 @@
             }
         };
         $scope.paymentmethods = JSON.parse($('#PAYNL_PAYMENTMETHODS').val());
+
         $scope.$watch('paymentmethods', function (newValue, oldValue) {
             $('#PAYNL_PAYMENTMETHODS').val(JSON.stringify(newValue));
         }, true);

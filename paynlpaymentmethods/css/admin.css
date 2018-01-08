@@ -11,6 +11,12 @@
 .align-right{
     text-align: right;
 }
+
+.switch.checked.blue {
+    background: #00A4E7 !important;
+    border-color: #00A4E7 !important;
+}
+
 .bootstrap input[type="number"] {
     display: block;
     width: 100%;
