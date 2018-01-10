@@ -1,9 +1,6 @@
 <?php
-
-class Order extends OrderCore
-{
-	public function getProductsDetail()
-	{
+class Order extends OrderCore {
+	public function getProductsDetail() {
 		$_details = parent::getProductsDetail();
 		if (Module::isEnabled('paynlpaymentmethods')) {
 			foreach ($_details as &$_detail) {

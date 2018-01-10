@@ -1,6 +1,8 @@
 <?php
 
-class OrderDetail extends OrderDetailCore {
+class OrderDetail extends OrderDetailCore
+{
+
 	public static $definition = array(
 		'table' => 'order_detail',
 		'primary' => 'id_order_detail',
@@ -18,7 +20,8 @@ class OrderDetail extends OrderDetailCore {
 			'product_quantity_return' =>    array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt'),
 			'product_quantity_refunded' =>    array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt'),
 			'product_quantity_reinjected' =>array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt'),
-			'product_price' =>                array('type' => self::TYPE_FLOAT, 'validate' => 'isFloat', 'required' => true),
+			//'product_price' =>                array('type' => self::TYPE_FLOAT, 'validate' => 'isPrice', 'required' => true),
+			'product_price' =>                array('type' => self::TYPE_FLOAT, 'validate' => 'isFloat', 'required' => true), //override reason
 			'reduction_percent' =>            array('type' => self::TYPE_FLOAT, 'validate' => 'isFloat'),
 			'reduction_amount' =>            array('type' => self::TYPE_FLOAT, 'validate' => 'isPrice'),
 			'reduction_amount_tax_incl' =>  array('type' => self::TYPE_FLOAT, 'validate' => 'isPrice'),

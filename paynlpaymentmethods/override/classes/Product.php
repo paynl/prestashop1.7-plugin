@@ -1,5 +1,4 @@
 <?php
-
 class Product extends ProductCore {
     public static function getPriceStatic($id_product, $usetax = true, $id_product_attribute = null, $decimals = 6, $divisor = null,
 		$only_reduc = false, $usereduc = true, $quantity = 1, $force_associated_tax = false, $id_customer = null, $id_cart = null,
@@ -15,6 +14,7 @@ class Product extends ProductCore {
 				return (float)number_format($usetax ? $price_wt : $price, 2);
 			}
 		}
+
 		return parent::getPriceStatic($id_product, $usetax, $id_product_attribute, $decimals, $divisor,
 			$only_reduc, $usereduc, $quantity, $force_associated_tax, $id_customer, $id_cart,
 			$id_address, $specific_price_output, $with_ecotax, $use_group_reduction, $context,

@@ -108,8 +108,9 @@ class PaynlPaymentMethods extends PaymentModule {
 		if ( ! $id_product ) {
 			$objProduct               = new Product();
 			$objProduct->price        = 0;
+			$objProduct->is_virtual   = 1;
 			$objProduct->out_of_stock = 2;
-			$objProduct->minimal_quantity = 0;
+			$objProduct->visibility   =  'none';
 
 			foreach ( Language::getLanguages() as $language ) {
 				$objProduct->name[ $language['id_lang'] ]         = 'Payment fee';
@@ -118,7 +119,9 @@ class PaynlPaymentMethods extends PaymentModule {
 
 			if ( $objProduct->add() ) {
 				//allow buy product out of stock
-				StockAvailable::setProductOutOfStock( $objProduct->id, true );
+				StockAvailable::setProductDependsOnStock($objProduct->id, false);
+				StockAvailable::setQuantity($objProduct->id, $objProduct->getDefaultIdProductAttribute(), 9999999);
+				StockAvailable::setProductOutOfStock( $objProduct->id, true);
 
 				//update product id
 				$id_product = $objProduct->id;
@@ -130,6 +133,9 @@ class PaynlPaymentMethods extends PaymentModule {
 	public function uninstall() {
 
 		if ( parent::uninstall() ) {
+
+			Configuration::deleteByName('PAYNL_FEE_PRODUCT_ID');
+
 			$queries = array();
 			include( _PS_MODULE_DIR_ . $this->name . DIRECTORY_SEPARATOR . 'sql/uninstall.php');
 			foreach ( $queries as $query ) {
@@ -486,13 +492,13 @@ class PaynlPaymentMethods extends PaymentModule {
 			}
 		}
 
-		if ( is_null( $objPaymentMethod ) || ! isset( $objPaymentMethod->fee_type ) ) {
+		if ( is_null( $objPaymentMethod ) || ! isset( $objPaymentMethod->fee_percentage ) ) {
 			return;
 		}
 
 		if ( $fee > 0 ) {
 			$total                   = $this->cartTotal;
-			$type                    = $objPaymentMethod->fee_type ? 1 : 0;
+			$type                    = $objPaymentMethod->fee_percentage ? 1 : 0;
 			$this->payment_option_id = (int) $objPaymentMethod->id;
 
 			Db::getInstance()->execute( '
@@ -509,18 +515,18 @@ class PaynlPaymentMethods extends PaymentModule {
                 VALUES 
                 (
                     ' . (int) $id_cart . ',
-                    "' . (float) $total . '",
+                    ' . (float) $total . ',
                     ' . (int) $type . ',
                     ' . (int) $this->payment_option_id . ',
-                    "' . (float) $fee . '",
+                    ' . (float) $fee . ',
                     "' . date( 'Y-m-d H:i:s' ) . '",
                     "' . date( 'Y-m-d H:i:s' ) . '" 
                 )
                 ON DUPLICATE KEY UPDATE 
-                    `total` = "' . (float) $total . '",
+                    `total` = ' . (float) $total . ',
                     `type` = ' . (int) $type . ',
                     `payment_option_id` = ' . (int) $this->payment_option_id . ',
-                    `fee` = "' . (float) $fee . '",
+                    `fee` = ' . (float) $fee . ',
                     `date_add` = "' . date( 'Y-m-d H:i:s' ) . '",
                     `date_updated` = "' . date( 'Y-m-d H:i:s' ) . '" 
             ' );
@@ -573,7 +579,7 @@ class PaynlPaymentMethods extends PaymentModule {
 		$specific_price_rule->reduction_tax  = 1;
 		$specific_price_rule->reduction_type = 'amount';
 		$specific_price_rule->from           = date( "Y-m-d H:i:s" );
-		$specific_price_rule->to             = date( "Y-m-d" ) . ' 23:59:59';
+		$specific_price_rule->to             = date( "Y-m-d H:i:s", time() + 1 );
 		$specific_price_rule->price          = (float) $iFee;
 		$specific_price_rule->add();
 	}
