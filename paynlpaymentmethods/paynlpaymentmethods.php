@@ -103,7 +103,7 @@ class PaynlPaymentMethods extends PaymentModule
 		return true;
 	}
 
-	private function createPaymentFeeProduct() {
+	public function createPaymentFeeProduct() {
 		$id_product = Configuration::get( 'PAYNL_FEE_PRODUCT_ID' );
 
 		// check if paymentfee product exists
@@ -283,7 +283,7 @@ class PaynlPaymentMethods extends PaymentModule
 				}
 
                 // check country
-                if($paymentMethod->limit_countries){
+                if(isset($paymentMethod->limit_countries) && $paymentMethod->limit_countries == 1){
                     $address = new Address($cart->id_address_delivery);
                     $address->id_country;
                     $allowed_countries = $paymentMethod->allowed_countries;
@@ -510,7 +510,7 @@ class PaynlPaymentMethods extends PaymentModule
 
 		if ( $fee > 0 ) {
 			$total                   = $this->cartTotal;
-			$type                    = $objPaymentMethod->fee_percentage ? 1 : 0;
+			$type                    = (isset($objPaymentMethod->fee_percentage) && $objPaymentMethod->fee_percentage == true) ? 1 : 0;
 			$this->payment_option_id = (int) $objPaymentMethod->id;
 
 			Db::getInstance()->execute( '
