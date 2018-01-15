@@ -10,6 +10,13 @@ $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_1fc245c1ed6edf855
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_d262bca42a884db060f5a6667b21205d'] = 'APItoken is verplicht';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_eca1973b20e3b246847fd7f1648c2599'] = 'ServiceId is verplicht';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_c888438d14855d7d96a2724ee9c306bd'] = 'Instellingen opgeslagen';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_68bf367e228f45ba83cb8831a5ee6447'] = 'Nederlands';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_78463a384a5aa4fad5fa73e2f506ecfc'] = 'Engels';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_cb5480c32e71778852b08ae1e8712775'] = 'Spaans';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_4be8e06d27bca7e1828f2fa9a49ca985'] = 'Italiaans';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_ad225f707802ba118c22987186dd38e8'] = 'Frans';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_86bc3115eb4e9873ac96904a4a68e19e'] = 'Duits';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_086247a9b57fde6eefee2a0c4752242d'] = 'Automatisch';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_cf36c09602888e0a3ea8b0e160e40ad7'] = 'Pay.nl account gegevens';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_0a0d3d18ca5a07d08e62a1c962f91946'] = 'APItoken';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_04542edeb8b2c5b3922716ca8ddd0032'] = 'Je kunt je APItoken vinden onderaan op https://admin.pay.nl/my_merchant';
@@ -19,9 +26,10 @@ $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_4245499695408b974
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_61142607f22ea506073bcb1c1c74133e'] = 'Start de transacties in sandbox modus om te testen';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_00d23a76e43b46dae9ec7aa9dcbebb32'] = 'Ingeschakeld';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_b9f5c797ebbf55adccdd8539a65a0241'] = 'Uitgeschakeld';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_3d8bf69f189462bae437c9b50d32f4e1'] = 'Betaalscherm taal';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_c9cc8cce247e49bae79f15173ce97354'] = 'Opslaan';
 $_MODULE['<{paynlpaymentmethods}prestashop>startpayment_e2b7dec8fa4b498156dfee6e4c84b156'] = 'Deze betaalmethode is niet beschikbaar';
-$_MODULE['<{paynlpaymentmethods}prestashop>payment_form_ideal_c5ddab2a7bb11a7ee8f5a131db40bfae'] = 'Kies uw bank';
+$_MODULE['<{paynlpaymentmethods}prestashop>payment_form_ideal_eb45bd2725cb8ac50d0795432a918f86'] = 'Bank';
 $_MODULE['<{paynlpaymentmethods}prestashop>payment_form_ideal_3ee7960dc804545cf3cc91a1fbc155ca'] = 'Kies uw bank a.u.b.';
 $_MODULE['<{paynlpaymentmethods}prestashop>admin_paymentmethods_0da8d9a75492046bea7f314521e07cae'] = 'Betaalmethoden';
 $_MODULE['<{paynlpaymentmethods}prestashop>admin_paymentmethods_49ee3087348e8d44e1feda1917443987'] = 'Naam';
