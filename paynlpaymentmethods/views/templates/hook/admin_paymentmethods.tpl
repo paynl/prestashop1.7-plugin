@@ -66,22 +66,22 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="control-label col-lg-3 align-right">{l s="Limit countries" mod="paynlpaymentmethods"}</label>
+                        <label class="control-label col-lg-3 align-right">{l s="Limit countries" mod='paynlpaymentmethods'}</label>
                         <div class="col-lg-9">
                             <switch ng-model="paymentmethod.limit_countries" class="enabledSwitch blue"></switch>
                             <p class="help-block">
-                                {l s="Enable this if you want to limit this payment method for cerain countries" mod="paynlpaymentmethods"}
+                                {l s="Enable this if you want to limit this payment method for cerain countries" mod='paynlpaymentmethods'}
                             </p>
                         </div>
                     </div>
                     <div class="form-group" ng-if="paymentmethod.limit_countries">
-                        <label class="control-label col-lg-3 align-right">{l s="Allowed countries" mod="paynlpaymentmethods"}</label>
+                        <label class="control-label col-lg-3 align-right">{l s="Allowed countries" mod='paynlpaymentmethods'}</label>
                         <div class="col-lg-9">
                             <select name="allowed_countries" ng-model="paymentmethod.allowed_countries" multiple>
                                 {literal}<option ng-repeat="country in availableCountries" value="{{country.id_country}}">{{country.name}}</option>{/literal}
                             </select>
                             <p class="help-block">
-                                {l s="Select all countries where this paymentmethod may be used, hold ctrl to select multiple countries" mod="paynlpaymentmethods"}
+                                {l s="Select all countries where this paymentmethod may be used, hold ctrl to select multiple countries" mod='paynlpaymentmethods'}
                             </p>
                         </div>
                     </div>
