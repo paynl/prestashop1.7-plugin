@@ -59,7 +59,7 @@ class PaynlPaymentMethods extends PaymentModule
 	public function __construct() {
 		$this->name                   = 'paynlpaymentmethods';
 		$this->tab                    = 'payments_gateways';
-		$this->version                = '4.0.4';
+		$this->version                = '4.1.0';
 		$this->ps_versions_compliancy = array( 'min' => '1.7', 'max' => _PS_VERSION_ );
 		$this->author                 = 'Pay.nl';
 		$this->controllers            = array( 'startPayment', 'finish', 'exchange' );

@@ -10,8 +10,5 @@ $queries[] = 'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'paynl_pfee_cart` (
 	`total` decimal(20,6) NOT NULL DEFAULT \'0.000000\',
 	`date_add` datetime NOT NULL,
 	`date_updated` datetime NOT NULL
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-  
-ALTER TABLE `ps_paynl_pfee_cart`
-  ADD PRIMARY KEY (`id_cart`);
-COMMIT;';
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8
+    PRIMARY KEY (`id_cart`);';
