@@ -6,7 +6,7 @@ function upgrade_module_4_1($module)
 {
     $results = array();
 
-    $results[] = Db::getInstance()->execute(
+    $results[] = (bool)Db::getInstance()->execute(
         'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'paynl_pfee_cart` (
         `id_cart` int(11) UNSIGNED NOT NULL,
         `payment_option_id` int(11) NOT NULL,
@@ -19,8 +19,8 @@ function upgrade_module_4_1($module)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8;'
     );
 
-    $results[] = $module->registerHook('actionValidateOrder');
-    $results[] = $module->createPaymentFeeProduct();
+    $results[] = (bool)$module->registerHook('actionValidateOrder');
+    $results[] = (bool)$module->createPaymentFeeProduct();
 
     $results[] = (bool)$module->uninstallOverrides();
     $results[] = (bool)$module->installOverrides();
