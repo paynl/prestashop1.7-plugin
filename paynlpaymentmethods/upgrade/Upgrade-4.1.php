@@ -22,6 +22,9 @@ function upgrade_module_4_1($module)
     $results[] = $module->registerHook('actionValidateOrder');
     $results[] = $module->createPaymentFeeProduct();
 
+    $results[] = (bool)$module->uninstallOverrides();
+    $results[] = (bool)$module->installOverrides();
+
     if(in_array(false, $results)) return false;
     return true;
 }
