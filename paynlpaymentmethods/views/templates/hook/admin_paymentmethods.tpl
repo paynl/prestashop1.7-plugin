@@ -68,7 +68,7 @@
                     <div class="form-group">
                         <label class="control-label col-lg-3 align-right">{l s="Limit countries" mod="paynlpaymentmethods"}</label>
                         <div class="col-lg-9">
-                            <input type="checkbox" ng-model="paymentmethod.limit_countries">
+                            <switch ng-model="paymentmethod.limit_countries" class="enabledSwitch blue"></switch>
                             <p class="help-block">
                                 {l s="Enable this if you want to limit this payment method for cerain countries" mod="paynlpaymentmethods"}
                             </p>
