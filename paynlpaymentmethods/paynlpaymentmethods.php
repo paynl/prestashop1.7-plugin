@@ -130,6 +130,7 @@ class PaynlPaymentMethods extends PaymentModule
 				Configuration::updateValue( 'PAYNL_FEE_PRODUCT_ID', $id_product );
 			}
 		}
+		return true;
 	}
 
 	public function uninstall() {
