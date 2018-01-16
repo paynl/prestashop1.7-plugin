@@ -115,7 +115,7 @@ class PaynlPaymentMethods extends PaymentModule
 			$objProduct->visibility   =  'none';
 
 			foreach ( Language::getLanguages() as $language ) {
-				$objProduct->name[ $language['id_lang'] ]         = 'Payment fee';
+				$objProduct->name[ $language['id_lang'] ]         = $this->l('Payment fee');
 				$objProduct->link_rewrite[ $language['id_lang'] ] = Tools::link_rewrite( $objProduct->name[ $language['id_lang'] ] );
 			}
 
@@ -582,7 +582,7 @@ class PaynlPaymentMethods extends PaymentModule
 		$iFee    = (float) number_format( (float) $iFee_wt / ( 1 + ( $vatRate / 100 ) ), 2 );
 
 		$specific_price_rule                 = new SpecificPriceRule();
-		$specific_price_rule->name           = 'Payment fee';
+		$specific_price_rule->name           = $this->l('Payment fee');
 		$specific_price_rule->id_shop        = (int) $this->context->shop->id;
 		$specific_price_rule->id_currency    = $cart->id_currency;
 		$specific_price_rule->id_country     = 0;
@@ -683,8 +683,6 @@ class PaynlPaymentMethods extends PaymentModule
 	private function _getProductData( Cart $cart ) {
 		$arrResult = array();
 		foreach ( $cart->getProducts() as $product ) {
-
-
 			$arrResult[] = array(
 				'id'            => $product['id_product'],
 				'name'          => $product['name'],

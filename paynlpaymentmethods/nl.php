@@ -5,6 +5,7 @@ $_MODULE = array();
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_fd93c592927b54c1ff15f8804f8c0b05'] = 'Pay.nl';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_464911b85907011709769c8123b32437'] = 'Voeg vele betaalmethoden toe aan uw webshop';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_a02758d758e8bec77a33d7f392eb3f8a'] = 'Er is voor deze module geen valuta ingesteld';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_020c2091aec3019d02193cef080bcf97'] = 'Betaalmethode toeslag';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_c888438d14855d7d96a2724ee9c306bd'] = 'Instellingen opgeslagen';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_68bf367e228f45ba83cb8831a5ee6447'] = 'Nederlands';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_78463a384a5aa4fad5fa73e2f506ecfc'] = 'Engels';
