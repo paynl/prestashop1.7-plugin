@@ -2,7 +2,7 @@
 /**
  * @param $module PaynlPaymentMethods
  */
-function upgrade_module_4_1($module)
+function upgrade_module_4_2($module)
 {
     $results = array();
 
