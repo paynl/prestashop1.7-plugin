@@ -39,7 +39,6 @@ if ( ! defined('_PS_VERSION_')) {
 
 class PaynlPaymentMethods extends PaymentModule
 {
-    const DEFAULT_FEE_STOCK = 1;
     protected $_html = '';
     protected $_postErrors = array();
     private $statusPending;
@@ -237,7 +236,7 @@ class PaynlPaymentMethods extends PaymentModule
                 $totalWithFee       = $cartTotal + $paymentMethod->fee;
 
                 if ($paymentMethod->fee > 0) {
-                    $strFee = " (+ " . Tools::displayPrice($paymentMethod->fee, $cart->id_currency) . ")";
+                    $strFee = " (+ " . Tools::displayPrice($paymentMethod->fee, (int) $cart->id_currency, true) . ")";
                 }
 
                 $paymentMethod->name .= $strFee;
@@ -483,6 +482,8 @@ class PaynlPaymentMethods extends PaymentModule
         $result = \Paynl\Transaction::start($startData);
 
         if ($this->shouldValidateOnStart($payment_option_id)) {
+            // flush the package list, so the fee is added to it.
+            $list = $this->context->cart->getPackageList(true);
             $this->validateOrder($cart->id, $this->statusPending, 0, $this->getPaymentMethodName($payment_option_id),
                 null, array(), null, false, $cart->secure_key);
         }
@@ -507,13 +508,14 @@ class PaynlPaymentMethods extends PaymentModule
      */
     private function addPaymentFee(Cart $cart, $iFee_wt)
     {
-        if ($iFee_wt <= 0) { // todo: check of we ook korting kunnen geven
+        if ($iFee_wt <= 0) {
             return;
         }
 
         $feeProduct = new Product(Configuration::get('PAYNL_FEE_PRODUCT_ID'), true);
 
-        $cart->updateQty(self::DEFAULT_FEE_STOCK, Configuration::get('PAYNL_FEE_PRODUCT_ID'));
+        $cart->updateQty(1, Configuration::get('PAYNL_FEE_PRODUCT_ID'));
+
         $cart->save();
 
         $vatRate = $feeProduct->tax_rate;
@@ -526,7 +528,7 @@ class PaynlPaymentMethods extends PaymentModule
         $specific_price->id_product_attribute = $feeProduct->getDefaultAttribute($feeProduct->id);
         $specific_price->id_cart              = (int)$cart->id;
         $specific_price->id_shop              = (int)$this->context->shop->id;
-        $specific_price->id_currency          = $cart->id_currency;
+        $specific_price->id_currency          = 0;
         $specific_price->id_country           = 0;
         $specific_price->id_group             = 0;
         $specific_price->id_customer          = 0;
