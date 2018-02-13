@@ -325,7 +325,7 @@ class PaynlPaymentMethods extends PaymentModule
         $transaction = $this->getTransaction($transactionId);
 
         $order_state = $this->statusPending;
-        if ($transaction->isPaid()) {
+        if ($transaction->isPaid() || $transaction->isAuthorized()) {
             $order_state = $this->statusPaid;
         } elseif ($transaction->isCanceled()) {
             $order_state = $this->statusCanceled;
@@ -400,7 +400,7 @@ class PaynlPaymentMethods extends PaymentModule
             $message = "Updated order (" . $order->reference . ") to: " . $orderStateName;
 
         } else {
-            if ($transaction->isPaid()) {
+            if ($transaction->isPaid() || $transaction->isAuthorized() || $transaction->isBeingVerified()) {
                 try {
                     $this->validateOrder((int)$transaction->getExtra1(), $order_state,
                         $transaction->getPaidCurrencyAmount(),
@@ -483,7 +483,8 @@ class PaynlPaymentMethods extends PaymentModule
 
         if ($this->shouldValidateOnStart($payment_option_id)) {
             // flush the package list, so the fee is added to it.
-            $list = $this->context->cart->getPackageList(true);
+            $this->context->cart->getPackageList(true);
+
             $this->validateOrder($cart->id, $this->statusPending, 0, $this->getPaymentMethodName($payment_option_id),
                 null, array(), null, false, $cart->secure_key);
         }
