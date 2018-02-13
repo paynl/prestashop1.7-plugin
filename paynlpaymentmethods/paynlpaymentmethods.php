@@ -82,6 +82,8 @@ class PaynlPaymentMethods extends PaymentModule
         if ( ! parent::install()
              || ! $this->registerHook('paymentOptions')
              || ! $this->registerHook('paymentReturn')
+             || ! $this->uninstallOverrides()
+             || ! $this->removeFeeTable()
         ) {
             return false;
         }
@@ -90,6 +92,17 @@ class PaynlPaymentMethods extends PaymentModule
         $this->createPaymentFeeProduct();
 
         return true;
+    }
+
+    /**
+     * This table was added in a previous version, but is no longer needed
+     *
+     * @return bool
+     */
+    private function removeFeeTable()
+    {
+        return (bool)Db::getInstance()->execute(
+            'DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'paynl_pfee_cart`');
     }
 
     public function createPaymentFeeProduct()
