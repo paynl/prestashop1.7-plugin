@@ -95,9 +95,10 @@ class PaynlPaymentMethods extends PaymentModule
     public function createPaymentFeeProduct()
     {
         $id_product = Configuration::get('PAYNL_FEE_PRODUCT_ID');
+        $feeProduct = new Product(Configuration::get('PAYNL_FEE_PRODUCT_ID'), true);
 
         // check if paymentfee product exists
-        if ( ! $id_product) {
+        if ( ! $id_product || ! $feeProduct->id) {
             $objProduct               = new Product();
             $objProduct->price        = 0;
             $objProduct->is_virtual   = 1;
@@ -448,6 +449,7 @@ class PaynlPaymentMethods extends PaymentModule
      */
     public function startPayment(Cart $cart, $payment_option_id, $extra_data = array())
     {
+        $this->createPaymentFeeProduct();
         $this->sdkLogin();
 
         $currency = new Currency($cart->id_currency);
