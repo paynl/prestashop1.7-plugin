@@ -449,7 +449,7 @@ class PaynlPaymentMethods extends PaymentModule
      */
     public function startPayment(Cart $cart, $payment_option_id, $extra_data = array())
     {
-        $this->createPaymentFeeProduct();
+
         $this->sdkLogin();
 
         $currency = new Currency($cart->id_currency);
@@ -521,7 +521,7 @@ class PaynlPaymentMethods extends PaymentModule
         if ($iFee_wt <= 0) {
             return;
         }
-
+        $this->createPaymentFeeProduct();
         $feeProduct = new Product(Configuration::get('PAYNL_FEE_PRODUCT_ID'), true);
 
         $cart->updateQty(1, Configuration::get('PAYNL_FEE_PRODUCT_ID'));
@@ -529,6 +529,14 @@ class PaynlPaymentMethods extends PaymentModule
         $cart->save();
 
         $vatRate = $feeProduct->tax_rate;
+        // if product doesn't exists, it assumes to have a taxrate 0
+        if($vatRate == 0) {
+            foreach($cart->getProducts() as $product) {
+                if($vatRate < $product['rate']) {
+                    $vatRate = $product['rate'];
+                }
+            }
+        }
 
         $iFee_wt = (float)number_format($iFee_wt, 2);
         $iFee    = (float)number_format((float)$iFee_wt / (1 + ($vatRate / 100)), 2);
