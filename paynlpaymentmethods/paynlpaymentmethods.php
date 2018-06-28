@@ -449,7 +449,6 @@ class PaynlPaymentMethods extends PaymentModule
      */
     public function startPayment(Cart $cart, $payment_option_id, $extra_data = array())
     {
-
         $this->sdkLogin();
 
         $currency = new Currency($cart->id_currency);
