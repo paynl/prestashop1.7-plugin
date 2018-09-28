@@ -32,6 +32,21 @@ class Result
         $this->data = $data;
     }
 
+    public function isRefunded()
+    {
+        return $this->data['refund']['statusName'] == 'Verwerkt';
+    }
+
+    public function getRequest()
+    {
+        return $this->data['request'];
+    }
+
+    public function getRefund()
+    {
+        return $this->data['refund'];
+    }
+
     /**
      * Get the complete result as an array
      * @return array

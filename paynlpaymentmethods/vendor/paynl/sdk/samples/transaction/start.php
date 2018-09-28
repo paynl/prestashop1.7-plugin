@@ -23,22 +23,23 @@ try {
     $result = \Paynl\Transaction::start(array(
         // required
         'amount' => 12.5,
-        'returnUrl' => dirname(Paynl\Helper::getBaseUrl()) . '/return.php',
+        'returnUrl' => dirname(\Paynl\Helper::getBaseUrl()) . '/return.php',
 
         // optional
-        'exchangeUrl' => dirname(Paynl\Helper::getBaseUrl()) . '/exchange.php',
+        'exchangeUrl' => dirname(\Paynl\Helper::getBaseUrl()) . '/exchange.php',
         'paymentMethod' => 10,
         'currency' => 'EUR',
-        'expireDate' => new DateTime('2016-04-01'),
+        'expireDate' => new \DateTime('2016-04-01'),
 //        'bank' => 1,
+        'orderNumber' => 'ABCDEFG12346', // max 16 alphanumeric characters
         'description' => '123456',
         'testmode' => 0,
         'extra1' => 'ext1',
         'extra2' => 'ext2',
         'extra3' => 'ext3',
         'ipaddress' => '10.0.0.1',
-        'invoiceDate' => new DateTime('now'),
-        'deliveryDate' => new DateTime('2016-06-06'), // in case of tickets for an event, use the event date here
+        'invoiceDate' => new \DateTime('now'),
+        'deliveryDate' => new \DateTime('2016-06-06'), // in case of tickets for an event, use the event date here
         'products' => array(
             array(
                 'id' => 1,
@@ -86,7 +87,7 @@ try {
             'initials' => 'T',
             'lastName' => 'Test',
             'gender' => 'M',
-            'birthDate' => new DateTime('1999-02-15'),
+            'birthDate' => new \DateTime('1999-02-15'),
             'phoneNumber' => '0612345678',
             'emailAddress' => 'test@test.nl',
             'customerReference' => '456789',//your customer id
@@ -116,6 +117,7 @@ try {
             'city' => 'ITest',
             'country' => 'NL',
         ),
+        'object' => 'Object', // 64 characters max
 
         // Only use this if you are told to
 //        'transferType' => 'merchant',
@@ -125,12 +127,11 @@ try {
 //        'transferValue' => '12345678X260bc5', // The transactionId
     ));
 
-// Save this transactionid and link it to your order
+    // Save this transactionid and link it to your order
     $transactionId = $result->getTransactionId();
 
     echo '<a href="' . $result->getRedirectUrl() . '">' . $result->getRedirectUrl() . '</a>';
     echo "<br />" . $transactionId;
-
 } catch (\Paynl\Error\Error $e) {
     echo "Fout: " . $e->getMessage();
 }

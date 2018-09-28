@@ -2,7 +2,7 @@
 require_once '../../../vendor/autoload.php';
 require_once '../../config.php';
 try {
-    $result = Paynl\DirectDebit\Recurring::add(array(
+    $result = \Paynl\DirectDebit\Recurring::add(array(
         'amount' => 0.1,
         'bankaccountHolder' => 'N Klant',
         'bankaccountNumber' => 'NL00RABO0123456789',
@@ -27,6 +27,6 @@ try {
         'currency' => 'EUR',
     ));
     echo $result->getMandateId();
-} catch (\Paynl\Error\Error $e){
+} catch (\Paynl\Error\Error $e) {
     echo "Error: ".$e->getMessage();
 }

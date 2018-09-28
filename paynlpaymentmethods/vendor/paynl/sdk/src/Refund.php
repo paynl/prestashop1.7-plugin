@@ -84,7 +84,7 @@ class Refund
             $api->setCurrency($options['currency']);
         }
         if (isset($options['processDate'])) {
-            if(is_string($options['processDate'])){
+            if (is_string($options['processDate'])) {
                 $options['processDate'] = new \DateTime($options['processDate']);
             }
             $api->setProcessDate($options['processDate']);
@@ -93,5 +93,23 @@ class Refund
         $result = $api->doRequest();
 
         return new Result\Add($result);
+    }
+
+    /**
+     * Get the refund
+     *
+     * @param string $refundId
+     *
+     * @return Result\Refund
+     */
+    public static function get($refundId)
+    {
+        $api = new Api\Info();
+        $api->setRefundId($refundId);
+        $result = $api->doRequest();
+
+        $result['refundId'] = $refundId;
+
+        return new Result\Refund($result);
     }
 }
