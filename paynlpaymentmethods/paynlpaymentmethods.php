@@ -625,7 +625,7 @@ class PaynlPaymentMethods extends PaymentModule
             'lastName'    => $objInvoiceAddress->lastname,
             'streetName'  => @$invoiceStreet,
             'houseNumber' => @$invoiceHousenr,
-            'zipcode'     => $objInvoiceAddress->postcode,
+            'zipCode'     => $objInvoiceAddress->postcode,
             'city'        => $objInvoiceAddress->city,
             'country'     => $invoiceCountry->iso_code
         );
