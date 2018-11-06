@@ -51,7 +51,7 @@ class PaynlPaymentMethods extends PaymentModule
     {
         $this->name                   = 'paynlpaymentmethods';
         $this->tab                    = 'payments_gateways';
-        $this->version                = '4.2.1';
+        $this->version                = '4.2.2';
         $this->ps_versions_compliancy = array('min' => '1.7', 'max' => _PS_VERSION_);
         $this->author                 = 'Pay.nl';
         $this->controllers            = array('startPayment', 'finish', 'exchange');
@@ -462,13 +462,19 @@ class PaynlPaymentMethods extends PaymentModule
 
         $products = $this->_getProductData($cart);
 
+        $description = $cart->id;
+
+        if(Configuration::get('PAYNL_DESCRIPTION_PREFIX')){
+            $description = Configuration::get('PAYNL_DESCRIPTION_PREFIX').$description;
+        }
+
         $startData = array(
             'amount'        => $cart->getOrderTotal(true, Cart::BOTH, null, null, false),
             'currency'      => $currency->iso_code,
             'returnUrl'     => $this->context->link->getModuleLink($this->name, 'finish', array(), true),
             'exchangeUrl'   => $this->context->link->getModuleLink($this->name, 'exchange', array(), true),
             'paymentMethod' => $payment_option_id,
-            'description'   => $cart->id,
+            'description'   => $description,
             'testmode'      => Configuration::get('PAYNL_TEST_MODE'),
             'extra1'        => $cart->id,
             'language'      => Language::getIsoById($cart->id_lang),
@@ -831,6 +837,7 @@ class PaynlPaymentMethods extends PaymentModule
             Configuration::updateValue('PAYNL_API_TOKEN', Tools::getValue('PAYNL_API_TOKEN'));
             Configuration::updateValue('PAYNL_SERVICE_ID', Tools::getValue('PAYNL_SERVICE_ID'));
             Configuration::updateValue('PAYNL_TEST_MODE', Tools::getValue('PAYNL_TEST_MODE'));
+            Configuration::updateValue('PAYNL_DESCRIPTION_PREFIX', Tools::getValue('PAYNL_DESCRIPTION_PREFIX'));
             Configuration::updateValue('PAYNL_PAYMENTMETHODS', Tools::getValue('PAYNL_PAYMENTMETHODS'));
             Configuration::updateValue('PAYNL_LANGUAGE', Tools::getValue('PAYNL_LANGUAGE'));
         }
@@ -859,6 +866,13 @@ class PaynlPaymentMethods extends PaymentModule
                         'name'     => 'PAYNL_SERVICE_ID',
                         'desc'     => $this->l('The SL-code of your service on https://admin.pay.nl/programs/programs'),
                         'required' => true
+                    ),
+                    array(
+                        'type'     => 'text',
+                        'label'    => $this->l('Transaction description prefix'),
+                        'name'     => 'PAYNL_DESCRIPTION_PREFIX',
+                        'desc'     => $this->l('A prefix added to the transaction description'),
+                        'required' => false
                     ),
                     array(
                         'type'   => 'switch',
@@ -938,6 +952,7 @@ class PaynlPaymentMethods extends PaymentModule
             'PAYNL_API_TOKEN'  => Tools::getValue('PAYNL_API_TOKEN', Configuration::get('PAYNL_API_TOKEN')),
             'PAYNL_SERVICE_ID' => Tools::getValue('PAYNL_SERVICE_ID', Configuration::get('PAYNL_SERVICE_ID')),
             'PAYNL_TEST_MODE'  => Tools::getValue('PAYNL_TEST_MODE', Configuration::get('PAYNL_TEST_MODE')),
+            'PAYNL_DESCRIPTION_PREFIX'  => Tools::getValue('PAYNL_DESCRIPTION_PREFIX', Configuration::get('PAYNL_DESCRIPTION_PREFIX')),
             'PAYNL_LANGUAGE'   => Tools::getValue('PAYNL_LANGUAGE', Configuration::get('PAYNL_LANGUAGE')),
 
             'PAYNL_PAYMENTMETHODS' => $paymentMethods
