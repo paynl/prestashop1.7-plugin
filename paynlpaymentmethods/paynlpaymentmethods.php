@@ -266,6 +266,14 @@ class PaynlPaymentMethods extends PaymentModule
                     }
                 }
 
+                // check carriers
+                if (isset($paymentMethod->limit_carriers) && $paymentMethod->limit_carriers == 1) {
+                    $allowed_carriers = $paymentMethod->allowed_carriers;
+                    if(!in_array($cart->id_carrier, $allowed_carriers)){
+                        continue;
+                    }
+                }
+
 
                 $result[] = $paymentMethod;
             }
@@ -1006,14 +1014,18 @@ class PaynlPaymentMethods extends PaymentModule
         $this->context->controller->addCss($this->_path . 'css/admin.css');
 
         $this->smarty->assign(array(
-            'available_countries' => $this->getCountries()
+            'available_countries' => $this->getCountries(),
+            'available_carriers' => $this->getCarriers()
         ));
 
         return $this->display(__FILE__, 'admin_paymentmethods.tpl');
     }
 
+    public function getCarriers(){
+        return Carrier::getCarriers($this->context->language->id, true);
+    }
     public function getCountries()
     {
-        return Country::getCountries($this->context->language->id);
+        return Country::getCountries($this->context->language->id, true);
     }
 }

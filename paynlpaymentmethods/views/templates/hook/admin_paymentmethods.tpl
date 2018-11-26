@@ -1,5 +1,4 @@
 <div ng-app="paynlApp" ng-controller="paymentmethodsCtrl" class="panel" id="fieldset_1">
-
     <div class="panel-heading">
         <i class="icon-euro"></i> {l s='Payment methods' mod='paynlpaymentmethods'}
     </div>
@@ -70,7 +69,7 @@
                         <div class="col-lg-9">
                             <switch ng-model="paymentmethod.limit_countries" class="enabledSwitch blue"></switch>
                             <p class="help-block">
-                                {l s="Enable this if you want to limit this payment method for cerain countries" mod='paynlpaymentmethods'}
+                                {l s="Enable this if you want to limit this payment method for certain countries" mod='paynlpaymentmethods'}
                             </p>
                         </div>
                     </div>
@@ -82,6 +81,26 @@
                             </select>
                             <p class="help-block">
                                 {l s="Select all countries where this paymentmethod may be used, hold ctrl to select multiple countries" mod='paynlpaymentmethods'}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-lg-3 align-right">{l s="Limit carriers" mod='paynlpaymentmethods'}</label>
+                        <div class="col-lg-9">
+                            <switch ng-model="paymentmethod.limit_carriers" class="enabledSwitch blue"></switch>
+                            <p class="help-block">
+                                {l s="Enable this if you want to limit this payment method for certain carriers" mod='paynlpaymentmethods'}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="form-group" ng-if="paymentmethod.limit_carriers">
+                        <label class="control-label col-lg-3 align-right">{l s="Allowed carriers" mod='paynlpaymentmethods'}</label>
+                        <div class="col-lg-9">
+                            <select name="allowed_carriers" ng-model="paymentmethod.allowed_carriers" multiple>
+                                {literal}<option ng-repeat="carrier in availableCarriers" value="{{carrier.id_carrier}}">{{carrier.name}}</option>{/literal}
+                            </select>
+                            <p class="help-block">
+                                {l s="Select all carriers where this paymentmethod may be used, hold ctrl to select multiple carriers" mod='paynlpaymentmethods'}
                             </p>
                         </div>
                     </div>
@@ -125,15 +144,18 @@
         return false;
     }
     var available_countries = {json_encode($available_countries)};
-    var sorted_countries = [];
-    for(var country_id in available_countries){
-        country = available_countries[country_id];
-        if(country.active == 1){
-            sorted_countries.push(country);
-        }
-    }
+    var available_carriers = {json_encode($available_carriers)};
 
-    sorted_countries.sort(function (a, b){
+    available_countries = Object.values(available_countries);
+    available_carriers = Object.values(available_carriers);
+
+    available_countries.sort(function (a, b){
+        if (a.name < b.name) return -1;
+        if (a.name > b.name) return 1;
+        return 0;
+    });
+
+    available_carriers.sort(function (a, b){
         if (a.name < b.name) return -1;
         if (a.name > b.name) return 1;
         return 0;
@@ -151,7 +173,9 @@
         };
         $scope.paymentmethods = JSON.parse($('#PAYNL_PAYMENTMETHODS').val());
 
-        $scope.availableCountries = sorted_countries;
+        $scope.availableCountries = available_countries;
+        $scope.availableCarriers = available_carriers;
+
         $scope.$watch('paymentmethods', function (newValue, oldValue) {
             $('#PAYNL_PAYMENTMETHODS').val(JSON.stringify(newValue));
         }, true);

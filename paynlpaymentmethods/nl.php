@@ -44,9 +44,13 @@ $_MODULE['<{paynlpaymentmethods}prestashop>admin_paymentmethods_cbf0df5036017794
 $_MODULE['<{paynlpaymentmethods}prestashop>admin_paymentmethods_dcd700acd4c6727dca97f5b414cfb384'] = 'Maximum bedrag';
 $_MODULE['<{paynlpaymentmethods}prestashop>admin_paymentmethods_aa0ea6331bed9e393e5a0ffe72a80346'] = 'Het maximum bedrag voor deze betaalmethode';
 $_MODULE['<{paynlpaymentmethods}prestashop>admin_paymentmethods_52797b3ed632a8be77edbd6f9c08982e'] = 'Landen beperken';
-$_MODULE['<{paynlpaymentmethods}prestashop>admin_paymentmethods_74290e57e1887894b54f1350f7b0feab'] = 'Schakel in als je deze betaalmethoden alleen in bepaalde landen wilt tonen';
+$_MODULE['<{paynlpaymentmethods}prestashop>admin_paymentmethods_b5ed195da187976d3dfeb263b80777aa'] = 'Schakel in als je deze betaalmethoden alleen in bepaalde landen wilt tonen';
 $_MODULE['<{paynlpaymentmethods}prestashop>admin_paymentmethods_9a141f9fcc3002a2bfacfde70ee6fdb2'] = 'Toegestane landen';
-$_MODULE['<{paynlpaymentmethods}prestashop>admin_paymentmethods_688929c55d8347be33c9ce0c0507c0ec'] = 'Selecteer alle landen waar deze betaalmethode mag worden gebruikt, houdt ctrl ingedrukt om meerdere landen te selecteren';
+$_MODULE['<{paynlpaymentmethods}prestashop>admin_paymentmethods_688929c55d8347be33c9ce0c0507c0ec'] = 'Selecteer alle landen waar deze betaalmethode mag worden gebruikt, houd ctrl ingedrukt om meerdere landen te selecteren';
+$_MODULE['<{paynlpaymentmethods}prestashop>admin_paymentmethods_7a8228f5e2218befdcbb3ea1a0a82665'] = 'Vervoerders beperken';
+$_MODULE['<{paynlpaymentmethods}prestashop>admin_paymentmethods_fd411a46ebdaf203d413a915be297fcf'] = 'Schakel in als je deze betaalmethoden alleen bij bepaalde vervoerders wilt tonen';
+$_MODULE['<{paynlpaymentmethods}prestashop>admin_paymentmethods_ef7de6d78d6f3cf0f787650cf4183ace'] = 'Toegestane vervoerders';
+$_MODULE['<{paynlpaymentmethods}prestashop>admin_paymentmethods_130b902b2f08df53c13209979d00f27f'] = 'Selecteer alle vervoerders waar deze betaalmethode mag worden gebruikt, houd ctrl ingedrukt om meerdere vervoerders te selecteren';
 $_MODULE['<{paynlpaymentmethods}prestashop>admin_paymentmethods_6ddb1f21389093a6d6c014a18b680a22'] = 'Betaalkosten als percentage';
 $_MODULE['<{paynlpaymentmethods}prestashop>admin_paymentmethods_15552aa94cf4b7239d3746c980512bf1'] = 'Het type toeslag voor deze betaalmethode';
 $_MODULE['<{paynlpaymentmethods}prestashop>admin_paymentmethods_fff62f3f9fe367bba8d702ca5ef30c6c'] = 'Waarde van de toeslag';
