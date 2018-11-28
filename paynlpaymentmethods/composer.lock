@@ -4,24 +4,25 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "76c38303708a3fccf000d60e6317ae4a",
+    "content-hash": "9240811b21d51535122c70c696488c66",
     "packages": [
         {
             "name": "paynl/sdk",
-            "version": "v1.5.5",
+            "version": "v1.5.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/paynl/sdk.git",
-                "reference": "2d0a0482fe0682e25983d6308d9517a0ef14ba4b"
+                "reference": "bf8b879114084d2d6445ae1a7ab83b06cf06088a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/paynl/sdk/zipball/2d0a0482fe0682e25983d6308d9517a0ef14ba4b",
-                "reference": "2d0a0482fe0682e25983d6308d9517a0ef14ba4b",
+                "url": "https://api.github.com/repos/paynl/sdk/zipball/bf8b879114084d2d6445ae1a7ab83b06cf06088a",
+                "reference": "bf8b879114084d2d6445ae1a7ab83b06cf06088a",
                 "shasum": ""
             },
             "require": {
-                "php-curl-class/php-curl-class": "^4.8"
+                "ext-json": "*",
+                "php-curl-class/php-curl-class": "^8.3"
             },
             "require-dev": {
                 "phpunit/phpunit": "^4.8",
@@ -40,28 +41,31 @@
                     "email": "andy@pay.nl"
                 }
             ],
-            "time": "2018-08-15T16:22:28+00:00"
+            "time": "2018-10-18T10:33:14+00:00"
         },
         {
             "name": "php-curl-class/php-curl-class",
-            "version": "4.13.0",
+            "version": "8.3.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-curl-class/php-curl-class.git",
-                "reference": "debe0a89ee1eb9a2f15c0bb63ce8b347130af50d"
+                "reference": "8f0a52bb17b444bf41c8c7e6953e6077e9158494"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-curl-class/php-curl-class/zipball/debe0a89ee1eb9a2f15c0bb63ce8b347130af50d",
-                "reference": "debe0a89ee1eb9a2f15c0bb63ce8b347130af50d",
+                "url": "https://api.github.com/repos/php-curl-class/php-curl-class/zipball/8f0a52bb17b444bf41c8c7e6953e6077e9158494",
+                "reference": "8f0a52bb17b444bf41c8c7e6953e6077e9158494",
                 "shasum": ""
             },
             "require": {
                 "ext-curl": "*",
+                "ext-mbstring": "*",
                 "php": ">=5.3"
             },
             "require-dev": {
-                "phpunit/phpunit": "*"
+                "ext-gd": "*",
+                "phpunit/phpunit": "*",
+                "squizlabs/php_codesniffer": "*"
             },
             "type": "library",
             "autoload": {
@@ -78,25 +82,31 @@
                     "name": "Zach Borboa"
                 }
             ],
-            "description": "PHP Curl Class is an object-oriented wrapper of the PHP cURL extension.",
+            "description": "PHP Curl Class makes it easy to send HTTP requests and integrate with web APIs.",
             "homepage": "https://github.com/php-curl-class/php-curl-class",
             "keywords": [
+                "API-Client",
                 "api",
                 "class",
                 "client",
                 "curl",
                 "framework",
                 "http",
-                "http client",
+                "http-client",
+                "http-proxy",
                 "json",
                 "php",
+                "php-curl",
+                "php-curl-library",
+                "proxy",
                 "requests",
-                "rest",
                 "restful",
-                "web service",
+                "web-scraper",
+                "web-scraping ",
+                "web-service",
                 "xml"
             ],
-            "time": "2016-07-25T19:31:39+00:00"
+            "time": "2018-11-14T07:02:19+00:00"
         }
     ],
     "packages-dev": [],
