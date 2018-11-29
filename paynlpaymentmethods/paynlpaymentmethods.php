@@ -52,6 +52,7 @@ class PaynlPaymentMethods extends PaymentModule
         $this->name = 'paynlpaymentmethods';
         $this->tab = 'payments_gateways';
         $this->version = '4.2.3';
+
         $this->ps_versions_compliancy = array('min' => '1.7', 'max' => _PS_VERSION_);
         $this->author = 'Pay.nl';
         $this->controllers = array('startPayment', 'finish', 'exchange');
@@ -95,12 +96,13 @@ class PaynlPaymentMethods extends PaymentModule
     public function createPaymentFeeProduct()
     {
         $id_product = Configuration::get('PAYNL_FEE_PRODUCT_ID');
+        $feeProduct = new Product(Configuration::get('PAYNL_FEE_PRODUCT_ID'), true);
 
         // check if paymentfee product exists
-        if (!$id_product) {
-            $objProduct = new Product();
-            $objProduct->price = 0;
-            $objProduct->is_virtual = 1;
+        if ( ! $id_product || ! $feeProduct->id) {
+            $objProduct               = new Product();
+            $objProduct->price        = 0;
+            $objProduct->is_virtual   = 1;
             $objProduct->out_of_stock = 2;
             $objProduct->visibility = 'none';
 
@@ -575,7 +577,7 @@ class PaynlPaymentMethods extends PaymentModule
         if ($iFee_wt <= 0) {
             return;
         }
-
+        $this->createPaymentFeeProduct();
         $feeProduct = new Product(Configuration::get('PAYNL_FEE_PRODUCT_ID'), true);
 
         $cart->updateQty(1, Configuration::get('PAYNL_FEE_PRODUCT_ID'));
@@ -583,6 +585,14 @@ class PaynlPaymentMethods extends PaymentModule
         $cart->save();
 
         $vatRate = $feeProduct->tax_rate;
+        // if product doesn't exists, it assumes to have a taxrate 0
+        if($vatRate == 0) {
+            foreach($cart->getProducts() as $product) {
+                if($vatRate < $product['rate']) {
+                    $vatRate = $product['rate'];
+                }
+            }
+        }
 
         $iFee_wt = (float)number_format($iFee_wt, 2);
         $iFee = (float)number_format((float)$iFee_wt / (1 + ($vatRate / 100)), 2);
