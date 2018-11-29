@@ -37,6 +37,7 @@ class Transaction
      * Start a new transaction
      *
      * @param array $options
+     *
      * @return Result\Start
      * @throws Error\Error
      */
@@ -68,6 +69,9 @@ class Transaction
         }
         if (isset($options['bank']) && !empty($options['bank'])) {
             $api->setPaymentOptionSubId($options['bank']);
+        }
+        if (isset($options['orderNumber']) && !empty($options['orderNumber'])) {
+            $api->setOrderNumber($options['orderNumber']);
         }
         if (isset($options['description']) && !empty($options['description'])) {
             $api->setDescription($options['description']);
@@ -118,8 +122,15 @@ class Transaction
                     $product['type'] = self::PRODUCT_TYPE_ARTICLE;
                 }
 
-                $api->addProduct($product['id'], $product['name'], $product['type'], round($product['price'] * 100),
-                    $product['qty'], $taxClass, $taxPercentage);
+                $api->addProduct(
+                    $product['id'],
+                    $product['name'],
+                    $product['type'],
+                    round($product['price'] * 100),
+                    $product['qty'],
+                    $taxClass,
+                    $taxPercentage
+                );
             }
         }
         $enduser = array();
@@ -129,7 +140,7 @@ class Transaction
             }
             $enduser = $options['enduser'];
         }
-        if(isset($options['company'])){
+        if (isset($options['company'])) {
             $enduser['company'] = $options['company'];
         }
         if (isset($options['language'])) {
@@ -224,6 +235,8 @@ class Transaction
      * This will automatically load orderId from the get string to fetch the transaction
      *
      * @return Result\Transaction
+     * @throws Error\Api
+     * @throws Error\Error
      */
     public static function getForReturn()
     {
@@ -234,7 +247,10 @@ class Transaction
      * Get the transaction
      *
      * @param string $transactionId
+     *
      * @return Result\Transaction
+     * @throws Error\Api
+     * @throws Error\Error
      */
     public static function get($transactionId)
     {
@@ -243,7 +259,23 @@ class Transaction
         $result = $api->doRequest();
 
         $result['transactionId'] = $transactionId;
+
         return new Result\Transaction($result);
+    }
+
+    /**
+     * @param $transactionId
+     * @return Result\Status
+     * @throws Error\Api
+     * @throws Error\Error
+     */
+    public static function status($transactionId)
+    {
+        $api = new Api\Status();
+        $api->setTransactionId($transactionId);
+        $result = $api->doRequest();
+
+        return new Result\Status($result);
     }
 
     /**
@@ -251,6 +283,8 @@ class Transaction
      * This will work for all kinds of exchange calls (GET, POST AND POST_XML)
      *
      * @return Result\Transaction
+     * @throws Error\Api
+     * @throws Error\Error
      */
     public static function getForExchange()
     {
@@ -263,6 +297,7 @@ class Transaction
         // maybe its xml
         $input = file_get_contents('php://input');
         $xml = simplexml_load_string($input);
+
         return self::get($xml->order_id);
     }
 
@@ -276,9 +311,15 @@ class Transaction
      * @param \DateTime $processDate
      *
      * @return Result\Refund
+     * @throws Error\Api
+     * @throws Error\Error
      */
-    public static function refund($transactionId, $amount = null,
-                                  $description = null, \DateTime $processDate = null)
+    public static function refund(
+        $transactionId,
+        $amount = null,
+        $description = null,
+        \DateTime $processDate = null
+    )
     {
         $api = new Api\Refund();
         $api->setTransactionId($transactionId);
@@ -326,7 +367,7 @@ class Transaction
 
     public static function void($transactionId)
     {
-        $api = new Api\Void();
+        $api = new Api\VoidTransaction();
         $api->setTransactionId($transactionId);
         $result = $api->doRequest();
 
@@ -338,7 +379,10 @@ class Transaction
      * This is currently only suitable for VISA and MasterCard Ask Pay.nl to activate this option for you.
      *
      * @param array $options An array that contains the following elements: transactionId (required), amount, description, extra1, extra2, extra3
+     *
      * @return Result\AddRecurring
+     * @throws Error\Api
+     * @throws Error\Error
      */
     public static function addRecurring($options = array())
     {
@@ -366,5 +410,73 @@ class Transaction
         $result = $api->doRequest();
 
         return new Result\AddRecurring($result);
+    }
+
+    /**
+     * Create a external payment
+     *
+     * @param array $options An array that contains the following elements: transactionId (required), customerId (required), customerName, paymentType
+     *
+     * @return \Paynl\Result\Transaction\ConfirmExternalPayment
+     * @throws Error\Api
+     * @throws Error\Error
+     */
+    public static function confirmExternalPayment($options = array())
+    {
+        $api = new Api\ConfirmExternalPayment();
+
+        if (isset($options['transactionId'])) {
+            $api->setTransactionId($options['transactionId']);
+        }
+
+        if (isset($options['customerId'])) {
+            $api->setCustomerId($options['customerId']);
+        }
+
+        if (isset($options['customerName'])) {
+            $api->setCustomerName($options['customerName']);
+        }
+
+        if (isset($options['paymentType'])) {
+            $api->setPaymentType($options['paymentType']);
+        }
+
+        $result = $api->doRequest();
+
+        return new Result\ConfirmExternalPayment($result);
+    }
+
+    /**
+     * Charge an alipay or wechat account by scanning a qr code
+     *
+     * @param array $options
+     * @return Result\QRPayment
+     * @throws Error\Api
+     * @throws Error\Error
+     * @throws Error\InvalidArgument
+     */
+    public static function QRPayment($options = array())
+    {
+        $api = new Api\QRPayment();
+
+        if (isset($options['scanData'])) {
+            $api->setScanData($options['scanData']);
+        }
+        if (isset($options['amount'])) {
+            $api->setAmount(round($options['amount'] * 100));
+        }
+        if (isset($options['description'])) {
+            $api->setDescription($options['description']);
+        }
+        if (isset($options['currency'])) {
+            $api->setCurrency($options['currency']);
+        }
+        if (isset($options['statsData'])) {
+            $api->setStatsData($options['statsData']);
+        }
+
+        $result = $api->doRequest();
+
+        return new Result\QRPayment($result);
     }
 }

@@ -43,7 +43,7 @@ class PaynlPaymentMethodsFinishModuleFrontController extends ModuleFrontControll
 
         $transaction = $module->getTransaction($transactionId);
 
-        if ($transaction->isPaid() || $transaction->isPending() || $transaction->isBeingVerified()) {
+        if ($transaction->isPaid() || $transaction->isPending() || $transaction->isBeingVerified() || $transaction->isAuthorized()) {
             // naar success
             /**
              * @var $cart CartCore

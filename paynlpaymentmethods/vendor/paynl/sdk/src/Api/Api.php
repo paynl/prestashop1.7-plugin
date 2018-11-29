@@ -18,6 +18,7 @@
 
 namespace Paynl\Api;
 
+use Curl\Curl;
 use Paynl\Config;
 use Paynl\Error;
 use Paynl\Helper;
@@ -27,122 +28,149 @@ use Paynl\Helper;
  *
  * @author Andy Pieters <andy@andypieters.nl>
  */
-class Api {
-	/**
-	 * @var int the version of the api
-	 */
-	protected $version = 1;
+class Api
+{
+    /**
+     * @var int the version of the api
+     */
+    protected $version = 1;
 
-	/**
-	 * @var array
-	 */
-	protected $data = array();
+    /**
+     * @var array
+     */
+    protected $data = array();
 
-	/**
-	 * @var bool Is the ApiToken required for this API
-	 */
-	protected $apiTokenRequired = false;
-	/**
-	 * @var bool Is the serviceId required for this API
-	 */
-	protected $serviceIdRequired = false;
+    /**
+     * @var bool Is the ApiToken required for this API
+     */
+    protected $apiTokenRequired = false;
+    /**
+     * @var bool Is the serviceId required for this API
+     */
+    protected $serviceIdRequired = false;
 
-	/**
-	 * @param $endpoint
-	 * @param null|int $version
-	 *
-	 * @return array
-	 *
-	 * @throws Error\Api
-	 * @throws Error\Error
-	 */
-	public function doRequest( $endpoint, $version = null ) {
-		if ( $version === null ) {
-			$version = $this->version;
-		}
+    /**
+     * @param $endpoint
+     * @param null|int $version
+     *
+     * @return array
+     *
+     * @throws Error\Api
+     * @throws Error\Error
+     */
+    public function doRequest($endpoint, $version = null)
+    {
+        if ($version === null) {
+            $version = $this->version;
+        }
 
-		$data = $this->getData();
+        $auth = $this->getAuth();
+        $data = $this->getData();
+        $uri = Config::getApiUrl($endpoint, (int) $version);
 
-		$uri = Config::getApiUrl( $endpoint, (int) $version );
+        /** @var Curl $curl */
+        $curl = Config::getCurl();
 
-		$curl = Config::getCurl();
+        if (Config::getCAInfoLocation()) {
+            // set a custom CAInfo file
+            $curl->setOpt(CURLOPT_CAINFO, Config::getCAInfoLocation());
+        }
 
-		if ( Config::getCAInfoLocation() ) {
-			// set a custom CAInfo file
-			$curl->setOpt( CURLOPT_CAINFO, Config::getCAInfoLocation() );
-		}
+        if (!empty($auth)) {
+            $curl->setBasicAuthentication($auth['username'], $auth['password']);
+        }
 
-		$curl->setOpt( CURLOPT_SSL_VERIFYPEER, Config::getVerifyPeer() );
 
-		$result = $curl->post( $uri, $data );
+        $curl->setOpt(CURLOPT_SSL_VERIFYPEER, Config::getVerifyPeer());
 
-		if ( isset( $result->status ) && $result->status === 'FALSE' ) {
-			throw new Error\Api( $result->error );
-		}
+        $result = $curl->post($uri, $data);
 
-		if ( $curl->error ) {
-			throw new Error\Error( $curl->errorMessage );
-		}
+        if (isset($result->status) && $result->status === 'FALSE') {
+            throw new Error\Api($result->error);
+        }
 
-		return $this->processResult( $result );
-	}
+        if ($curl->error) {
+            throw new Error\Error($curl->errorMessage);
+        }
 
-	/**
-	 * @return array
-	 * @throws Error\Required\ApiToken
-	 * @throws Error\Required\ServiceId
-	 */
-	protected function getData() {
-		if ( $this->isApiTokenRequired() ) {
-			Helper::requireApiToken();
-			$this->data['token'] = Config::getApiToken();
-		}
-		if ( $this->isServiceIdRequired() ) {
-			Helper::requireServiceId();
-			$this->data['serviceId'] = Config::getServiceId();
-		}
+        return $this->processResult($result);
+    }
 
-		return $this->data;
-	}
+    /**
+     * @return array
+     * @throws Error\Required\ApiToken
+     * @throws Error\Required\ServiceId
+     */
+    protected function getData()
+    {
+        if ($this->isServiceIdRequired()) {
+            Helper::requireServiceId();
 
-	/**
-	 * @return bool
-	 */
-	public function isApiTokenRequired() {
-		return $this->apiTokenRequired;
-	}
+            $this->data['serviceId'] = Config::getServiceId();
+        }
+        return $this->data;
+    }
 
-	/**
-	 * @return bool
-	 */
-	public function isServiceIdRequired() {
-		return $this->serviceIdRequired;
-	}
+    /**
+     * @return array|null
+     */
+    private function getAuth()
+    {
+        if (!$this->isApiTokenRequired()) {
+            return null;
+        }
 
-	/**
-	 * @param object|array $result
-	 *
-	 * @return array
-	 * @throws Error\Api
-	 */
-	protected function processResult( $result ) {
-		$output = Helper::objectToArray( $result );
+        Helper::requireApiToken();
+        $tokenCode = Config::getTokenCode();
+        $apiToken = Config::getApiToken();
+        if (!$tokenCode) {
+            $this->data['token'] = $apiToken;
+            return null;
+        }
+        return array('username' => $tokenCode, 'password' => $apiToken);
+    }
 
-		if ( ! is_array( $output ) ) {
-			throw new Error\Api( $output );
-		}
+    /**
+     * @return bool
+     */
+    public function isApiTokenRequired()
+    {
+        return $this->apiTokenRequired;
+    }
 
-		if ( isset( $output['result'] ) ) {
-			return $output;
-		}
+    /**
+     * @return bool
+     */
+    public function isServiceIdRequired()
+    {
+        return $this->serviceIdRequired;
+    }
 
-		if (
-			isset( $output['request'] ) &&
-			$output['request']['result'] != 1 &&
-			$output['request']['result'] !== 'TRUE' ) {
-			throw new Error\Api( $output['request']['errorId'] . ' - ' . $output['request']['errorMessage'] );
-		}
+    /**
+     * @param object|array $result
+     *
+     * @return array
+     * @throws Error\Api
+     */
+    protected function processResult($result)
+    {
+        $output = Helper::objectToArray($result);
 
-		return $output;
-	}
+        if (! is_array($output)) {
+            throw new Error\Api($output);
+        }
+
+        if (isset($output['result'])) {
+            return $output;
+        }
+
+        if (
+            isset($output['request']) &&
+            $output['request']['result'] != 1 &&
+            $output['request']['result'] !== 'TRUE') {
+            throw new Error\Api($output['request']['errorId'] . ' - ' . $output['request']['errorMessage']);
+        }
+
+        return $output;
+    }
 }

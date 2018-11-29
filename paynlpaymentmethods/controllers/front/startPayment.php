@@ -40,12 +40,12 @@ class PaynlPaymentMethodsStartPaymentModuleFrontController extends ModuleFrontCo
             Tools::redirect('index.php?controller=order&step=1');
         }
 
-        // Check that this payment option is still available in case the customer changed his address just before the end of the checkout process
-        $authorized = false;
 
+        $authorized = false;
+        $paymentOptionId = $_REQUEST['payment_option_id'];
         foreach (Module::getPaymentModules() as $module) {
             if ($module['name'] == 'paynlpaymentmethods') {
-                $authorized = true;
+                $authorized = $this->module->isPaymentMethodAvailable($cart, $paymentOptionId);
                 break;
             }
         }
@@ -54,15 +54,19 @@ class PaynlPaymentMethodsStartPaymentModuleFrontController extends ModuleFrontCo
             die($this->module->l('This payment method is not available.', 'validation'));
         }
 
-        $paymentOptionId = $_REQUEST['payment_option_id'];
 
         $extra_data = array();
         if(isset($_REQUEST['bank'])){
             $extra_data['bank'] = $_REQUEST['bank'];
         }
+        try{
+            $redirectUrl = $this->module->startPayment($cart, $paymentOptionId, $extra_data);
+            Tools::redirect($redirectUrl);
+        } catch (Exception $e){
 
-        $redirectUrl = $this->module->startPayment($cart, $paymentOptionId, $extra_data);
+            die('Error: '.$e->getMessage());
+        }
 
-        Tools::redirect($redirectUrl);
+
     }
 }
