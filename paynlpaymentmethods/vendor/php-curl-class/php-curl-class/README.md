@@ -34,7 +34,7 @@ For latest commit version:
 
 ### Requirements
 
-PHP Curl Class works with PHP 5.3, 5.4, 5.5, 5.6, 7.0, 7.1, 7.2, and HHVM.
+PHP Curl Class works with PHP 5.3, 5.4, 5.5, 5.6, 7.0, 7.1, 7.2, 7.3, and HHVM.
 
 ### Quick Start and Examples
 
@@ -320,6 +320,10 @@ MultiCurl::setJsonDecoder($mixed)
 MultiCurl::setOpt($option, $value)
 MultiCurl::setOpts($options)
 MultiCurl::setPort($port)
+MultiCurl::setProxy($proxy, $port = null, $username = null, $password = null)
+MultiCurl::setProxyAuth($auth)
+MultiCurl::setProxyTunnel($tunnel = true)
+MultiCurl::setProxyType($type)
 MultiCurl::setReferer($referer)
 MultiCurl::setReferrer($referrer)
 MultiCurl::setRetry($mixed)
@@ -330,6 +334,7 @@ MultiCurl::setXmlDecoder($mixed)
 MultiCurl::start()
 MultiCurl::success($callback)
 MultiCurl::unsetHeader($key)
+MultiCurl::unsetProxy()
 MultiCurl::verbose($on = true, $output = STDERR)
 ```
 

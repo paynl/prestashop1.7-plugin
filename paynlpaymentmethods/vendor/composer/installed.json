@@ -1,17 +1,17 @@
 [
     {
         "name": "paynl/sdk",
-        "version": "v1.5.6",
-        "version_normalized": "1.5.6.0",
+        "version": "v1.5.8",
+        "version_normalized": "1.5.8.0",
         "source": {
             "type": "git",
             "url": "https://github.com/paynl/sdk.git",
-            "reference": "bf8b879114084d2d6445ae1a7ab83b06cf06088a"
+            "reference": "c21dff94cace15b94655116cf2d3c93eed2b1a3c"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/paynl/sdk/zipball/bf8b879114084d2d6445ae1a7ab83b06cf06088a",
-            "reference": "bf8b879114084d2d6445ae1a7ab83b06cf06088a",
+            "url": "https://api.github.com/repos/paynl/sdk/zipball/c21dff94cace15b94655116cf2d3c93eed2b1a3c",
+            "reference": "c21dff94cace15b94655116cf2d3c93eed2b1a3c",
             "shasum": ""
         },
         "require": {
@@ -22,7 +22,7 @@
             "phpunit/phpunit": "^4.8",
             "satooshi/php-coveralls": "~1.0"
         },
-        "time": "2018-10-18T10:33:14+00:00",
+        "time": "2019-02-01T15:13:13+00:00",
         "type": "library",
         "installation-source": "dist",
         "autoload": {
@@ -40,22 +40,21 @@
     },
     {
         "name": "php-curl-class/php-curl-class",
-        "version": "8.3.3",
-        "version_normalized": "8.3.3.0",
+        "version": "8.5.0",
+        "version_normalized": "8.5.0.0",
         "source": {
             "type": "git",
             "url": "https://github.com/php-curl-class/php-curl-class.git",
-            "reference": "8f0a52bb17b444bf41c8c7e6953e6077e9158494"
+            "reference": "2b387e3ef1c8a1d6116a1459c0e3e71643f86806"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/php-curl-class/php-curl-class/zipball/8f0a52bb17b444bf41c8c7e6953e6077e9158494",
-            "reference": "8f0a52bb17b444bf41c8c7e6953e6077e9158494",
+            "url": "https://api.github.com/repos/php-curl-class/php-curl-class/zipball/2b387e3ef1c8a1d6116a1459c0e3e71643f86806",
+            "reference": "2b387e3ef1c8a1d6116a1459c0e3e71643f86806",
             "shasum": ""
         },
         "require": {
             "ext-curl": "*",
-            "ext-mbstring": "*",
             "php": ">=5.3"
         },
         "require-dev": {
@@ -63,7 +62,10 @@
             "phpunit/phpunit": "*",
             "squizlabs/php_codesniffer": "*"
         },
-        "time": "2018-11-14T07:02:19+00:00",
+        "suggest": {
+            "ext-mbstring": "*"
+        },
+        "time": "2019-01-07T06:43:45+00:00",
         "type": "library",
         "installation-source": "dist",
         "autoload": {

@@ -3,14 +3,14 @@
 
 namespace Paynl;
 
+
 use Paynl\Error\Error;
 
-class DynamicUUID
+class StaticUUID
 {
     const REFERENCE_TYPE_STRING = 1;
     const REFERENCE_TYPE_HEX = 0;
     const HASH_METHOD = 'sha256';
-
 
     /**
      * Generate a UUID
@@ -18,12 +18,13 @@ class DynamicUUID
      * @param string $serviceId
      * @param string $secret
      * @param string $reference Your reference to the transaction
+     * @param double $amount The transaction amount
      * @param string $padChar The reference will be padded with this character, default '0'
      * @param int $referenceType Define if you are using a string (8 chars) of hex (16 chars)
      *
      * @return string The UUID
      */
-    public static function encode($serviceId, $secret, $reference, $padChar = '0', $referenceType=self::REFERENCE_TYPE_STRING)
+    public static function encode($serviceId, $secret, $amount, $reference, $padChar = '0', $referenceType=self::REFERENCE_TYPE_STRING)
     {
         if ($referenceType == self::REFERENCE_TYPE_STRING) {
             self::validateReferenceString($reference);
@@ -36,21 +37,23 @@ class DynamicUUID
         self::validateServiceId($serviceId);
         self::validatePadChar($padChar);
 
-        $UUIDData = preg_replace('/[^0-9]/', '', $serviceId);
-        $UUIDData .= str_pad(strtolower($reference), 16, $padChar, STR_PAD_LEFT);
+        $amount = round($amount);
+        $serviceId = preg_replace('/\D/', '', $serviceId);
+        $prefix = strlen($amount);
+        $UUIDData = $prefix . $amount . $serviceId;
+        $reference = str_pad(strtolower($reference), 16, $padChar, STR_PAD_LEFT);
 
         $hash = hash_hmac(self::HASH_METHOD, $UUIDData, $secret);
 
-        $UUID = "b" . substr($hash, 0, 7) . $UUIDData;
+        $UUIDData = str_pad($prefix . $amount, 8, $hash, STR_PAD_RIGHT);
+        $UUIDData .= $serviceId . $reference;
 
-        return sprintf(
-            '%08s-%04s-%04s-%04s-%12s',
-            substr($UUID, 0, 8),
-            substr($UUID, 8, 4),
-            substr($UUID, 12, 4),
-            substr($UUID, 16, 4),
-            substr($UUID, 20, 12)
-        );
+        return sprintf('%08s-%04s-%04s-%04s-%12s',
+            substr($UUIDData, 0, 8),
+            substr($UUIDData, 8, 4),
+            substr($UUIDData, 12, 4),
+            substr($UUIDData, 16, 4),
+            substr($UUIDData, 20, 12));
     }
 
     private static function asciiToHex($ascii) {
@@ -62,80 +65,41 @@ class DynamicUUID
         }
         return $hex;
     }
-
+    
     private static function validateSecret($strSecret)
     {
-        if (!preg_match('/^[0-9a-f]{40}$/i', $strSecret)) {
-            throw new Error('Invalid secret');
+        if(preg_match('/^[0-9a-f]{40}$/i', $strSecret) != 1){
+            throw new Error("Service secret invalid; service secret should be an alpha numeric string of 40 chars.");
         }
     }
 
     private static function validateServiceId($strServiceId)
     {
-        if (!preg_match('/^SL-[0-9]{4}-[0-9]{4}$/', $strServiceId)) {
+        if ( ! preg_match('/^SL-[0-9]{4}-[0-9]{4}$/', $strServiceId)) {
             throw new Error('Invalid service ID');
         }
     }
 
     private static function validateReferenceString($strReference)
     {
-        if (!preg_match('/^[0-9a-zA-Z]{0,8}$/i', $strReference)) {
+        if ( ! preg_match('/^[0-9a-zA-Z]{0,8}$/i', $strReference)) {
             throw new Error('Invalid reference: only alphanumeric chars are allowed, up to 8 chars long');
         }
     }
 
     private static function validateReferenceHex($strReference)
     {
-        if (!preg_match('/^[0-9a-f]{0,16}$/i', $strReference)) {
+        if ( ! preg_match('/^[0-9a-f]{0,16}$/i', $strReference)) {
             throw new Error('Invalid reference: only alphanumeric chars are allowed, up to 16 chars long');
         }
     }
 
     private static function validatePadChar($strPadChar)
     {
-        if (!preg_match('/^[a-z0-9]{1}$/i', $strPadChar)) {
+        if ( ! preg_match('/^[a-z0-9]{1}$/i', $strPadChar)) {
             throw new Error('Invalid pad char');
         }
     }
-
-    /**
-     * Get url and qr-image for bancontact
-     * @param $UUID
-     * @param $withBase64 True if you need a base64 image
-     * @return array url, QRUrl and QRBase64
-     */
-    public static function bancontact($UUID, $withBase64 = false)
-    {
-        $qrUrl = 'https://chart.googleapis.com/chart?cht=qr&chs=260x260&chl=https://qr.pisp.me/bc/' . $UUID;
-        $result = [
-            'url' => 'https://qr.pisp.me/bc/' . $UUID,
-            'QRUrl' => $qrUrl
-        ];
-        if($withBase64) $result['QRBase64'] = base64_encode(file_get_contents($qrUrl));
-
-        return $result;
-    }
-
-    /**
-     * Get url and qr-image for ideal
-     *
-     * @param $UUID
-     * @param $withBase64 True if you need a base64 image
-     * @return array url, QRUrl and QRBase64
-     */
-    public static function ideal($UUID, $withBase64 = false)
-    {
-        $qrUrl = 'https://ideal.pay.nl/qr/' . $UUID;
-        $result = [
-            'url' => 'https://qr6.ideal.nl/' . $UUID,
-            'QRUrl' => $qrUrl
-        ];
-
-        if($withBase64) $result['QRBase64'] = base64_encode(file_get_contents($qrUrl));
-
-        return $result;
-    }
-
 
     /**
      * Decode a UUID
@@ -144,31 +108,31 @@ class DynamicUUID
      * @param string|null $secret If supplied the uuid will be validated before decoding.
      * @param string $padChar The reference will be padded with this character, default '0'
      *
-     * @return array Array with serviceId and reference
+     * @return array Array with serviceId, reference and amount
      * @throws Error
      */
     public static function decode($uuid, $secret = null, $padChar = '0', $referenceType = self::REFERENCE_TYPE_STRING)
     {
-        if (isset($secret)) {
+        if ( isset($secret)) {
             self::validateSecret($secret);
             $isValid = self::validate($uuid, $secret);
-            if (!$isValid) {
+            if ( ! $isValid) {
                 throw new Error('Incorrect signature');
             }
         }
 
         $uuidData = preg_replace('/[^0-9a-z]/i', '', $uuid);
-        $uuidData = substr($uuidData, 8);
 
-        $serviceId = "SL-" . substr($uuidData, 0, 4) . '-' . substr($uuidData, 4, 4);
-        $reference = substr($uuidData, 8);
+        $amountLength = substr($uuidData, 0, 1);
+        $amount = substr($uuid,1, $amountLength);
 
-        $reference = ltrim($reference, $padChar);
+        $serviceId = substr($uuidData, 8,8);
+        $serviceId = "SL-" . substr($serviceId, 0, 4) . '-' . substr($serviceId, 4, 4);
 
-        if ($referenceType == self::REFERENCE_TYPE_STRING) {
-            $reference = pack("H*", $reference);
-        }
+        $reference = substr($uuidData, 16);
+
         return array(
+            'amount' => $amount,
             'serviceId' => $serviceId,
             'reference' => $reference
         );
@@ -182,15 +146,17 @@ class DynamicUUID
      *
      * @return bool
      */
-    public
-    static function validate($uuid, $secret)
+    public static function validate($uuid, $secret)
     {
-        $uuidData = preg_replace('/[^0-9a-z]/i', '', $uuid);
-        $uuidData = substr($uuidData, 8);
+        $uuidData = preg_replace('/[^0-9a-f]/i', '', $uuid);
 
-        $hash = hash_hmac(self::HASH_METHOD, $uuidData, $secret);
-        $checksum = "b" . substr($hash, 0, 7);
+        $amountLength = substr($uuidData, 0, 1);
+        $amount = substr($uuidData, 1, $amountLength);
 
-        return $checksum == substr($uuid, 0, 8);
+        $serviceId = substr($uuidData, 8, 8);
+        $strChecksumUUID = substr($uuidData, ($amountLength+1), (7-$amountLength));
+        $hash = hash_hmac(self::HASH_METHOD, $amountLength . $amount . $serviceId, $secret);
+
+        return substr($hash, 0, strlen($strChecksumUUID)) == $strChecksumUUID;
     }
 }
