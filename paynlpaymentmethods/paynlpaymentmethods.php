@@ -444,7 +444,7 @@ class PaynlPaymentMethods extends PaymentModule
 
             $orderPayment->save();
 
-            # In case of banktransfer the total_paid_real isn't set, we're doning that now.
+            # In case of banktransfer the total_paid_real isn't set, we're doing that now.
             if ($order_state == $this->statusPaid && $order->total_paid_real == 0) {
               $order->total_paid_real = $orderPayment->amount;
               $order->save();
