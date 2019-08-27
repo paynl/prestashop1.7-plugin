@@ -51,7 +51,7 @@ class PaynlPaymentMethods extends PaymentModule
     {
         $this->name = 'paynlpaymentmethods';
         $this->tab = 'payments_gateways';
-        $this->version = '4.2.4';
+        $this->version = '4.2.5';
 
         $this->ps_versions_compliancy = array('min' => '1.7', 'max' => _PS_VERSION_);
         $this->author = 'Pay.nl';
@@ -443,6 +443,12 @@ class PaynlPaymentMethods extends PaymentModule
             $orderPayment->id_currency = $order->id_currency;
 
             $orderPayment->save();
+
+            # In case of banktransfer the total_paid_real isn't set, we're doing that now.
+            if ($order_state == $this->statusPaid && $order->total_paid_real == 0) {
+              $order->total_paid_real = $orderPayment->amount;
+              $order->save();
+            }
 
             $history = new OrderHistory();
 
