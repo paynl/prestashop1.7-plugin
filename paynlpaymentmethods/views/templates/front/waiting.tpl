@@ -46,7 +46,7 @@
 <body>
 <div id="inner">
     <a href="https://www.pay.nl" target="_blank">
-        <img src="https://www.pay.nl/uploads/1/brands/main_logo.png"></a><br>
+        <img src="https://static.pay.nl/generic/images/100x100/logo.png"></a><br>
     Please wait while your order is being processed...<br>
 
     <div class="footer">
