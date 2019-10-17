@@ -51,7 +51,7 @@ class PaynlPaymentMethods extends PaymentModule
     {
         $this->name = 'paynlpaymentmethods';
         $this->tab = 'payments_gateways';
-        $this->version = '4.2.5';
+        $this->version = '4.2.6';
 
         $this->ps_versions_compliancy = array('min' => '1.7', 'max' => _PS_VERSION_);
         $this->author = 'Pay.nl';
@@ -69,7 +69,7 @@ class PaynlPaymentMethods extends PaymentModule
         $this->statusRefund = Configuration::get('PS_OS_REFUND');
 
         $this->displayName = $this->l('Pay.nl');
-        $this->description = $this->l('Add many payment methods to you webshop');
+        $this->description = $this->l('Add many payment methods to your webshop');
 
         if (!count(Currency::checkPaymentCurrencies($this->id))) {
             $this->warning = $this->l('No currency has been set for this module.');
@@ -903,6 +903,7 @@ class PaynlPaymentMethods extends PaymentModule
             Configuration::updateValue('PAYNL_API_TOKEN', Tools::getValue('PAYNL_API_TOKEN'));
             Configuration::updateValue('PAYNL_SERVICE_ID', Tools::getValue('PAYNL_SERVICE_ID'));
             Configuration::updateValue('PAYNL_TEST_MODE', Tools::getValue('PAYNL_TEST_MODE'));
+            Configuration::updateValue('PAYNL_VALIDATION_DELAY', Tools::getValue('PAYNL_VALIDATION_DELAY'));
             Configuration::updateValue('PAYNL_DESCRIPTION_PREFIX', Tools::getValue('PAYNL_DESCRIPTION_PREFIX'));
             Configuration::updateValue('PAYNL_PAYMENTMETHODS', Tools::getValue('PAYNL_PAYMENTMETHODS'));
             Configuration::updateValue('PAYNL_LANGUAGE', Tools::getValue('PAYNL_LANGUAGE'));
@@ -915,7 +916,7 @@ class PaynlPaymentMethods extends PaymentModule
         $fields_form = array(
             'form' => array(
                 'legend' => array(
-                    'title' => $this->l('Pay.nl Account Settings'),
+                    'title' => $this->l('Pay.nl Account Settings. Plugin version 4.2.6'),
                     'icon' => 'icon-envelope'
                 ),
                 'input' => array(
@@ -940,6 +941,24 @@ class PaynlPaymentMethods extends PaymentModule
                         'desc' => $this->l('A prefix added to the transaction description'),
                         'required' => false
                     ),
+                  array(
+                    'type' => 'switch',
+                    'label' => $this->l('Validation delay'),
+                    'name' => 'PAYNL_VALIDATION_DELAY',
+                    'desc' => $this->l('When payment is done, wait for Pay.nl to validate payment before redirecting to success page'),
+                    'values' => array(
+                      array(
+                        'id' => 'validation_delay_on',
+                        'value' => 1,
+                        'label' => $this->l('Enabled')
+                      ),
+                      array(
+                        'id' => 'validation_delay_off',
+                        'value' => 0,
+                        'label' => $this->l('Disabled')
+                      )
+                    ),
+                  ),
                     array(
                         'type' => 'switch',
                         'label' => $this->l('Test mode'),
@@ -1018,9 +1037,9 @@ class PaynlPaymentMethods extends PaymentModule
             'PAYNL_API_TOKEN' => Tools::getValue('PAYNL_API_TOKEN', Configuration::get('PAYNL_API_TOKEN')),
             'PAYNL_SERVICE_ID' => Tools::getValue('PAYNL_SERVICE_ID', Configuration::get('PAYNL_SERVICE_ID')),
             'PAYNL_TEST_MODE' => Tools::getValue('PAYNL_TEST_MODE', Configuration::get('PAYNL_TEST_MODE')),
+            'PAYNL_VALIDATION_DELAY' => Tools::getValue('PAYNL_VALIDATION_DELAY', Configuration::get('PAYNL_VALIDATION_DELAY')),
             'PAYNL_DESCRIPTION_PREFIX' => Tools::getValue('PAYNL_DESCRIPTION_PREFIX', Configuration::get('PAYNL_DESCRIPTION_PREFIX')),
             'PAYNL_LANGUAGE' => Tools::getValue('PAYNL_LANGUAGE', Configuration::get('PAYNL_LANGUAGE')),
-
             'PAYNL_PAYMENTMETHODS' => $paymentMethods
         );
     }
