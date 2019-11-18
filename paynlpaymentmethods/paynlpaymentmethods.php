@@ -467,10 +467,19 @@ class PaynlPaymentMethods extends PaymentModule
                 }
 
                 try {
+                    $profileId = $transaction->getData()['paymentDetails']['paymentOptionId'];
+                    $paymentMethodName = $transaction->getData()['paymentDetails']['paymentProfileName'];
+
+                    # Profile 613 is for testing purposes
+                    if($profileId != 613) {
+                      $settings = $this->getPaymentMethodSettings($profileId);
+
+                      # Get the custom method name
+                      $paymentMethodName = $settings->name;
+                    }
+
                     $this->validateOrder((int)$transaction->getExtra1(), $order_state,
-                        $amountPaid,
-                        $transaction->getData()['paymentDetails']['paymentProfileName'], null,
-                        array('transaction_id' => $transactionId), null, false, $cart->secure_key);
+                      $amountPaid, $paymentMethodName, null, array('transaction_id' => $transactionId), null, false, $cart->secure_key);
 
                     /** @var OrderCore $orderId */
                     $orderId = Order::getIdByCartId($transaction->getExtra1());
@@ -535,7 +544,6 @@ class PaynlPaymentMethods extends PaymentModule
             'description' => $description,
             'testmode' => Configuration::get('PAYNL_TEST_MODE'),
             'extra1' => $cart->id,
-            'language' => Language::getIsoById($cart->id_lang),
             'products' => $products
         );
 
@@ -546,24 +554,43 @@ class PaynlPaymentMethods extends PaymentModule
             $startData['bank'] = $extra_data['bank'];
         }
 
-        // Taal betaalscherm bepalen
-        $language = $this->getLanguageForOrder();
-        $startData['language'] = $language;
+        # Retrieve language
+        $startData['language'] = $this->getLanguageForOrder($cart);
 
         $result = \Paynl\Transaction::start($startData);
 
-        if ($this->shouldValidateOnStart($payment_option_id)) {
-            // flush the package list, so the fee is added to it.
-            $this->context->cart->getPackageList(true);
+      if ($this->shouldValidateOnStart($payment_option_id)) {
+        // flush the package list, so the fee is added to it.
+        $this->context->cart->getPackageList(true);
 
-            $this->validateOrder($cart->id, $this->statusPending, 0, $this->getPaymentMethodName($payment_option_id),
-                null, array(), null, false, $cart->secure_key);
-        }
+        $paymentMethodSettings = $this->getPaymentMethodSettings($payment_option_id);
+
+        $this->validateOrder($cart->id, $this->statusPending, 0, $paymentMethodSettings->name,
+            null, array(), null, false, $cart->secure_key);
+      }
 
         return $result->getRedirectUrl();
     }
 
-    private function getPaymentMethod($payment_option_id)
+  /**
+   * Retrieve the settings of a specific payment with payment_profile_id
+   *
+   * @param $payment_profile_id
+   * @return bool
+   */
+  private function getPaymentMethodSettings($payment_profile_id)
+  {
+    $paymentMethods = json_decode(Configuration::get('PAYNL_PAYMENTMETHODS'));
+    foreach ($paymentMethods as $objPaymentSettings) {
+      if ($objPaymentSettings->id == $payment_profile_id) {
+        return $objPaymentSettings;
+      }
+    }
+    return false;
+  }
+
+
+  private function getPaymentMethod($payment_option_id)
     {
         foreach ($this->getPaymentMethodsForCart() as $objPaymentOption) {
             if ($objPaymentOption->id == (int)$payment_option_id) {
@@ -709,14 +736,22 @@ class PaynlPaymentMethods extends PaymentModule
         );
     }
 
-    private function getLanguageForOrder()
+    /**
+     * Retrieve language
+     *
+     * @param $cart
+     * @return mixed|string
+     */
+    private function getLanguageForOrder($cart)
     {
-        $languageSetting = Tools::getValue('PAYNL_LANGUAGE', Configuration::get('PAYNL_LANGUAGE'));
-        if ($languageSetting == 'auto') {
-            return $this->getBrowserLanguage();
-        } else {
-            return $languageSetting;
-        }
+      $languageSetting = Tools::getValue('PAYNL_LANGUAGE', Configuration::get('PAYNL_LANGUAGE'));
+      if ($languageSetting == 'auto') {
+        return $this->getBrowserLanguage();
+      } elseif ($languageSetting == 'cart') {
+        return Language::getIsoById($cart->id_lang);
+      } else {
+        return $languageSetting;
+      }
     }
 
     private function getBrowserLanguage()
@@ -797,8 +832,12 @@ class PaynlPaymentMethods extends PaymentModule
                 'label' => $this->l('German')
             ),
             array(
+                'language_id' => 'cart',
+                'label' => $this->l('Webshop language')
+            ),
+            array(
                 'language_id' => 'auto',
-                'label' => $this->l('Automatic')
+                'label' => $this->l('Automatic (Browser language)')
             ),
         );
     }
