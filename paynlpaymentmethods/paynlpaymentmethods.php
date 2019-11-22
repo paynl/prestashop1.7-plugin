@@ -676,6 +676,7 @@ class PaynlPaymentMethods extends PaymentModule
         $enduser['birthDate'] = $customer->birthday;
         $enduser['phoneNumber'] = $objShippingAddress->phone ? $objShippingAddress->phone : $objShippingAddress->phone_mobile;
         $enduser['emailAddress'] = $customer->email;
+        $enduser['gender'] = $customer->id_gender == 1 ? 'M' : ($customer->id_gender == 2 ? 'F' : '');
 
         list($shipStreet, $shipHousenr) = Paynl\Helper::splitAddress(trim($objShippingAddress->address1 . ' ' . $objShippingAddress->address2));
         list($invoiceStreet, $invoiceHousenr) = Paynl\Helper::splitAddress(trim($objInvoiceAddress->address1 . ' ' . $objInvoiceAddress->address2));
