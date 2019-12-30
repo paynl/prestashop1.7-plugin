@@ -88,6 +88,9 @@ class PaynlPaymentMethodsFinishModuleFrontController extends ModuleFrontControll
             Tools::redirect('index.php?controller=order-confirmation'.$slow.'&id_cart=' . $cartId . '&id_module=' . $this->module->id . '&id_order=' . $orderId . '&key=' . $customer->secure_key);
 
         } else {
+	    # delete old payment fee
+	    $this->context->cart->deleteProduct(Configuration::get('PAYNL_FEE_PRODUCT_ID'),0);
+
             // naar checkout
             Tools::redirect('index.php?controller=order&step=1');
         }
