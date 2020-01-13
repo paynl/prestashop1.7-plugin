@@ -542,9 +542,11 @@ class PaynlPaymentMethods extends PaymentModule
             'exchangeUrl' => $this->context->link->getModuleLink($this->name, 'exchange', array(), true),
             'paymentMethod' => $payment_option_id,
             'description' => $description,
+            'orderNumber' => $cart->id,
             'testmode' => Configuration::get('PAYNL_TEST_MODE'),
             'extra1' => $cart->id,
-            'products' => $products
+            'products' => $products,
+            'object' => 'prestashop '. $this->version,
         );
 
         $addressData = $this->_getAddressData($cart);
@@ -698,7 +700,8 @@ class PaynlPaymentMethods extends PaymentModule
         /** @var AddressCore $objInvoiceAddress */
         /** @var CustomerCore $customer */
         $enduser = array();
-        $enduser['initials'] = substr($objShippingAddress->firstname, 0, 1);
+        $enduser['initials'] = $objShippingAddress->firstname;
+        $enduser['firstName'] = $objShippingAddress->firstname;
         $enduser['lastName'] = $objShippingAddress->lastname;
         $enduser['birthDate'] = $customer->birthday;
         $enduser['phoneNumber'] = $objShippingAddress->phone ? $objShippingAddress->phone : $objShippingAddress->phone_mobile;
