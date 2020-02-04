@@ -38,12 +38,17 @@ class PaynlPaymentMethodsExchangeModuleFrontController extends ModuleFrontContro
             die('TRUE| Ignoring pending');
         }
 
+        # PAY. action
+        $action = Tools::getValue('action');
+
         $transactionId = $_REQUEST['order_id'];
 
         $module = $this->module;
         /**
          * @var $module PaynlPaymentMethods
          */
+
+        $module->payLog('Exchange. Action: ' . $action . '. TransactionId: ' . $transactionId);
 
         try {
             $message = '';
