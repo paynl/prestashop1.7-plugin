@@ -46,6 +46,7 @@ class PaynlPaymentMethods extends PaymentModule
     private $statusRefund;
     private $statusCanceled;
     private $paymentMethods;
+    private $payLogEnabled;
 
     public function __construct()
     {
@@ -53,6 +54,7 @@ class PaynlPaymentMethods extends PaymentModule
         $this->tab = 'payments_gateways';
         $this->version = '4.2.7';
 
+        $this->payLogEnabled = false;
         $this->ps_versions_compliancy = array('min' => '1.7', 'max' => _PS_VERSION_);
         $this->author = 'Pay.nl';
         $this->controllers = array('startPayment', 'finish', 'exchange');
@@ -391,16 +393,18 @@ class PaynlPaymentMethods extends PaymentModule
             $orderStateName = array_pop($orderStateName);
         }
 
-        $cart = new Cart((int)$transaction->getExtra1());
+        $cartId = $transaction->getExtra1();
+
+        $cart = new Cart((int)$cartId);
 
         /**
          * @var $cart CartCore
          */
         if (version_compare(_PS_VERSION_, '1.7.1.0', '>=')) {
-            $orderId = Order::getIdByCartId($transaction->getExtra1());
+            $orderId = Order::getIdByCartId($cartId);
         } else {
             //Deprecated since prestashop 1.7.1.0
-            $orderId = Order::getOrderByCartId($transaction->getExtra1());
+            $orderId = Order::getOrderByCartId($cartId);
         }
 
         if ($orderId) {
@@ -459,6 +463,8 @@ class PaynlPaymentMethods extends PaymentModule
 
             $message = "Updated order (" . $order->reference . ") to: " . $orderStateName;
 
+            $this->payLog($message . '. Transaction: ' . $transactionId , $cartId);
+
         } else {
             if ($transaction->isPaid() || $transaction->isAuthorized() || $transaction->isBeingVerified()) {
                 $amountPaid = $transaction->getPaidCurrencyAmount();
@@ -478,15 +484,18 @@ class PaynlPaymentMethods extends PaymentModule
                       $paymentMethodName = $settings->name;
                     }
 
+                    $this->payLog('processPayment(). Transaction: ' . $transactionId . '. Creating ORDER for ppid ' . $profileId . '. Status: ' . $orderStateName, $cartId);
+
                     $this->validateOrder((int)$transaction->getExtra1(), $order_state,
                       $amountPaid, $paymentMethodName, null, array('transaction_id' => $transactionId), null, false, $cart->secure_key);
 
                     /** @var OrderCore $orderId */
-                    $orderId = Order::getIdByCartId($transaction->getExtra1());
+                    $orderId = Order::getIdByCartId($cartId);
                     $order = new Order($orderId);
 
                     $message = "Validated order (" . $order->reference . ") with status: " . $orderStateName;
                 } catch (Exception $ex) {
+                    $this->payLog('processPayment(). Could not validate(create) order.', $cartId);
                     $message = "Could not validate order, error: " . $ex->getMessage();
                     Throw new Exception($message);
                 }
@@ -505,6 +514,18 @@ class PaynlPaymentMethods extends PaymentModule
 
         return $transaction;
     }
+
+    public function payLog($message, $cartid = null)
+    {
+      if($this->payLogEnabled) {
+        if (is_null($cartid)) {
+          PrestaShopLogger::addLog('PAY.: ' . $message);
+        } else {
+          PrestaShopLogger::addLog('PAY.: CartId:' . $cartid . '. ' . $message);
+        }
+      }
+    }
+
 
     /**
      * @param Cart $cart
@@ -525,11 +546,16 @@ class PaynlPaymentMethods extends PaymentModule
         $cart->deleteProduct(Configuration::get('PAYNL_FEE_PRODUCT_ID'),0);
         $cartTotal = $cart->getOrderTotal(true, Cart::BOTH, null, null, false);
         $iPaymentFee = $this->getPaymentFee($objPaymentMethod, $cartTotal);
+        $iPaymentFee = empty($iPaymentFee) ? 0 : $iPaymentFee;
+        $cartId = $cart->id;
+
+        $this->payLog('Starting new payment with cart-total: ' . $cartTotal . '. Fee: ' . $iPaymentFee, $cartId);
+
         $this->addPaymentFee($cart, $iPaymentFee);
 
         $products = $this->_getProductData($cart);
 
-        $description = $cart->id;
+        $description = $cartId;
 
         if (Configuration::get('PAYNL_DESCRIPTION_PREFIX')) {
             $description = Configuration::get('PAYNL_DESCRIPTION_PREFIX') . $description;
@@ -542,11 +568,9 @@ class PaynlPaymentMethods extends PaymentModule
             'exchangeUrl' => $this->context->link->getModuleLink($this->name, 'exchange', array(), true),
             'paymentMethod' => $payment_option_id,
             'description' => $description,
-            'orderNumber' => $cart->id,
             'testmode' => Configuration::get('PAYNL_TEST_MODE'),
             'extra1' => $cart->id,
-            'products' => $products,
-            'object' => 'prestashop '. $this->version,
+            'products' => $products
         );
 
         $addressData = $this->_getAddressData($cart);
@@ -562,6 +586,9 @@ class PaynlPaymentMethods extends PaymentModule
         $result = \Paynl\Transaction::start($startData);
 
       if ($this->shouldValidateOnStart($payment_option_id)) {
+
+        $this->payLog('Pre-Creating order for pp : ' . $payment_option_id, $cartId);
+
         // flush the package list, so the fee is added to it.
         $this->context->cart->getPackageList(true);
 
@@ -569,6 +596,9 @@ class PaynlPaymentMethods extends PaymentModule
 
         $this->validateOrder($cart->id, $this->statusPending, 0, $paymentMethodSettings->name,
             null, array(), null, false, $cart->secure_key);
+      } else
+      {
+        $this->payLog('Not pre-creating the order, waiting for payment.', $cartId);
       }
 
         return $result->getRedirectUrl();
