@@ -15,7 +15,7 @@
                     <switch ng-model="paymentmethod.enabled" class="enabledSwitch green"></switch>
                 </span>
                 <span ng-click="toggleSettings(paymentmethod)" class="col-xs-1 clickable">
-                    <img src="https://www.pay.nl/images/payment_profiles/50x50/{literal}{{paymentmethod.id}}{/literal}.png">
+                    <img src="https://static.pay.nl/payment_profiles/50x50/{literal}{{paymentmethod.id}}{/literal}.png">
                 </span>
                 <span ng-click="toggleSettings(paymentmethod)" class="col-xs-9 clickable">
                     <h4 class="list-group-item-heading">{literal}{{paymentmethod.name}}{/literal}</h4>

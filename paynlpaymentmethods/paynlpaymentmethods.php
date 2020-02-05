@@ -203,7 +203,7 @@ class PaynlPaymentMethods extends PaymentModule
                         'value' => $paymentMethod->id,
                     ],
                 ])
-                ->setLogo('https://www.pay.nl/images/payment_profiles/50x32/' . $paymentMethod->id . '.png');
+                ->setLogo('https://static.pay.nl/payment_profiles/50x32/' . $paymentMethod->id . '.png');
             if (isset($paymentMethod->description)) {
                 $objPaymentMethod->setAdditionalInformation('<p>' . $paymentMethod->description . '</p>');
             }
