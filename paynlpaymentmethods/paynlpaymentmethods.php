@@ -46,6 +46,7 @@ class PaynlPaymentMethods extends PaymentModule
     private $statusRefund;
     private $statusCanceled;
     private $paymentMethods;
+    private $payLogEnabled;
 
     public function __construct()
     {
@@ -53,6 +54,7 @@ class PaynlPaymentMethods extends PaymentModule
         $this->tab = 'payments_gateways';
         $this->version = '4.2.8';
 
+        $this->payLogEnabled = false;
         $this->ps_versions_compliancy = array('min' => '1.7', 'max' => _PS_VERSION_);
         $this->author = 'PAY.';
         $this->controllers = array('startPayment', 'finish', 'exchange');
@@ -391,16 +393,18 @@ class PaynlPaymentMethods extends PaymentModule
             $orderStateName = array_pop($orderStateName);
         }
 
-        $cart = new Cart((int)$transaction->getExtra1());
+        $cartId = $transaction->getExtra1();
+
+        $cart = new Cart((int)$cartId);
 
         /**
          * @var $cart CartCore
          */
         if (version_compare(_PS_VERSION_, '1.7.1.0', '>=')) {
-            $orderId = Order::getIdByCartId($transaction->getExtra1());
+            $orderId = Order::getIdByCartId($cartId);
         } else {
             //Deprecated since prestashop 1.7.1.0
-            $orderId = Order::getOrderByCartId($transaction->getExtra1());
+            $orderId = Order::getOrderByCartId($cartId);
         }
 
         if ($orderId) {
@@ -459,6 +463,8 @@ class PaynlPaymentMethods extends PaymentModule
 
             $message = "Updated order (" . $order->reference . ") to: " . $orderStateName;
 
+            $this->payLog($message . '. Transaction: ' . $transactionId , $cartId);
+
         } else {
             if ($transaction->isPaid() || $transaction->isAuthorized() || $transaction->isBeingVerified()) {
                 $amountPaid = $transaction->getPaidCurrencyAmount();
@@ -467,17 +473,29 @@ class PaynlPaymentMethods extends PaymentModule
                 }
 
                 try {
+                    $profileId = $transaction->getData()['paymentDetails']['paymentOptionId'];
+                    $paymentMethodName = $transaction->getData()['paymentDetails']['paymentProfileName'];
+
+                    # Profile 613 is for testing purposes
+                    if($profileId != 613) {
+                      $settings = $this->getPaymentMethodSettings($profileId);
+
+                      # Get the custom method name
+                      $paymentMethodName = $settings->name;
+                    }
+
+                    $this->payLog('processPayment(). Transaction: ' . $transactionId . '. Creating ORDER for ppid ' . $profileId . '. Status: ' . $orderStateName, $cartId);
+
                     $this->validateOrder((int)$transaction->getExtra1(), $order_state,
-                        $amountPaid,
-                        $transaction->getData()['paymentDetails']['paymentProfileName'], null,
-                        array('transaction_id' => $transactionId), null, false, $cart->secure_key);
+                      $amountPaid, $paymentMethodName, null, array('transaction_id' => $transactionId), null, false, $cart->secure_key);
 
                     /** @var OrderCore $orderId */
-                    $orderId = Order::getIdByCartId($transaction->getExtra1());
+                    $orderId = Order::getIdByCartId($cartId);
                     $order = new Order($orderId);
 
                     $message = "Validated order (" . $order->reference . ") with status: " . $orderStateName;
                 } catch (Exception $ex) {
+                    $this->payLog('processPayment(). Could not validate(create) order.', $cartId);
                     $message = "Could not validate order, error: " . $ex->getMessage();
                     Throw new Exception($message);
                 }
@@ -496,6 +514,18 @@ class PaynlPaymentMethods extends PaymentModule
 
         return $transaction;
     }
+
+    public function payLog($message, $cartid = null)
+    {
+      if($this->payLogEnabled) {
+        if (is_null($cartid)) {
+          PrestaShopLogger::addLog('PAY.: ' . $message);
+        } else {
+          PrestaShopLogger::addLog('PAY.: CartId:' . $cartid . '. ' . $message);
+        }
+      }
+    }
+
 
     /**
      * @param Cart $cart
@@ -516,11 +546,16 @@ class PaynlPaymentMethods extends PaymentModule
         $cart->deleteProduct(Configuration::get('PAYNL_FEE_PRODUCT_ID'),0);
         $cartTotal = $cart->getOrderTotal(true, Cart::BOTH, null, null, false);
         $iPaymentFee = $this->getPaymentFee($objPaymentMethod, $cartTotal);
+        $iPaymentFee = empty($iPaymentFee) ? 0 : $iPaymentFee;
+        $cartId = $cart->id;
+
+        $this->payLog('Starting new payment with cart-total: ' . $cartTotal . '. Fee: ' . $iPaymentFee, $cartId);
+
         $this->addPaymentFee($cart, $iPaymentFee);
 
         $products = $this->_getProductData($cart);
 
-        $description = $cart->id;
+        $description = $cartId;
 
         if (Configuration::get('PAYNL_DESCRIPTION_PREFIX')) {
             $description = Configuration::get('PAYNL_DESCRIPTION_PREFIX') . $description;
@@ -535,8 +570,8 @@ class PaynlPaymentMethods extends PaymentModule
             'description' => $description,
             'testmode' => Configuration::get('PAYNL_TEST_MODE'),
             'extra1' => $cart->id,
-            'language' => Language::getIsoById($cart->id_lang),
-            'products' => $products
+            'products' => $products,
+            'object' => 'prestashop '. $this->version,
         );
 
         $addressData = $this->_getAddressData($cart);
@@ -546,24 +581,49 @@ class PaynlPaymentMethods extends PaymentModule
             $startData['bank'] = $extra_data['bank'];
         }
 
-        // Taal betaalscherm bepalen
-        $language = $this->getLanguageForOrder();
-        $startData['language'] = $language;
+        # Retrieve language
+        $startData['language'] = $this->getLanguageForOrder($cart);
 
         $result = \Paynl\Transaction::start($startData);
 
-        if ($this->shouldValidateOnStart($payment_option_id)) {
-            // flush the package list, so the fee is added to it.
-            $this->context->cart->getPackageList(true);
+      if ($this->shouldValidateOnStart($payment_option_id)) {
 
-            $this->validateOrder($cart->id, $this->statusPending, 0, $this->getPaymentMethodName($payment_option_id),
-                null, array(), null, false, $cart->secure_key);
-        }
+        $this->payLog('Pre-Creating order for pp : ' . $payment_option_id, $cartId);
+
+        // flush the package list, so the fee is added to it.
+        $this->context->cart->getPackageList(true);
+
+        $paymentMethodSettings = $this->getPaymentMethodSettings($payment_option_id);
+
+        $this->validateOrder($cart->id, $this->statusPending, 0, $paymentMethodSettings->name,
+            null, array(), null, false, $cart->secure_key);
+      } else
+      {
+        $this->payLog('Not pre-creating the order, waiting for payment.', $cartId);
+      }
 
         return $result->getRedirectUrl();
     }
 
-    private function getPaymentMethod($payment_option_id)
+  /**
+   * Retrieve the settings of a specific payment with payment_profile_id
+   *
+   * @param $payment_profile_id
+   * @return bool
+   */
+  private function getPaymentMethodSettings($payment_profile_id)
+  {
+    $paymentMethods = json_decode(Configuration::get('PAYNL_PAYMENTMETHODS'));
+    foreach ($paymentMethods as $objPaymentSettings) {
+      if ($objPaymentSettings->id == $payment_profile_id) {
+        return $objPaymentSettings;
+      }
+    }
+    return false;
+  }
+
+
+  private function getPaymentMethod($payment_option_id)
     {
         foreach ($this->getPaymentMethodsForCart() as $objPaymentOption) {
             if ($objPaymentOption->id == (int)$payment_option_id) {
@@ -671,11 +731,13 @@ class PaynlPaymentMethods extends PaymentModule
         /** @var AddressCore $objInvoiceAddress */
         /** @var CustomerCore $customer */
         $enduser = array();
-        $enduser['initials'] = substr($objShippingAddress->firstname, 0, 1);
+        $enduser['initials'] = $objShippingAddress->firstname;
+        $enduser['firstName'] = $objShippingAddress->firstname;
         $enduser['lastName'] = $objShippingAddress->lastname;
         $enduser['birthDate'] = $customer->birthday;
         $enduser['phoneNumber'] = $objShippingAddress->phone ? $objShippingAddress->phone : $objShippingAddress->phone_mobile;
         $enduser['emailAddress'] = $customer->email;
+        $enduser['gender'] = $customer->id_gender == 1 ? 'M' : ($customer->id_gender == 2 ? 'F' : '');
 
         list($shipStreet, $shipHousenr) = Paynl\Helper::splitAddress(trim($objShippingAddress->address1 . ' ' . $objShippingAddress->address2));
         list($invoiceStreet, $invoiceHousenr) = Paynl\Helper::splitAddress(trim($objInvoiceAddress->address1 . ' ' . $objInvoiceAddress->address2));
@@ -709,14 +771,22 @@ class PaynlPaymentMethods extends PaymentModule
         );
     }
 
-    private function getLanguageForOrder()
+    /**
+     * Retrieve language
+     *
+     * @param $cart
+     * @return mixed|string
+     */
+    private function getLanguageForOrder($cart)
     {
-        $languageSetting = Tools::getValue('PAYNL_LANGUAGE', Configuration::get('PAYNL_LANGUAGE'));
-        if ($languageSetting == 'auto') {
-            return $this->getBrowserLanguage();
-        } else {
-            return $languageSetting;
-        }
+      $languageSetting = Tools::getValue('PAYNL_LANGUAGE', Configuration::get('PAYNL_LANGUAGE'));
+      if ($languageSetting == 'auto') {
+        return $this->getBrowserLanguage();
+      } elseif ($languageSetting == 'cart') {
+        return Language::getIsoById($cart->id_lang);
+      } else {
+        return $languageSetting;
+      }
     }
 
     private function getBrowserLanguage()
@@ -797,8 +867,12 @@ class PaynlPaymentMethods extends PaymentModule
                 'label' => $this->l('German')
             ),
             array(
+                'language_id' => 'cart',
+                'label' => $this->l('Webshop language')
+            ),
+            array(
                 'language_id' => 'auto',
-                'label' => $this->l('Automatic')
+                'label' => $this->l('Automatic (Browser language)')
             ),
         );
     }
@@ -903,6 +977,7 @@ class PaynlPaymentMethods extends PaymentModule
             Configuration::updateValue('PAYNL_API_TOKEN', Tools::getValue('PAYNL_API_TOKEN'));
             Configuration::updateValue('PAYNL_SERVICE_ID', Tools::getValue('PAYNL_SERVICE_ID'));
             Configuration::updateValue('PAYNL_TEST_MODE', Tools::getValue('PAYNL_TEST_MODE'));
+            Configuration::updateValue('PAYNL_VALIDATION_DELAY', Tools::getValue('PAYNL_VALIDATION_DELAY'));
             Configuration::updateValue('PAYNL_DESCRIPTION_PREFIX', Tools::getValue('PAYNL_DESCRIPTION_PREFIX'));
             Configuration::updateValue('PAYNL_PAYMENTMETHODS', Tools::getValue('PAYNL_PAYMENTMETHODS'));
             Configuration::updateValue('PAYNL_LANGUAGE', Tools::getValue('PAYNL_LANGUAGE'));
@@ -915,7 +990,7 @@ class PaynlPaymentMethods extends PaymentModule
         $fields_form = array(
             'form' => array(
                 'legend' => array(
-                    'title' => sprintf($this->l('PAY. Account Settings. Plugin version %s'), '4.2.8'),
+                    'title' => sprintf($this->l('PAY. Account Settings. Plugin version %s'), $this->version),
                     'icon' => 'icon-envelope'
                 ),
                 'input' => array(
@@ -940,6 +1015,24 @@ class PaynlPaymentMethods extends PaymentModule
                         'desc' => $this->l('A prefix added to the transaction description'),
                         'required' => false
                     ),
+                  array(
+                    'type' => 'switch',
+                    'label' => $this->l('Validation delay'),
+                    'name' => 'PAYNL_VALIDATION_DELAY',
+                    'desc' => $this->l('When payment is done, wait for Pay.nl to validate payment before redirecting to success page'),
+                    'values' => array(
+                      array(
+                        'id' => 'validation_delay_on',
+                        'value' => 1,
+                        'label' => $this->l('Enabled')
+                      ),
+                      array(
+                        'id' => 'validation_delay_off',
+                        'value' => 0,
+                        'label' => $this->l('Disabled')
+                      )
+                    ),
+                  ),
                     array(
                         'type' => 'switch',
                         'label' => $this->l('Test mode'),
@@ -1018,9 +1111,9 @@ class PaynlPaymentMethods extends PaymentModule
             'PAYNL_API_TOKEN' => Tools::getValue('PAYNL_API_TOKEN', Configuration::get('PAYNL_API_TOKEN')),
             'PAYNL_SERVICE_ID' => Tools::getValue('PAYNL_SERVICE_ID', Configuration::get('PAYNL_SERVICE_ID')),
             'PAYNL_TEST_MODE' => Tools::getValue('PAYNL_TEST_MODE', Configuration::get('PAYNL_TEST_MODE')),
+            'PAYNL_VALIDATION_DELAY' => Tools::getValue('PAYNL_VALIDATION_DELAY', Configuration::get('PAYNL_VALIDATION_DELAY')),
             'PAYNL_DESCRIPTION_PREFIX' => Tools::getValue('PAYNL_DESCRIPTION_PREFIX', Configuration::get('PAYNL_DESCRIPTION_PREFIX')),
             'PAYNL_LANGUAGE' => Tools::getValue('PAYNL_LANGUAGE', Configuration::get('PAYNL_LANGUAGE')),
-
             'PAYNL_PAYMENTMETHODS' => $paymentMethods
         );
     }

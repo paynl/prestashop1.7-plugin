@@ -29,12 +29,25 @@
  */
 class PaynlPaymentMethodsFinishModuleFrontController extends ModuleFrontController
 {
-    /**
-     * @see FrontController::postProcess()
-     */
+
+  private $order = null;
+  private $payOrderId = null;
+  private $orderStatusId = null;
+  private $paymentSessionId = null;
+  /**
+   * @see FrontController::postProcess()
+   */
     public function postProcess()
     {
-        $transactionId = $_REQUEST['orderId'];
+      $transactionId = $_REQUEST['orderId'];
+
+      $iAttempt = Tools::getValue('attempt');
+
+      $bValidationDelay = Configuration::get('PAYNL_VALIDATION_DELAY') == 1;
+
+      $this->payOrderId = $transactionId;
+      $this->orderStatusId = Tools::getValue('orderStatusId');
+      $this->paymentSessionId = Tools::getValue('paymentSessionId');
 
         $module = $this->module;
         /**
@@ -56,8 +69,12 @@ class PaynlPaymentMethodsFinishModuleFrontController extends ModuleFrontControll
             $customer = new Customer($cart->id_customer);
 
             $slow = '';
+
             if (!$transaction->isPaid()) {
                 $slow = '&slowvalidation=1';
+              if($bValidationDelay == 1 && $iAttempt < 20) {
+                return;
+              }
             }
 
             unset($this->context->cart);
@@ -66,11 +83,35 @@ class PaynlPaymentMethodsFinishModuleFrontController extends ModuleFrontControll
             $cartId = $transaction->getExtra1();
             $orderId = Order::getIdByCartId($cartId);
 
+            $this->order = $orderId;
+
             Tools::redirect('index.php?controller=order-confirmation'.$slow.'&id_cart=' . $cartId . '&id_module=' . $this->module->id . '&id_order=' . $orderId . '&key=' . $customer->secure_key);
+
         } else {
+	    # delete old payment fee
+	    $this->context->cart->deleteProduct(Configuration::get('PAYNL_FEE_PRODUCT_ID'),0);
+
             // naar checkout
             Tools::redirect('index.php?controller=order&step=1');
         }
 
+  }
+
+  public function initContent()
+  {
+    $iAttempt = Tools::getValue('attempt');
+
+    if (empty($iAttempt)) {
+      $iAttempt = 0;
     }
+
+    $iAttempt += 1;
+    $url =  'module/paynlpaymentmethods/finish?orderId=' . $this->payOrderId .
+      '&orderStatusId=' . $this->orderStatusId .
+      '&paymentSessionId=' . $this->paymentSessionId . '&utm_nooverride=1&attempt=' . $iAttempt;
+
+    $this->context->smarty->assign(array('order' => $this->payOrderId, 'extendUrl' => $url));
+    $this->setTemplate('module:paynlpaymentmethods/views/templates/front/waiting.tpl');
+  }
+
 }
