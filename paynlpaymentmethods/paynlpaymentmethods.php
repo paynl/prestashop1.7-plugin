@@ -51,10 +51,10 @@ class PaynlPaymentMethods extends PaymentModule
     {
         $this->name = 'paynlpaymentmethods';
         $this->tab = 'payments_gateways';
-        $this->version = '4.2.5';
+        $this->version = '4.2.8';
 
         $this->ps_versions_compliancy = array('min' => '1.7', 'max' => _PS_VERSION_);
-        $this->author = 'Pay.nl';
+        $this->author = 'PAY.';
         $this->controllers = array('startPayment', 'finish', 'exchange');
         $this->is_eu_compatible = 1;
 
@@ -68,8 +68,8 @@ class PaynlPaymentMethods extends PaymentModule
         $this->statusCanceled = Configuration::get('PS_OS_CANCELED');
         $this->statusRefund = Configuration::get('PS_OS_REFUND');
 
-        $this->displayName = $this->l('Pay.nl');
-        $this->description = $this->l('Add many payment methods to you webshop');
+        $this->displayName = $this->l('PAY.');
+        $this->description = $this->l('PAY. payment methods for PrestaShop');
 
         if (!count(Currency::checkPaymentCurrencies($this->id))) {
             $this->warning = $this->l('No currency has been set for this module.');
@@ -201,7 +201,7 @@ class PaynlPaymentMethods extends PaymentModule
                         'value' => $paymentMethod->id,
                     ],
                 ])
-                ->setLogo('https://www.pay.nl/images/payment_profiles/50x32/' . $paymentMethod->id . '.png');
+                ->setLogo('https://static.pay.nl/payment_profiles/50x32/' . $paymentMethod->id . '.png');
             if (isset($paymentMethod->description)) {
                 $objPaymentMethod->setAdditionalInformation('<p>' . $paymentMethod->description . '</p>');
             }
@@ -851,7 +851,7 @@ class PaynlPaymentMethods extends PaymentModule
         }
         $loggedin = false;
         if (!class_exists('\Paynl\Paymentmethods')) {
-            $this->adminDisplayWarning($this->l('Cannot find Pay.nl SDK, did you install the source code instead of the package?'));
+            $this->adminDisplayWarning($this->l('Cannot find PAY. SDK, did you install the source code instead of the package?'));
 
             return false;
         }
@@ -915,7 +915,7 @@ class PaynlPaymentMethods extends PaymentModule
         $fields_form = array(
             'form' => array(
                 'legend' => array(
-                    'title' => $this->l('Pay.nl Account Settings'),
+                    'title' => sprintf($this->l('PAY. Account Settings. Plugin version %s'), '4.2.8'),
                     'icon' => 'icon-envelope'
                 ),
                 'input' => array(
