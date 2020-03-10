@@ -48,11 +48,13 @@ class PaynlPaymentMethods extends PaymentModule
     private $paymentMethods;
     private $payLogEnabled;
 
+    const STATUS_AUTHORIZE = 95;
+
     public function __construct()
     {
         $this->name = 'paynlpaymentmethods';
         $this->tab = 'payments_gateways';
-        $this->version = '4.2.7';
+        $this->version = '4.2.8';
 
         $this->payLogEnabled = false;
         $this->ps_versions_compliancy = array('min' => '1.7', 'max' => _PS_VERSION_);
@@ -85,6 +87,7 @@ class PaynlPaymentMethods extends PaymentModule
         if (!parent::install()
             || !$this->registerHook('paymentOptions')
             || !$this->registerHook('paymentReturn')
+            || !$this->registerHook('actionOrderStatusPostUpdate')
         ) {
             return false;
         }
@@ -148,6 +151,55 @@ class PaynlPaymentMethods extends PaymentModule
     }
 
 
+    /**
+     * @param array $params
+     * @return bool
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
+     * @throws PrestaShopModuleException
+     */
+    public function hookActionOrderStatusPostUpdate($params)
+    {
+        if (!$this->active) {
+            return false;
+        }
+
+        if (empty($params['id_order'])) {
+            throw new PrestaShopModuleException('Empty order-id in hookActionOrderStatusPostUpdate where an integer is required to find the order details.');
+        }
+
+        if (empty($params['newOrderStatus']) || !$params['newOrderStatus'] instanceof OrderState) {
+            throw new PrestaShopModuleException('Unrecognizable order-status passed to hookActionOrderStatusPostUpdate');
+        }
+
+        $order = new Order($params['id_order']);
+        $newOrderStatusId = $params['newOrderStatus']->id;
+
+        // Validate paid with current module
+        if ($order->module != $this->name) {
+            return true;
+        }
+
+        // Validate configured order-state
+        $captureOnStatusId = Configuration::get('PAYNL_CAPTURE_ORDERSTATE');
+        if (empty($captureOnStatusId) || $captureOnStatusId != $newOrderStatusId) {
+            return false;
+        }
+
+        // Validate TransactionState
+        foreach($order->getOrderPayments() as $payment) {
+            $transactionStatus = $this->getTransactionStatus($payment->transaction_id);
+            $paymentDetails = $transactionStatus->getData()['paymentDetails'];
+
+            if ($paymentDetails['state'] == self::STATUS_AUTHORIZE) {
+                // All good, execute.
+                $this->capturePayment($payment->transaction_id);
+            }
+        }
+
+        return true;
+    }
+
     public function hookPaymentOptions($params)
     {
         if (!$this->active) {
@@ -189,7 +241,7 @@ class PaynlPaymentMethods extends PaymentModule
          */
         $availablePaymentMethods = $this->getPaymentMethodsForCart($cart);
 
-        $paymentmethods = [];
+        $paymentmethods = array();
         foreach ($availablePaymentMethods as $paymentMethod) {
             $objPaymentMethod = new PaymentOption();
 
@@ -515,17 +567,32 @@ class PaynlPaymentMethods extends PaymentModule
         return $transaction;
     }
 
-    public function payLog($message, $cartid = null)
+    public function getTransactionStatus($transactionId)
     {
-      if($this->payLogEnabled) {
-        if (is_null($cartid)) {
-          PrestaShopLogger::addLog('PAY.: ' . $message);
-        } else {
-          PrestaShopLogger::addLog('PAY.: CartId:' . $cartid . '. ' . $message);
-        }
-      }
+        $this->sdkLogin();
+
+        $transaction = \Paynl\Transaction::status($transactionId);
+        return $transaction;
     }
 
+    public function capturePayment($transactionId)
+    {
+        $this->sdkLogin();
+        $result = \Paynl\Transaction::capture($transactionId);
+
+        return $result;
+    }
+
+    public function payLog($message, $cartid = null)
+    {
+        if($this->payLogEnabled) {
+            if (is_null($cartid)) {
+                PrestaShopLogger::addLog('PAY.: ' . $message);
+            } else {
+                PrestaShopLogger::addLog('PAY.: CartId:' . $cartid . '. ' . $message);
+            }
+        }
+    }
 
     /**
      * @param Cart $cart
@@ -981,6 +1048,7 @@ class PaynlPaymentMethods extends PaymentModule
             Configuration::updateValue('PAYNL_DESCRIPTION_PREFIX', Tools::getValue('PAYNL_DESCRIPTION_PREFIX'));
             Configuration::updateValue('PAYNL_PAYMENTMETHODS', Tools::getValue('PAYNL_PAYMENTMETHODS'));
             Configuration::updateValue('PAYNL_LANGUAGE', Tools::getValue('PAYNL_LANGUAGE'));
+            Configuration::updateValue('PAYNL_CAPTURE_ORDERSTATE', Tools::getValue('PAYNL_CAPTURE_ORDERSTATE'));
         }
         $this->_html .= $this->displayConfirmation($this->l('Settings updated'));
     }
@@ -1063,6 +1131,17 @@ class PaynlPaymentMethods extends PaymentModule
                         )
                     ),
                     array(
+                        'type' => 'select',
+                        'label' => $this->l('Capture order state'),
+                        'name' => 'PAYNL_CAPTURE_ORDERSTATE',
+                        'desc' => $this->l("Select on which order status the Transaction Capture command should be executed. Leave this empty to send no capture requests at all."),
+                        'options' => array(
+                            'query' => $this->getOrderStates(),
+                            'id' => 'id_order_state',
+                            'name' => 'name'
+                        )
+                    ),
+                    array(
                         'type' => 'hidden',
                         'name' => 'PAYNL_PAYMENTMETHODS',
                     )
@@ -1114,6 +1193,7 @@ class PaynlPaymentMethods extends PaymentModule
             'PAYNL_VALIDATION_DELAY' => Tools::getValue('PAYNL_VALIDATION_DELAY', Configuration::get('PAYNL_VALIDATION_DELAY')),
             'PAYNL_DESCRIPTION_PREFIX' => Tools::getValue('PAYNL_DESCRIPTION_PREFIX', Configuration::get('PAYNL_DESCRIPTION_PREFIX')),
             'PAYNL_LANGUAGE' => Tools::getValue('PAYNL_LANGUAGE', Configuration::get('PAYNL_LANGUAGE')),
+            'PAYNL_CAPTURE_ORDERSTATE' => Tools::getValue('PAYNL_CAPTURE_ORDERSTATE', Configuration::get('PAYNL_CAPTURE_ORDERSTATE')),
             'PAYNL_PAYMENTMETHODS' => $paymentMethods
         );
     }
@@ -1181,4 +1261,16 @@ class PaynlPaymentMethods extends PaymentModule
     {
         return Country::getCountries($this->context->language->id, true);
     }
+
+    private function getOrderStates()
+    {
+        $orderStates = OrderState::getOrderStates($this->context->language->id);
+
+        $states = [['id_order_state' => null, 'name' => '']];
+        foreach($orderStates as $orderState) {
+            $states[] = ['id_order_state' => $orderState['id_order_state'], 'name' => $orderState['name']];
+        }
+        return $states;
+    }
+
 }
