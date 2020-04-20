@@ -203,8 +203,10 @@ class PaynlPaymentMethods extends PaymentModule
                         'value' => $paymentMethod->id,
                     ],
                 ])
-                ->setLogo('https://static.pay.nl/payment_profiles/50x32/' . $paymentMethod->id . '.png');
-            if (isset($paymentMethod->description)) {
+                if (Configuration::get('PAYNL_SHOW_IMAGE')) {
+                    $objPaymentMethod->
+                    setLogo('https://static.pay.nl/payment_profiles/50x32/' . $paymentMethod->id . '.png');
+                }            if (isset($paymentMethod->description)) {
                 $objPaymentMethod->setAdditionalInformation('<p>' . $paymentMethod->description . '</p>');
             }
 
@@ -981,6 +983,8 @@ class PaynlPaymentMethods extends PaymentModule
             Configuration::updateValue('PAYNL_DESCRIPTION_PREFIX', Tools::getValue('PAYNL_DESCRIPTION_PREFIX'));
             Configuration::updateValue('PAYNL_PAYMENTMETHODS', Tools::getValue('PAYNL_PAYMENTMETHODS'));
             Configuration::updateValue('PAYNL_LANGUAGE', Tools::getValue('PAYNL_LANGUAGE'));
+            Configuration::updateValue('PAYNL_SHOW_IMAGE', Tools::getValue('PAYNL_SHOW_IMAGE'));
+
         }
         $this->_html .= $this->displayConfirmation($this->l('Settings updated'));
     }
@@ -1038,6 +1042,24 @@ class PaynlPaymentMethods extends PaymentModule
                         'label' => $this->l('Test mode'),
                         'name' => 'PAYNL_TEST_MODE',
                         'desc' => $this->l('Start transactions in sandbox mode for testing.'),
+                        'values' => array(
+                            array(
+                                'id' => 'active_on',
+                                'value' => 1,
+                                'label' => $this->l('Enabled')
+                            ),
+                            array(
+                                'id' => 'active_off',
+                                'value' => 0,
+                                'label' => $this->l('Disabled')
+                            )
+                        ),
+                    ),
+                    array(
+                        'type' => 'switch',
+                        'label' => $this->l('Show images'),
+                        'name' => 'PAYNL_SHOW_IMAGE',
+                        'desc' => $this->l('Show the images of the payment methods in checkout.'),
                         'values' => array(
                             array(
                                 'id' => 'active_on',
@@ -1114,6 +1136,7 @@ class PaynlPaymentMethods extends PaymentModule
             'PAYNL_VALIDATION_DELAY' => Tools::getValue('PAYNL_VALIDATION_DELAY', Configuration::get('PAYNL_VALIDATION_DELAY')),
             'PAYNL_DESCRIPTION_PREFIX' => Tools::getValue('PAYNL_DESCRIPTION_PREFIX', Configuration::get('PAYNL_DESCRIPTION_PREFIX')),
             'PAYNL_LANGUAGE' => Tools::getValue('PAYNL_LANGUAGE', Configuration::get('PAYNL_LANGUAGE')),
+            'PAYNL_SHOW_IMAGE' => Tools::getValue('PAYNL_SHOW_IMAGE', Configuration::get('PAYNL_SHOW_IMAGE')),
             'PAYNL_PAYMENTMETHODS' => $paymentMethods
         );
     }
