@@ -31,6 +31,8 @@ $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_00d23a76e43b46dae
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_b9f5c797ebbf55adccdd8539a65a0241'] = 'Uitgeschakeld';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_4245499695408b974322be6f01b0d17a'] = 'Test modus';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_61142607f22ea506073bcb1c1c74133e'] = 'Start de transacties in sandbox modus om te testen';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_4861c3d5c88af6037e2bfb0d5c309ce1'] = 'Weergave afbeeldingen';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_f7d5170bde3cbe04f1e4c3cb3459dc08'] = 'Laat de afbeeldingen van de betaalmethoden zien in de checkout.';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_3d8bf69f189462bae437c9b50d32f4e1'] = 'Betaalscherm taal';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_1efea134dc382b9d18ef9ed8a21e178f'] = 'Selecteer de taal waarin het betaalscherm wordt weergegeven, gebruikt automatisch de browser taal';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_c9cc8cce247e49bae79f15173ce97354'] = 'Opslaan';
