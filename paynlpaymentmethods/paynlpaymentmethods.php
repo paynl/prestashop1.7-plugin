@@ -31,6 +31,7 @@ if (!class_exists('\Paynl\Paymentmethods')) {
     }
 }
 
+use Paynl\Result\Transaction\Refund;
 use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
 
 if (!defined('_PS_VERSION_')) {
@@ -52,9 +53,9 @@ class PaynlPaymentMethods extends PaymentModule
     {
         $this->name = 'paynlpaymentmethods';
         $this->tab = 'payments_gateways';
-        $this->version = '4.2.7';
+        $this->version = '4.2.8';
 
-        $this->payLogEnabled = false;
+        $this->payLogEnabled = null;
         $this->ps_versions_compliancy = array('min' => '1.7', 'max' => _PS_VERSION_);
         $this->author = 'Pay.nl';
         $this->controllers = array('startPayment', 'finish', 'exchange');
@@ -85,17 +86,122 @@ class PaynlPaymentMethods extends PaymentModule
         if (!parent::install()
             || !$this->registerHook('paymentOptions')
             || !$this->registerHook('paymentReturn')
+            || !$this->registerHook('hookDisplayAdminOrder')
         ) {
             return false;
         }
-
 
         $this->createPaymentFeeProduct();
 
         return true;
     }
 
-    public function createPaymentFeeProduct()
+  /**
+   * @param $params
+   * @return bool|string|void
+   */
+  public function hookDisplayAdminOrder($params)
+  {
+
+    try {
+      $cartId = Cart::getCartIdByOrderId((int)$params['id_order']);
+      $orderId = Order::getIdByCartId($cartId);
+      $order = new Order($orderId);
+    } catch (Exception $e) {
+      return;
+    }
+
+    $orderPayments = $order->getOrderPayments();
+    $orderPayment = reset($orderPayments);
+
+    $status = 'unavailable';
+    $method = $order->payment;
+    $currency = new Currency($orderPayment->id_currency);
+    $transactionId = $orderPayment->transaction_id;
+
+    try {
+      $transaction = $this->getTransaction($transactionId);
+      $arrTransactionDetails = $transaction->getData();
+      $status = $arrTransactionDetails['paymentDetails']['stateName'];
+      $method = $arrTransactionDetails['paymentDetails']['paymentProfileName'];
+      $showRefundButton = $transaction->isPaid() || $transaction->isPartiallyRefunded();
+    } catch (Exception $exception) {
+      $showRefundButton = false;
+    }
+
+    $amountFormatted = number_format($order->total_paid, 2, ',','.');
+
+    $this->context->controller->addCss($this->_path . 'css/PAY.css');
+    $this->context->controller->addJqueryUI('ui.dialog');
+    $this->context->controller->addJs($this->_path . 'views/js/PAY.js');
+
+    $this->context->smarty->assign(array(
+      'lang' => $this->getMultiLang(),
+      'this_version'    => $this->version,
+      'PrestaOrderId' => $orderId,
+      'amountFormatted' => $amountFormatted,
+      'amount' => $order->total_paid,
+      'currency' => $currency->iso_code,
+      'pay_orderid' => $transactionId,
+      'status' => $status,
+      'method' => $method,
+      'ajaxURL' => $this->context->link->getModuleLink($this->name, 'ajax', array(), true),
+      'showRefundButton' => $showRefundButton,
+    ));
+
+    return $this->display(__FILE__, 'payorder.tpl');
+  }
+
+  private function getMultiLang()
+  {
+    $lang['title'] = $this->l('PAY.');
+    $lang['are_you_sure'] = $this->l('Are you sure want to refund this amount');
+    $lang['refund_button'] = $this->l('REFUND');
+    $lang['my_text'] = $this->l('Are you sure?');
+    $lang['refund_not_possible'] = $this->l('Refund is not possible');
+    $lang['amount_to_refund'] = $this->l('Amount to refund');
+    $lang['refunding'] = $this->l('Processing');
+    $lang['currency'] = $this->l('Currency');
+    $lang['amount'] = $this->l('Orderamount');
+    $lang['invalidamount'] = $this->l('Invalid amount');
+    $lang['succesfully_refunded'] = $this->l('Succesfully refunded');
+    $lang['paymentmethod'] = $this->l('Paymentmethod');
+    $lang['could_not_process_refund'] = $this->l('Could not process refund. Refund might be too fast or amount is invalid');
+    $lang['info_refund_title'] = $this->l('Refund');
+    $lang['info_refund_text'] = $this->l('The orderstatus will only change to `Refunded` when the full amount is refunded.');
+    $lang['info_log_title'] = $this->l('Logs');
+    $lang['info_log_text'] = $this->l('For log information see `Advanced settings` and then `Logs`. Then filter on `PAY.`.');
+
+    return $lang;
+  }
+
+  /**
+   * @param $transactionId
+   * @param null $amount
+   * @return bool|Refund
+   */
+  public function doRefund($transactionId,  $amount = null)
+  {
+    try {
+      $this->sdkLogin();
+      $refundResult = \Paynl\Transaction::refund($transactionId, $amount);
+    } catch (Exception $objException)
+    {
+      $refundResult = false;
+    }
+
+    return $refundResult;
+  }
+
+  public function updateOrderHistory($orderId, $orderState)
+  {
+    $history = new OrderHistory();
+    $history->id_order = $orderId;
+    $history->changeIdOrderState($orderState, $orderId, true);
+    $history->addWs();
+  }
+
+  public function createPaymentFeeProduct()
     {
         $id_product = Configuration::get('PAYNL_FEE_PRODUCT_ID');
         $feeProduct = new Product(Configuration::get('PAYNL_FEE_PRODUCT_ID'), true);
@@ -454,12 +560,8 @@ class PaynlPaymentMethods extends PaymentModule
               $order->save();
             }
 
-            $history = new OrderHistory();
+            $this->updateOrderHistory($order->id, $order_state);
 
-            $history->id_order = $order->id;
-
-            $history->changeIdOrderState($order_state, $order->id, true);
-            $history->addWs();
 
             $message = "Updated order (" . $order->reference . ") to: " . $orderStateName;
 
@@ -506,6 +608,12 @@ class PaynlPaymentMethods extends PaymentModule
         return $transaction;
     }
 
+  /**
+   * @param $transactionId
+   * @return \Paynl\Result\Transaction\Transaction
+   * @throws \Paynl\Error\Api
+   * @throws \Paynl\Error\Error
+   */
     public function getTransaction($transactionId)
     {
         $this->sdkLogin();
@@ -515,8 +623,16 @@ class PaynlPaymentMethods extends PaymentModule
         return $transaction;
     }
 
+  /**
+   * @param $message
+   * @param null $cartid
+   */
     public function payLog($message, $cartid = null)
     {
+      if(is_null($this->payLogEnabled)) {
+        $this->payLogEnabled = Configuration::get('PAYNL_PAYLOGGER') == 1;
+      }
+
       if($this->payLogEnabled) {
         if (is_null($cartid)) {
           PrestaShopLogger::addLog('PAY.: ' . $message);
@@ -584,7 +700,12 @@ class PaynlPaymentMethods extends PaymentModule
         # Retrieve language
         $startData['language'] = $this->getLanguageForOrder($cart);
 
-        $result = \Paynl\Transaction::start($startData);
+
+      /**
+       * @var $payTransaction Paynl\Result\Transaction\Start
+       */
+
+      $payTransaction = \Paynl\Transaction::start($startData);
 
       if ($this->shouldValidateOnStart($payment_option_id)) {
 
@@ -595,14 +716,26 @@ class PaynlPaymentMethods extends PaymentModule
 
         $paymentMethodSettings = $this->getPaymentMethodSettings($payment_option_id);
 
-        $this->validateOrder($cart->id, $this->statusPending, 0, $paymentMethodSettings->name,
-            null, array(), null, false, $cart->secure_key);
+        $this->validateOrder($cart->id, $this->statusPending, 0, $paymentMethodSettings->name, null, array(), null, false, $cart->secure_key);
+
+        $transactionData = $payTransaction->getData();
+        $orderId = Order::getIdByCartId($cartId);
+        $order = new Order($orderId);
+
+        $orderPayment = new OrderPayment();
+        $orderPayment->order_reference = $order->reference;
+        $orderPayment->payment_method = 'PAY Overboeking';
+        $orderPayment->amount = $startData['amount'];
+        $orderPayment->transaction_id = $transactionData['transaction']['transactionId'];
+        $orderPayment->id_currency = $cart->id_currency;
+        $orderPayment->save();
+
       } else
       {
         $this->payLog('Not pre-creating the order, waiting for payment.', $cartId);
       }
 
-        return $result->getRedirectUrl();
+        return $payTransaction->getRedirectUrl();
     }
 
   /**
@@ -978,6 +1111,7 @@ class PaynlPaymentMethods extends PaymentModule
             Configuration::updateValue('PAYNL_SERVICE_ID', Tools::getValue('PAYNL_SERVICE_ID'));
             Configuration::updateValue('PAYNL_TEST_MODE', Tools::getValue('PAYNL_TEST_MODE'));
             Configuration::updateValue('PAYNL_VALIDATION_DELAY', Tools::getValue('PAYNL_VALIDATION_DELAY'));
+            Configuration::updateValue('PAYNL_PAYLOGGER', Tools::getValue('PAYNL_PAYLOGGER'));
             Configuration::updateValue('PAYNL_DESCRIPTION_PREFIX', Tools::getValue('PAYNL_DESCRIPTION_PREFIX'));
             Configuration::updateValue('PAYNL_PAYMENTMETHODS', Tools::getValue('PAYNL_PAYMENTMETHODS'));
             Configuration::updateValue('PAYNL_LANGUAGE', Tools::getValue('PAYNL_LANGUAGE'));
@@ -1028,6 +1162,24 @@ class PaynlPaymentMethods extends PaymentModule
                       ),
                       array(
                         'id' => 'validation_delay_off',
+                        'value' => 0,
+                        'label' => $this->l('Disabled')
+                      )
+                    ),
+                  ),
+                  array(
+                    'type' => 'switch',
+                    'label' => $this->l('PAY Logging'),
+                    'name' => 'PAYNL_PAYLOGGER',
+                    'desc' => $this->l('Log communication between the webshop and PAY.'),
+                    'values' => array(
+                      array(
+                        'id' => 'paylogger_on',
+                        'value' => 1,
+                        'label' => $this->l('Enabled')
+                      ),
+                      array(
+                        'id' => 'paylogger_off',
                         'value' => 0,
                         'label' => $this->l('Disabled')
                       )
@@ -1112,6 +1264,7 @@ class PaynlPaymentMethods extends PaymentModule
             'PAYNL_SERVICE_ID' => Tools::getValue('PAYNL_SERVICE_ID', Configuration::get('PAYNL_SERVICE_ID')),
             'PAYNL_TEST_MODE' => Tools::getValue('PAYNL_TEST_MODE', Configuration::get('PAYNL_TEST_MODE')),
             'PAYNL_VALIDATION_DELAY' => Tools::getValue('PAYNL_VALIDATION_DELAY', Configuration::get('PAYNL_VALIDATION_DELAY')),
+            'PAYNL_PAYLOGGER' => Tools::getValue('PAYNL_PAYLOGGER', Configuration::get('PAYNL_PAYLOGGER')),
             'PAYNL_DESCRIPTION_PREFIX' => Tools::getValue('PAYNL_DESCRIPTION_PREFIX', Configuration::get('PAYNL_DESCRIPTION_PREFIX')),
             'PAYNL_LANGUAGE' => Tools::getValue('PAYNL_LANGUAGE', Configuration::get('PAYNL_LANGUAGE')),
             'PAYNL_PAYMENTMETHODS' => $paymentMethods
