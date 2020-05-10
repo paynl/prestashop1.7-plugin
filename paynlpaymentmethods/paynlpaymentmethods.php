@@ -57,7 +57,7 @@ class PaynlPaymentMethods extends PaymentModule
 
         $this->payLogEnabled = null;
         $this->ps_versions_compliancy = array('min' => '1.7', 'max' => _PS_VERSION_);
-        $this->author = 'Pay.nl';
+        $this->author = 'PAY.';
         $this->controllers = array('startPayment', 'finish', 'exchange');
         $this->is_eu_compatible = 1;
 
@@ -71,8 +71,8 @@ class PaynlPaymentMethods extends PaymentModule
         $this->statusCanceled = Configuration::get('PS_OS_CANCELED');
         $this->statusRefund = Configuration::get('PS_OS_REFUND');
 
-        $this->displayName = $this->l('Pay.nl');
-        $this->description = $this->l('Add many payment methods to your webshop');
+        $this->displayName = $this->l('PAY.');
+        $this->description = $this->l('PAY. payment methods for PrestaShop');
 
         if (!count(Currency::checkPaymentCurrencies($this->id))) {
             $this->warning = $this->l('No currency has been set for this module.');
@@ -314,8 +314,10 @@ class PaynlPaymentMethods extends PaymentModule
                         'value' => $paymentMethod->id,
                     ],
                 ])
-                ->setLogo('https://www.pay.nl/images/payment_profiles/50x32/' . $paymentMethod->id . '.png');
-            if (isset($paymentMethod->description)) {
+                if (Configuration::get('PAYNL_SHOW_IMAGE')) {
+                    $objPaymentMethod->
+                    setLogo('https://static.pay.nl/payment_profiles/50x32/' . $paymentMethod->id . '.png');
+                }            if (isset($paymentMethod->description)) {
                 $objPaymentMethod->setAdditionalInformation('<p>' . $paymentMethod->description . '</p>');
             }
 
@@ -1070,7 +1072,7 @@ class PaynlPaymentMethods extends PaymentModule
         }
         $loggedin = false;
         if (!class_exists('\Paynl\Paymentmethods')) {
-            $this->adminDisplayWarning($this->l('Cannot find Pay.nl SDK, did you install the source code instead of the package?'));
+            $this->adminDisplayWarning($this->l('Cannot find PAY. SDK, did you install the source code instead of the package?'));
 
             return false;
         }
@@ -1127,6 +1129,8 @@ class PaynlPaymentMethods extends PaymentModule
             Configuration::updateValue('PAYNL_DESCRIPTION_PREFIX', Tools::getValue('PAYNL_DESCRIPTION_PREFIX'));
             Configuration::updateValue('PAYNL_PAYMENTMETHODS', Tools::getValue('PAYNL_PAYMENTMETHODS'));
             Configuration::updateValue('PAYNL_LANGUAGE', Tools::getValue('PAYNL_LANGUAGE'));
+            Configuration::updateValue('PAYNL_SHOW_IMAGE', Tools::getValue('PAYNL_SHOW_IMAGE'));
+
         }
         $this->_html .= $this->displayConfirmation($this->l('Settings updated'));
     }
@@ -1136,7 +1140,7 @@ class PaynlPaymentMethods extends PaymentModule
         $fields_form = array(
             'form' => array(
                 'legend' => array(
-                    'title' => $this->l('Pay.nl Account Settings. Plugin version ' . $this->version),
+                    'title' => sprintf($this->l('PAY. Account Settings. Plugin version %s'), $this->version),
                     'icon' => 'icon-envelope'
                 ),
                 'input' => array(
@@ -1216,6 +1220,24 @@ class PaynlPaymentMethods extends PaymentModule
                         ),
                     ),
                     array(
+                        'type' => 'switch',
+                        'label' => $this->l('Show images'),
+                        'name' => 'PAYNL_SHOW_IMAGE',
+                        'desc' => $this->l('Show the images of the payment methods in checkout.'),
+                        'values' => array(
+                            array(
+                                'id' => 'active_on',
+                                'value' => 1,
+                                'label' => $this->l('Enabled')
+                            ),
+                            array(
+                                'id' => 'active_off',
+                                'value' => 0,
+                                'label' => $this->l('Disabled')
+                            )
+                        ),
+                    ),
+                    array(
                         'type' => 'select',
                         'label' => $this->l('Payment screen language'),
                         'name' => 'PAYNL_LANGUAGE',
@@ -1279,6 +1301,7 @@ class PaynlPaymentMethods extends PaymentModule
             'PAYNL_PAYLOGGER' => Tools::getValue('PAYNL_PAYLOGGER', Configuration::get('PAYNL_PAYLOGGER')),
             'PAYNL_DESCRIPTION_PREFIX' => Tools::getValue('PAYNL_DESCRIPTION_PREFIX', Configuration::get('PAYNL_DESCRIPTION_PREFIX')),
             'PAYNL_LANGUAGE' => Tools::getValue('PAYNL_LANGUAGE', Configuration::get('PAYNL_LANGUAGE')),
+            'PAYNL_SHOW_IMAGE' => Tools::getValue('PAYNL_SHOW_IMAGE', Configuration::get('PAYNL_SHOW_IMAGE')),
             'PAYNL_PAYMENTMETHODS' => $paymentMethods
         );
     }
