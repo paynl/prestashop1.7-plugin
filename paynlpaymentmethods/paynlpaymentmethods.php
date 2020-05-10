@@ -198,6 +198,12 @@ class PaynlPaymentMethods extends PaymentModule
     return $refundResult;
   }
 
+  /**
+   * Update order status
+   *
+   * @param $orderId
+   * @param $orderState
+   */
   public function updateOrderHistory($orderId, $orderState)
   {
     $history = new OrderHistory();
@@ -313,7 +319,7 @@ class PaynlPaymentMethods extends PaymentModule
                         'type' => 'hidden',
                         'value' => $paymentMethod->id,
                     ],
-                ])
+                ]);
                 if (Configuration::get('PAYNL_SHOW_IMAGE')) {
                     $objPaymentMethod->
                     setLogo('https://static.pay.nl/payment_profiles/50x32/' . $paymentMethod->id . '.png');
