@@ -111,6 +111,11 @@ class PaynlPaymentMethods extends PaymentModule
       return;
     }
 
+    # Check if the order is processed by PAY.
+    if($order->module !== 'paynlpaymentmethods') {
+      return;
+    }
+
     $orderPayments = $order->getOrderPayments();
     $orderPayment = reset($orderPayments);
 
@@ -519,6 +524,13 @@ class PaynlPaymentMethods extends PaymentModule
             /**
              * @var $order OrderCore
              */
+
+            # Check if the order is processed by PAY.
+            if($order->module !== 'paynlpaymentmethods') {
+              $message = 'Not a PAY. order. Customer seemed to used different provider. Not updating the order.';
+              return $transaction;
+            }
+
             if ($order->hasBeenPaid() && !$transaction->isRefunded(false)) {
                 $message = 'Order is already paid | OrderReference: ' . $order->reference;
 
