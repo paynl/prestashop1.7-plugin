@@ -52,7 +52,7 @@ class PaynlPaymentMethods extends PaymentModule
     {
         $this->name = 'paynlpaymentmethods';
         $this->tab = 'payments_gateways';
-        $this->version = '4.2.8';
+        $this->version = '4.2.9';
 
         $this->payLogEnabled = false;
         $this->ps_versions_compliancy = array('min' => '1.7', 'max' => _PS_VERSION_);
@@ -202,7 +202,7 @@ class PaynlPaymentMethods extends PaymentModule
                         'type' => 'hidden',
                         'value' => $paymentMethod->id,
                     ],
-                ])
+                ]);
                 if (Configuration::get('PAYNL_SHOW_IMAGE')) {
                     $objPaymentMethod->
                     setLogo('https://static.pay.nl/payment_profiles/50x32/' . $paymentMethod->id . '.png');
