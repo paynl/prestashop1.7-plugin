@@ -78,6 +78,10 @@ class PaynlPaymentMethods extends PaymentModule
             $this->warning = $this->l('No currency has been set for this module.');
         }
 
+        if (!$this->isRegisteredInHook('displayAdminOrder')) {
+          $this->registerHook('displayAdminOrder');
+        }
+
     }
 
     public function install()
