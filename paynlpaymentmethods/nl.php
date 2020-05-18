@@ -43,7 +43,7 @@ $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_2ab45b27dbaf728ec
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_b989ff7da93d9c8344a4c4e765cab502'] = 'Validatievertraging';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_00d23a76e43b46dae9ec7aa9dcbebb32'] = 'Ingeschakeld';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_b9f5c797ebbf55adccdd8539a65a0241'] = 'Uitgeschakeld';
-$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_56d40defec5b7682e494af89a7a4d2a9'] = 'Log communicatie en proces informatie van PAY.';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_56d40defec5b7682e494af89a7a4d2a9'] = 'Log communicatie en procesinformatie van PAY.';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_4245499695408b974322be6f01b0d17a'] = 'Test modus';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_61142607f22ea506073bcb1c1c74133e'] = 'Start de transacties in sandbox modus om te testen';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_4861c3d5c88af6037e2bfb0d5c309ce1'] = 'Weergave afbeeldingen';
