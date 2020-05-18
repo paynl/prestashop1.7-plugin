@@ -34,13 +34,16 @@ class PaynlPaymentMethodsAjaxModuleFrontController extends ModuleFrontController
   {
     $prestaorderid = Tools::getValue('prestaorderid');
     $amount = Tools::getValue('amount');
+
+    /**
+     * @var $module PaynlPaymentMethods
+     */
     $module = $this->module;
-    $module->payLog('PAY.: Refund - start. Trying to refund ' . $amount . ' on prestashop-orderid ' . $prestaorderid);
 
     try {
       $order = new Order($prestaorderid);
     } catch (Exception $e) {
-      $module->payLog('PAY.: Refund - Failed. Prestasshop order not found.');
+      $module->payLog('Refund', 'Failed trying to refund ' . $amount . ' on ps-orderid ' . $prestaorderid . ' Order not found. Errormessage: ' . $e->getMessage());
       $this->returnResponse(false, 0, 'Could not find order');
     }
 
@@ -52,20 +55,24 @@ class PaynlPaymentMethodsAjaxModuleFrontController extends ModuleFrontController
     $currency = new Currency($currencyId);
     $strCurrency = $currency->iso_code;
 
-    /**
-     * @var $module PaynlPaymentMethods
-     */
-    $refundResult = $module->doRefund($transactionId, $amount);
-    if (!empty($refundResult)) {
+    $cartId = !empty($order->id_cart) ? $order->id_cart : null;
+
+    $module->payLog('Refund', 'Trying to refund ' . $amount . ' ' . $strCurrency . ' on prestashop-orderid ' . $prestaorderid, $cartId, $transactionId);
+
+    $arrRefundResult = $module->doRefund($transactionId, $amount);
+    $refundResult = $arrRefundResult['data'];
+
+    if ($arrRefundResult['result'])
+    {
       $arrResult = $refundResult->getData();
       $amountRefunded = !empty($arrResult['amountRefunded']) ? $arrResult['amountRefunded'] : '';
 
       $desc = !empty($arrResult['description']) ? $arrResult['description'] : 'empty';
-      $module->payLog('PAY.: Refund - Success, result message:' . $desc);
+      $module->payLog('Refund', 'Refund success, result message: ' . $desc, $cartId, $transactionId);
 
       $this->returnResponse(true, $amountRefunded, 'succesfully_refunded ' . $strCurrency . ' ' . $amount);
     } else {
-      $module->payLog('PAY.: Refund - Failed. Possible PAY. connection error or refund too fast or invalid amount.');
+      $module->payLog('Refund', 'Refund failed: ' . $refundResult, $cartId, $transactionId);
       $this->returnResponse(false, 0, 'could_not_process_refund');
     }
 

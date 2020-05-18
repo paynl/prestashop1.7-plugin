@@ -6,12 +6,12 @@
 {
     border:0;
     background: none;
-    background-color: #393939;
+    background-color: #fff;
     color: white;
 }
 .ui-dialog *
 {
-    color: #FFFFFF;
+    color: #333;
 }
 .ui-dialog-title
 {
