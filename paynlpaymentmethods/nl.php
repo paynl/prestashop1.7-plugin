@@ -18,7 +18,7 @@ $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_0767b61acf9e2b7c9
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_27e600a9fa8e36c761aad9cb1ba5a156'] = 'Betaalmethode';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_9b24ac685f7ec44b2895b9d172d22ccc'] = 'Terugbetalen mislukt. Probeer het later nog eens of pas het bedrag aan.';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_76f0ed934de85cc7131910b32ede7714'] = 'Terugbetaling';
-$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_6fed3072d725c3906e264e4b4136b6b4'] = 'De orderstatus wordt alleen bij een volledige terugbetaling aangepast naar \'Terugbetaald\'.';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_26cd177f2b6765750334ed39a2f4b5b6'] = 'De orderstatus wordt alleen bij een volledige terugbetaling aangepast naar `Terugbetaald`. De voorraad wordt hierbij niet aangepast.';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_b2d37ae1cedf42ff874289b721860af2'] = 'Log-informatie';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_4f6cbea9f2eade99f783747f7cafb211'] = 'Ga hiervoor naar `Geavanceerde instellingen` en open `Logboeken` en filter bij (indien ingeschakeld bij de plugin instellingen) `Bericht` op `PAY.`';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_020c2091aec3019d02193cef080bcf97'] = 'Betaalmethode toeslag';

@@ -177,7 +177,7 @@ class PaynlPaymentMethods extends PaymentModule
     $lang['paymentmethod'] = $this->l('Paymentmethod');
     $lang['could_not_process_refund'] = $this->l('Could not process refund. Refund might be too fast or amount is invalid');
     $lang['info_refund_title'] = $this->l('Refund');
-    $lang['info_refund_text'] = $this->l('The orderstatus will only change to `Refunded` when the full amount is refunded.');
+    $lang['info_refund_text'] = $this->l('The orderstatus will only change to `Refunded` when the full amount is refunded. Stock wont by updated.');
     $lang['info_log_title'] = $this->l('Logs');
     $lang['info_log_text'] = $this->l('For log information see `Advanced settings` and then `Logs`. Then filter on `PAY.`.');
 
