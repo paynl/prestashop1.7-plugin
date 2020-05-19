@@ -59,7 +59,7 @@ class PaynlPaymentMethodsAjaxModuleFrontController extends ModuleFrontController
 
     $module->payLog('Refund', 'Trying to refund ' . $amount . ' ' . $strCurrency . ' on prestashop-orderid ' . $prestaorderid, $cartId, $transactionId);
 
-    $arrRefundResult = $module->doRefund($transactionId, $amount);
+    $arrRefundResult = $module->doRefund($transactionId, $amount, $strCurrency);
     $refundResult = $arrRefundResult['data'];
 
     if ($arrRefundResult['result'])

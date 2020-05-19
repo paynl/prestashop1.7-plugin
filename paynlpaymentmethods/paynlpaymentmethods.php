@@ -187,14 +187,15 @@ class PaynlPaymentMethods extends PaymentModule
   /**
    * @param $transactionId
    * @param null $amount
+   * @param string|null $strCurrency
    * @return array
    */
-  public function doRefund($transactionId, $amount = null)
+  public function doRefund($transactionId, $amount = null, $strCurrency = null)
   {
     try {
       $this->sdkLogin();
       $result = true;
-      $refundResult = \Paynl\Transaction::refund($transactionId, $amount);
+      $refundResult = \Paynl\Transaction::refund($transactionId, $amount, null, null, $strCurrency);
     } catch (Exception $objException) {
       $refundResult = $objException->getMessage();
       $result = false;

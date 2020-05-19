@@ -55,6 +55,12 @@ class Refund extends Transaction
         $this->transactionId = $transactionId;
     }
 
+    private $currency;
+
+    public function setCurrency($strCurrency)
+    {
+      $this->currency = $strCurrency;
+    }
     /**
      * @param int $amount
      */
@@ -99,6 +105,10 @@ class Refund extends Transaction
         }
         if ($this->processDate instanceof \DateTime) {
             $this->data['processDate'] = $this->processDate->format('d-m-Y');
+        }
+
+        if(!empty($this->currency)) {
+          $this->data['currency'] = $this->currency;
         }
 
         return parent::getData();

@@ -309,6 +309,7 @@ class Transaction
      * @param int|float|null $amount
      * @param string|null $description
      * @param \DateTime $processDate
+     * @param string|null $strCurrency
      *
      * @return Result\Refund
      * @throws Error\Api
@@ -318,7 +319,8 @@ class Transaction
         $transactionId,
         $amount = null,
         $description = null,
-        \DateTime $processDate = null
+        \DateTime $processDate = null,
+        $strCurrency = null
     )
     {
         $api = new Api\Refund();
@@ -332,6 +334,9 @@ class Transaction
         }
         if ($processDate !== null) {
             $api->setProcessDate($processDate);
+        }
+        if(!empty($strCurrency)) {
+          $api->setCurrency($strCurrency);
         }
         $result = $api->doRequest();
 
