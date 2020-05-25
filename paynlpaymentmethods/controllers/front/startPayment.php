@@ -54,7 +54,6 @@ class PaynlPaymentMethodsStartPaymentModuleFrontController extends ModuleFrontCo
             die($this->module->l('This payment method is not available.', 'validation'));
         }
 
-
         $extra_data = array();
         if(isset($_REQUEST['bank'])){
             $extra_data['bank'] = $_REQUEST['bank'];
@@ -63,8 +62,8 @@ class PaynlPaymentMethodsStartPaymentModuleFrontController extends ModuleFrontCo
             $redirectUrl = $this->module->startPayment($cart, $paymentOptionId, $extra_data);
             Tools::redirect($redirectUrl);
         } catch (Exception $e){
-
-            die('Error: '.$e->getMessage());
+          $this->module->payLog('postProcess', 'Error startPayment: ' . $e->getMessage(), $cart->id);
+          die('Error: ' . $e->getMessage());
         }
 
 

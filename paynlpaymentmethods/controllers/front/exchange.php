@@ -34,21 +34,22 @@ class PaynlPaymentMethodsExchangeModuleFrontController extends ModuleFrontContro
      */
     public function postProcess()
     {
-        if($_REQUEST['action'] == 'pending'){
-            die('TRUE| Ignoring pending');
-        }
+        $transactionId = $_REQUEST['order_id'];
 
         # PAY. action
         $action = Tools::getValue('action');
+        $cartid = Tools::getValue('extra1');
 
-        $transactionId = $_REQUEST['order_id'];
-
-        $module = $this->module;
         /**
-         * @var $module PaynlPaymentMethods
-         */
+        * @var $module PaynlPaymentMethods
+        */
+        $module = $this->module;
 
-        $module->payLog('Exchange. Action: ' . $action . '. TransactionId: ' . $transactionId);
+        $module->payLog('Exchange', 'Action: ' . $action, $cartid, $transactionId);
+
+        if($_REQUEST['action'] == 'pending'){
+            die('TRUE| Ignoring pending');
+        }
 
         try {
             $message = '';

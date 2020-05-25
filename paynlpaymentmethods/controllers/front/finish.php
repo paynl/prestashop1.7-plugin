@@ -49,14 +49,21 @@ class PaynlPaymentMethodsFinishModuleFrontController extends ModuleFrontControll
       $this->orderStatusId = Tools::getValue('orderStatusId');
       $this->paymentSessionId = Tools::getValue('paymentSessionId');
 
-        $module = $this->module;
-        /**
-         * @var $module PaynlPaymentMethods
-         */
+      /**
+       * @var $module PaynlPaymentMethods
+       */
+      $module = $this->module;
 
+      try {
         $transaction = $module->getTransaction($transactionId);
+      } catch (Exception $e) {
+        $module->payLog('finishPostProcess', 'Could not retrieve transaction', null, $transactionId);
+        return;
+      }
 
-        if ($transaction->isPaid() || $transaction->isPending() || $transaction->isBeingVerified() || $transaction->isAuthorized()) {
+      $module->payLog('finishPostProcess', 'Returning to webshop', $transaction->getExtra1(), $transactionId);
+
+      if ($transaction->isPaid() || $transaction->isPending() || $transaction->isBeingVerified() || $transaction->isAuthorized()) {
             // naar success
             /**
              * @var $cart CartCore
@@ -87,13 +94,13 @@ class PaynlPaymentMethodsFinishModuleFrontController extends ModuleFrontControll
 
             Tools::redirect('index.php?controller=order-confirmation'.$slow.'&id_cart=' . $cartId . '&id_module=' . $this->module->id . '&id_order=' . $orderId . '&key=' . $customer->secure_key);
 
-        } else {
-	    # delete old payment fee
-	    $this->context->cart->deleteProduct(Configuration::get('PAYNL_FEE_PRODUCT_ID'),0);
+      } else {
+        # Delete old payment fee
+        $this->context->cart->deleteProduct(Configuration::get('PAYNL_FEE_PRODUCT_ID'), 0);
 
-            // naar checkout
-            Tools::redirect('index.php?controller=order&step=1');
-        }
+        # To checkout
+        Tools::redirect('index.php?controller=order&step=1');
+      }
 
   }
 
