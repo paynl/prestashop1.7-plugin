@@ -8,25 +8,29 @@
     "packages": [
         {
             "name": "paynl/sdk",
-            "version": "v1.5.8",
+            "version": "v1.5.16",
             "source": {
                 "type": "git",
                 "url": "https://github.com/paynl/sdk.git",
-                "reference": "c21dff94cace15b94655116cf2d3c93eed2b1a3c"
+                "reference": "da650911f57e406ce71da6cf530bdb1402b3808a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/paynl/sdk/zipball/c21dff94cace15b94655116cf2d3c93eed2b1a3c",
-                "reference": "c21dff94cace15b94655116cf2d3c93eed2b1a3c",
+                "url": "https://api.github.com/repos/paynl/sdk/zipball/da650911f57e406ce71da6cf530bdb1402b3808a",
+                "reference": "da650911f57e406ce71da6cf530bdb1402b3808a",
                 "shasum": ""
             },
             "require": {
+                "ext-curl": "*",
                 "ext-json": "*",
                 "php-curl-class/php-curl-class": "^8.3"
             },
             "require-dev": {
-                "phpunit/phpunit": "^4.8",
-                "satooshi/php-coveralls": "~1.0"
+                "php-coveralls/php-coveralls": "^1.0",
+                "phpunit/phpunit": "^4.8"
+            },
+            "suggest": {
+                "ext-simplexml": "*"
             },
             "type": "library",
             "autoload": {
@@ -35,13 +39,16 @@
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
             "authors": [
                 {
                     "name": "Andy Pieters",
                     "email": "andy@pay.nl"
                 }
             ],
-            "time": "2019-02-01T15:13:13+00:00"
+            "time": "2020-07-13T17:53:29+00:00"
         },
         {
             "name": "php-curl-class/php-curl-class",

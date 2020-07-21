@@ -1,20 +1,4 @@
 <?php
-/*
- * Copyright (C) 2015 Andy Pieters <andy@pay.nl>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 
 namespace Paynl;
 
@@ -28,10 +12,43 @@ use Paynl\Result\Transaction as Result;
  */
 class Transaction
 {
+    /** @var string Normal retail article */
     const PRODUCT_TYPE_ARTICLE = 'ARTICLE';
-    const PRODUCT_TYPE_SHIPPING = 'SHIPPING';
-    const PRODUCT_TYPE_HANDLING = 'HANDLING';
+    /** @var string Retail product with high fraud risk, easy to resell (mobile phones, tablets, laptops, juwelery) */
+    const PRODUCT_TYPE_ARTICLE_H = 'ARTICLE_H';
+    /** @var string Credit of a previous payment */
+    const PRODUCT_TYPE_CREDIT = 'CREDIT';
+    /** @var string Digital currency like BitCoin, Ethereum or other altcoins */
+    const PRODUCT_TYPE_CRYPTO = 'CRYPTO';
+    /** @var string Discount for the total order */
     const PRODUCT_TYPE_DISCOUNT = 'DISCOUNT';
+    /** @var string Digital transfer of a file (photo, video, data) */
+    const PRODUCT_TYPE_DOWNLOAD = 'DOWNLOAD';
+    /** @var string Vouchers that can be redeemded at multiple platforms or potentially be resold (eg. iTunes/steam/paysafecard etc.) - open loop (high risk) */
+    const PRODUCT_TYPE_EMONEY = 'EMONEY';
+    /** @var string Card that represents a value for a (group of) merchant(s) - closed loop (medium risk) */
+    const PRODUCT_TYPE_GIFTCARD = 'GIFTCARD';
+    /** @var string Costs that are added for taking care of the order */
+    const PRODUCT_TYPE_HANDLING = 'HANDLING';
+    /** @var string Verification payment to check identity or account/name verification. */
+    const PRODUCT_TYPE_IDENTITY = 'IDENTITY';
+    /** @var string Payment of an invoice (products or service must already be delivered) */
+    const PRODUCT_TYPE_INVOICE = 'INVOICE';
+    /** @var string Payment fees */
+    const PRODUCT_TYPE_PAYMENT = 'PAYMENT';
+    /** @var string An extra order line added by PAY. if the total amount does not match the total of the product lines */
+    const PRODUCT_TYPE_ROUNDING = 'ROUNDING';   
+    /** @var string Costs for shipment */
+    const PRODUCT_TYPE_SHIPPING = 'SHIPPING';
+    /** @var string Ticket for events, festivals or theaters */
+    const PRODUCT_TYPE_TICKET = 'TICKET';
+    /** @var string Add funds to an account (owned by a person or company) NOTE: if you sell anonymous or temporary accounts please use EMONEY */
+    const PRODUCT_TYPE_TOPUP = 'TOPUP';
+    /** @var string Digital assets, stored on the server of the merchant (eg. in game puchases) */
+    const PRODUCT_TYPE_VIRTUAL = 'VIRTUAL';
+    /** @var string Voucher for a free article or discount for next order */
+    const PRODUCT_TYPE_VOUCHER = 'VOUCHER';
+
 
     /**
      * Start a new transaction
@@ -39,7 +56,10 @@ class Transaction
      * @param array $options
      *
      * @return Result\Start
+     * @throws Error\Api
      * @throws Error\Error
+     * @throws Error\Required\ApiToken
+     * @throws Error\Required\ServiceId
      */
     public static function start($options = array())
     {
@@ -88,6 +108,11 @@ class Transaction
         if (isset($options['extra3'])) {
             $api->setExtra3($options['extra3']);
         }
+
+        if (isset($options['transferData'])){
+            $api->setTransferData($options['transferData']);
+        }
+
         if (isset($options['ipaddress'])) {
             $api->setIpAddress($options['ipaddress']);
         }
@@ -237,6 +262,8 @@ class Transaction
      * @return Result\Transaction
      * @throws Error\Api
      * @throws Error\Error
+     * @throws Error\Required\ApiToken
+     * @throws Error\Required\ServiceId
      */
     public static function getForReturn()
     {
@@ -251,6 +278,8 @@ class Transaction
      * @return Result\Transaction
      * @throws Error\Api
      * @throws Error\Error
+     * @throws Error\Required\ApiToken
+     * @throws Error\Required\ServiceId
      */
     public static function get($transactionId)
     {
@@ -268,6 +297,8 @@ class Transaction
      * @return Result\Status
      * @throws Error\Api
      * @throws Error\Error
+     * @throws Error\Required\ApiToken
+     * @throws Error\Required\ServiceId
      */
     public static function status($transactionId)
     {
@@ -278,6 +309,35 @@ class Transaction
         return new Result\Status($result);
     }
 
+    /**
+     * Gets details of a transaction
+     *
+     * @param string $transactionId
+     * @param string|null $entranceCode
+     *
+     * @return Result\Details
+     * @throws Error\Api
+     * @throws Error\Error
+     * @throws Error\Required\ApiToken    
+     */
+    public static function details(
+        $transactionId,
+        $entranceCode = null
+    )
+    {
+        
+        $api = new Api\Details();
+        
+        $api->setTransactionId($transactionId);
+      
+        if ($entranceCode !== null) {
+            $api->setEntranceCode($entranceCode);
+        }        
+        $result = $api->doRequest();       
+        
+        return new Result\Details($result);
+    }
+    
     /**
      * Get the transaction in an exchange script.
      * This will work for all kinds of exchange calls (GET, POST AND POST_XML)
@@ -291,9 +351,15 @@ class Transaction
         if (isset($_GET['order_id'])) {
             return self::get($_GET['order_id']);
         }
+
         if (isset($_POST['order_id'])) {
             return self::get($_POST['order_id']);
         }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_SERVER['CONTENT_TYPE'] === 'application/json') {
+            return self::get(json_decode(file_get_contents('php://input'), true)['order_id']);
+        }
+
         // maybe its xml
         $input = file_get_contents('php://input');
         $xml = simplexml_load_string($input);
@@ -309,18 +375,22 @@ class Transaction
      * @param int|float|null $amount
      * @param string|null $description
      * @param \DateTime $processDate
-     * @param string|null $strCurrency
+     * @param int|float|null $vatPercentage
+     * @param string $currency
      *
      * @return Result\Refund
      * @throws Error\Api
      * @throws Error\Error
+     * @throws Error\Required\ApiToken
+     * @throws Error\Required\ServiceId
      */
     public static function refund(
         $transactionId,
         $amount = null,
         $description = null,
         \DateTime $processDate = null,
-        $strCurrency = null
+        $vatPercentage = null,
+        $currency = null
     )
     {
         $api = new Api\Refund();
@@ -335,14 +405,78 @@ class Transaction
         if ($processDate !== null) {
             $api->setProcessDate($processDate);
         }
-        if(!empty($strCurrency)) {
-          $api->setCurrency($strCurrency);
+        if ($vatPercentage !== null) {
+            $api->setVatPercentage($vatPercentage);
+        }
+        if ($currency !== null) {
+            $api->setCurrency($currency);
         }
         $result = $api->doRequest();
 
         return new Result\Refund($result);
     }
 
+    /**
+     * Cancels a transaction
+     *
+     * @param string $transactionId
+     * @param string|null $entranceCode
+     *
+     * @return Result\Cancel
+     * @throws Error\Api
+     * @throws Error\Error
+     * @throws Error\Required\ApiToken    
+     */
+    public static function cancel(
+        $transactionId,
+        $entranceCode = null
+    )
+    {
+        $api = new Api\Cancel();
+        $api->setTransactionId($transactionId);
+      
+        if ($entranceCode !== null) {
+            $api->setEntranceCode($entranceCode);
+        }
+      
+        $result = $api->doRequest();
+
+        return new Result\Cancel($result);
+    }
+
+    /**
+     * Charge an existing recurring transaction by its id
+     *
+     * @param $options array
+     * @return Result\ByRecurringId
+     * @throws Error\Api
+     * @throws Error\Error
+     * @throws Error\Required\ApiToken
+     * @throws Error\Required\ServiceId
+     */
+    public static function byRecurringId($options)
+    {
+        $api = new Api\ByRecurringId();
+
+        if (isset($options['recurringId'])) $api->setRecurringId($options['recurringId']);
+        if (isset($options['amount'])) $api->setAmount($options['amount']);
+        if (isset($options['description'])) $api->setDescription($options['description']);
+        if (isset($options['currency'])) $api->setCurrency($options['currency']);
+        if (isset($options['cvc'])) $api->setCvc($options['cvc']);
+        if (isset($options['statsData']) && is_array($options['statsData'])) $api->setStatsData($options['statsData']);
+        $result = $api->doRequest();
+        return new Result\ByRecurringId($result);
+    }
+
+    /**
+     * Approve a transaction that needs to be verified
+     * @param $transactionId
+     * @return bool
+     * @throws Error\Api
+     * @throws Error\Error
+     * @throws Error\Required\ApiToken
+     * @throws Error\Required\ServiceId
+     */
     public static function approve($transactionId)
     {
         $api = new Api\Approve();
@@ -352,6 +486,15 @@ class Transaction
         return $result['request']['result'] == 1;
     }
 
+    /**
+     * Decline a transaction that need to be verified
+     * @param $transactionId
+     * @return bool
+     * @throws Error\Api
+     * @throws Error\Error
+     * @throws Error\Required\ApiToken
+     * @throws Error\Required\ServiceId
+     */
     public static function decline($transactionId)
     {
         $api = new Api\Decline();
@@ -361,15 +504,46 @@ class Transaction
         return $result['request']['result'] == 1;
     }
 
-    public static function capture($transactionId)
+    /**
+     * Capture a transaction
+     *
+     * @param string $transactionId
+     * @param string|null $amount
+     * @param string|null $tracktrace
+     * @return bool
+     * @throws Error\Api
+     * @throws Error\Error
+     * @throws Error\Required\ApiToken
+     * @throws Error\Required\ServiceId
+     */
+    public static function capture($transactionId, $amount = null , $tracktrace = null )
     {
         $api = new Api\Capture();
+
+        if (isset($amount)) {
+            $api->setAmount(round($amount * 100));
+        }
+
+        if (isset($tracktrace)) {
+            $api->setTracktrace($tracktrace);
+        }
+
         $api->setTransactionId($transactionId);
         $result = $api->doRequest();
 
         return $result['request']['result'] == 1;
     }
 
+    /**
+     * Void a transaction
+     *
+     * @param $transactionId
+     * @return bool
+     * @throws Error\Api
+     * @throws Error\Error
+     * @throws Error\Required\ApiToken
+     * @throws Error\Required\ServiceId
+     */
     public static function void($transactionId)
     {
         $api = new Api\VoidTransaction();
@@ -388,6 +562,8 @@ class Transaction
      * @return Result\AddRecurring
      * @throws Error\Api
      * @throws Error\Error
+     * @throws Error\Required\ApiToken
+     * @throws Error\Required\ServiceId
      */
     public static function addRecurring($options = array())
     {
@@ -425,6 +601,8 @@ class Transaction
      * @return \Paynl\Result\Transaction\ConfirmExternalPayment
      * @throws Error\Api
      * @throws Error\Error
+     * @throws Error\Required\ApiToken
+     * @throws Error\Required\ServiceId
      */
     public static function confirmExternalPayment($options = array())
     {
@@ -459,6 +637,8 @@ class Transaction
      * @throws Error\Api
      * @throws Error\Error
      * @throws Error\InvalidArgument
+     * @throws Error\Required\ApiToken
+     * @throws Error\Required\ServiceId
      */
     public static function QRPayment($options = array())
     {

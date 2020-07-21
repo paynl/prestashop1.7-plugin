@@ -53,7 +53,7 @@ class PaynlPaymentMethods extends PaymentModule
     {
         $this->name = 'paynlpaymentmethods';
         $this->tab = 'payments_gateways';
-        $this->version = '4.2.11';
+        $this->version = '4.3.0';
 
         $this->payLogEnabled = null;
         $this->ps_versions_compliancy = array('min' => '1.7', 'max' => _PS_VERSION_);
@@ -82,7 +82,17 @@ class PaynlPaymentMethods extends PaymentModule
           $this->registerHook('displayAdminOrder');
         }
 
+        if (!$this->isRegisteredInHook('displayHeader')) {
+          $this->registerHook('displayHeader');
+        }
     }
+
+    public function hookDisplayHeader(array $params)
+    {
+      $this->context->controller->addCss($this->_path . 'css/PAY.css');
+      $this->context->controller->addJs($this->_path . 'views/js/PAY_CHECKOUT.js');
+    }
+
 
     public function install()
     {
@@ -91,6 +101,7 @@ class PaynlPaymentMethods extends PaymentModule
             || !$this->registerHook('paymentOptions')
             || !$this->registerHook('paymentReturn')
             || !$this->registerHook('displayAdminOrder')
+            || !$this->registerHook('displayHeader')
         ) {
             return false;
         }
@@ -195,7 +206,7 @@ class PaynlPaymentMethods extends PaymentModule
     try {
       $this->sdkLogin();
       $result = true;
-      $refundResult = \Paynl\Transaction::refund($transactionId, $amount, null, null, $strCurrency);
+      $refundResult = \Paynl\Transaction::refund($transactionId, $amount, null, null, null, $strCurrency);
     } catch (Exception $objException) {
       $refundResult = $objException->getMessage();
       $result = false;
@@ -330,11 +341,13 @@ class PaynlPaymentMethods extends PaymentModule
                         'value' => $paymentMethod->id,
                     ],
                 ]);
-                if (Configuration::get('PAYNL_SHOW_IMAGE')) {
-                    $objPaymentMethod->
-                    setLogo('https://static.pay.nl/payment_profiles/50x32/' . $paymentMethod->id . '.png');
-                }            if (isset($paymentMethod->description)) {
-                $objPaymentMethod->setAdditionalInformation('<p>' . $paymentMethod->description . '</p>');
+
+            if (Configuration::get('PAYNL_SHOW_IMAGE')) {
+              $objPaymentMethod->setLogo($this->_path . 'views/images/' . $paymentMethod->brand_id . '.png');
+            }
+
+            if (isset($paymentMethod->description)) {
+              $objPaymentMethod->setAdditionalInformation('<p class="paynl_payment">' . $paymentMethod->description . '</p>');
             }
 
             if ($paymentMethod->id == 10) {
@@ -1321,6 +1334,12 @@ class PaynlPaymentMethods extends PaymentModule
             $paymentMethods = json_encode($paymentMethods);
         }
 
+      $showImage = Configuration::get('PAYNL_SHOW_IMAGE');
+      if ($showImage === false) {
+        $showImage = 1;
+        Configuration::updateValue('PAYNL_SHOW_IMAGE', $showImage);
+      }
+
         return array(
             'PAYNL_API_TOKEN' => Tools::getValue('PAYNL_API_TOKEN', Configuration::get('PAYNL_API_TOKEN')),
             'PAYNL_SERVICE_ID' => Tools::getValue('PAYNL_SERVICE_ID', Configuration::get('PAYNL_SERVICE_ID')),
@@ -1329,7 +1348,7 @@ class PaynlPaymentMethods extends PaymentModule
             'PAYNL_PAYLOGGER' => Tools::getValue('PAYNL_PAYLOGGER', Configuration::get('PAYNL_PAYLOGGER')),
             'PAYNL_DESCRIPTION_PREFIX' => Tools::getValue('PAYNL_DESCRIPTION_PREFIX', Configuration::get('PAYNL_DESCRIPTION_PREFIX')),
             'PAYNL_LANGUAGE' => Tools::getValue('PAYNL_LANGUAGE', Configuration::get('PAYNL_LANGUAGE')),
-            'PAYNL_SHOW_IMAGE' => Tools::getValue('PAYNL_SHOW_IMAGE', Configuration::get('PAYNL_SHOW_IMAGE')),
+            'PAYNL_SHOW_IMAGE' => $showImage,
             'PAYNL_PAYMENTMETHODS' => $paymentMethods
         );
     }
@@ -1339,6 +1358,7 @@ class PaynlPaymentMethods extends PaymentModule
      */
     private function getPaymentMethodsCombined()
     {
+        $changed = false;
         $resultArray = array();
         $savedPaymentMethods = json_decode(Configuration::get('PAYNL_PAYMENTMETHODS'));
         try {
@@ -1346,17 +1366,51 @@ class PaynlPaymentMethods extends PaymentModule
             $paymentmethods = \Paynl\Paymentmethods::getList();
             $paymentmethods = (array)$paymentmethods;
             foreach ($savedPaymentMethods as $paymentmethod) {
-                if (isset($paymentmethods[$paymentmethod->id])) {
-                    $resultArray[] = $paymentmethod;
-                    unset($paymentmethods[$paymentmethod->id]);
+              if (isset($paymentmethods[$paymentmethod->id])) {
+                # The paymentmethod allready exists in the config. Check if fields are set..
+                $extMethod = $paymentmethods[$paymentmethod->id];
+
+                if (!isset($paymentmethod->min_amount)) {
+                  $paymentmethod->min_amount = isset($extMethod['min_amount']) ? intval($extMethod['min_amount'] / 100) : 0;
+                  $changed = true;
                 }
+
+                if (!isset($paymentmethod->max_amount)) {
+                  $paymentmethod->max_amount = isset($extMethod['max_amount']) ? intval($extMethod['max_amount'] / 100) : 0;
+                  $changed = true;
+                }
+
+                if (!isset($paymentmethod->description)) {
+                  $paymentmethod->description = isset($extMethod['brand']['public_description']) ? $extMethod['brand']['public_description'] : '';
+                  $changed = true;
+                }
+
+                if (!isset($paymentmethod->brand_id)) {
+                  $paymentmethod->brand_id = isset($extMethod['brand']['id']) ? $extMethod['brand']['id'] : '';
+                  $changed = true;
+                }
+
+                $resultArray[] = $paymentmethod;
+                unset($paymentmethods[$paymentmethod->id]);
+              }
             }
+
+            # Nieuwe payment methods voorzien van standaard values.
             foreach ($paymentmethods as $paymentmethod) {
                 $resultArray[] = array(
                     'id' => $paymentmethod['id'],
                     'name' => $paymentmethod['name'],
                     'enabled' => false,
+                    'min_amount' => isset($paymentmethod['min_amount']) ? intval($paymentmethod['min_amount'] / 100) : null,
+                    'max_amount' => isset($paymentmethod['max_amount']) ? intval($paymentmethod['max_amount'] / 100) : null,
+                    'description' => isset($paymentmethod['brand']['public_description']) ? $paymentmethod['brand']['public_description'] : '',
+                    'brand_id' => isset($paymentmethod['brand']['id']) ? $paymentmethod['brand']['id'] : '1'
                 );
+                $changed = true;
+            }
+
+            if($changed) {
+              Configuration::updateValue('PAYNL_PAYMENTMETHODS', json_encode($resultArray));
             }
         } catch (\Exception  $e) {
 
