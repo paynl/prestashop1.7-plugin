@@ -5,6 +5,8 @@
 - [Quickstart](#quickstart)
 - [Setup](#setup)
 
+author: support@pay.nl
+
 ---
 ### Summary
 
