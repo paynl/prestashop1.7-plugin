@@ -25,15 +25,12 @@
 <form action="{$action}" method="POST" id="payment-form">
     <input type="hidden" name="payment_option_id" value="{$payment_option_id}"/>
     <div class="form-group row PaynlBanks {$logoClass}">
-        <span for="bank" class="form-control-label">{l s='Bank' mod='paynlpaymentmethods'}</span>
-        <div>
             <select class="form-control form-control-select" id="bank" name="bank">
                 <option value="">{l s='Please select your bank' mod='paynlpaymentmethods'}</option>
                 {foreach from=$banks item=bank}
                     <option value="{$bank['id']}">{$bank['name']}</option>
                 {/foreach}
             </select>
-        </div>
     </div>
     {if !empty($description)}
         <div class="paynl_payment_description">
