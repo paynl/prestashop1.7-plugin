@@ -326,7 +326,7 @@ class PaynlPaymentMethods extends PaymentModule
          * @var $cart Cart
          */
         $availablePaymentMethods = $this->getPaymentMethodsForCart($cart);
-
+        $bShowLogo = Configuration::get('PAYNL_SHOW_IMAGE');
         $paymentmethods = [];
         foreach ($availablePaymentMethods as $paymentMethod) {
             $objPaymentMethod = new PaymentOption();
@@ -342,15 +342,21 @@ class PaynlPaymentMethods extends PaymentModule
                     ],
                 ]);
 
-            if (Configuration::get('PAYNL_SHOW_IMAGE')) {
+            if ($bShowLogo) {
               $objPaymentMethod->setLogo($this->_path . 'views/images/' . $paymentMethod->brand_id . '.png');
             }
 
-            if ($paymentMethod->id == 10) {
-                $objPaymentMethod->setForm($this->getBanksForm($paymentMethod->id, $paymentMethod->description));
-            } elseif(!empty($paymentMethod->description)) {
-              $objPaymentMethod->setForm($this->getPayForm($paymentMethod->description));
+            $strDescription = empty($paymentMethod->description) ? null : $paymentMethod->description;
+
+            try {
+              $payForm = $this->getPayForm($paymentMethod->id, $strDescription, $bShowLogo);
+            } catch (Exception $e) {
             }
+
+            if (!empty($payForm)) {
+              $objPaymentMethod->setForm($payForm);
+            }
+
             $paymentmethods[] = $objPaymentMethod;
         }
 
@@ -481,8 +487,16 @@ class PaynlPaymentMethods extends PaymentModule
         return $iFee;
     }
 
-    private function getBanksForm($payment_option_id, $description = null)
+  /**
+   * @param $payment_option_id
+   * @param null $description
+   * @param bool $logo
+   * @return bool|string
+   * @throws SmartyException
+   */
+    private function getPayForm($payment_option_id, $description = null, $logo = true)
     {
+      if ($payment_option_id == 10) {
         $this->sdkLogin();
         $banks = \Paynl\Paymentmethods::getBanks($payment_option_id);
 
@@ -490,18 +504,15 @@ class PaynlPaymentMethods extends PaymentModule
             'action' => $this->context->link->getModuleLink($this->name, 'startPayment', array(), true),
             'banks' => $banks,
             'payment_option_id' => $payment_option_id,
-            'description' => $description
+            'description' => $description,
+            'logoClass' => $logo ? '' : 'noLogo'
         ]);
 
         return $this->context->smarty->fetch('module:paynlpaymentmethods/views/templates/front/payment_form_ideal.tpl');
-    }
-
-    private function getPayForm($description)
-    {
-        $this->context->smarty->assign([
-          'description' => $description,
-        ]);
+      } elseif (!empty($description)) {
+        $this->context->smarty->assign(['description' => $description]);
         return $this->context->smarty->fetch('module:paynlpaymentmethods/views/templates/front/payment_form.tpl');
+      }
     }
 
     private function sdkLogin()

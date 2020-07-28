@@ -23,8 +23,16 @@
     margin-top: -50px;
 }
 
+.PaynlBanks.noLogo {
+    margin-top: -37px;
+}
+
 .PaynlBanks select {
     width: 200px;
+}
+
+.PaynlBanks.noLogo select.form-control {
+    height: 28px;
 }
 
 .PaynlBanks span, .PaynlBanks div {
@@ -35,6 +43,7 @@
     padding-left: 40px;
     margin-bottom: 20px;
     font-size: 14px;
+    padding-top: 5px;
 }
 .PAY.panel #dialog-info-modal
 {
