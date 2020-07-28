@@ -1417,7 +1417,7 @@ class PaynlPaymentMethods extends PaymentModule
             foreach ($paymentmethods as $paymentmethod) {
                 $resultArray[] = array(
                     'id' => $paymentmethod['id'],
-                    'name' => $paymentmethod['name'],
+                    'name' => empty($paymentmethod['visibleName']) ? $paymentmethod['name'] : $paymentmethod['visibleName'],
                     'enabled' => false,
                     'min_amount' => isset($paymentmethod['min_amount']) ? intval($paymentmethod['min_amount'] / 100) : null,
                     'max_amount' => isset($paymentmethod['max_amount']) ? intval($paymentmethod['max_amount'] / 100) : null,
@@ -1454,7 +1454,8 @@ class PaynlPaymentMethods extends PaymentModule
 
         $this->smarty->assign(array(
             'available_countries' => $this->getCountries(),
-            'available_carriers' => $this->getCarriers()
+            'available_carriers' => $this->getCarriers(),
+            'image_url' => $this->_path . 'views/images/'
         ));
 
         return $this->display(__FILE__, 'admin_paymentmethods.tpl');
