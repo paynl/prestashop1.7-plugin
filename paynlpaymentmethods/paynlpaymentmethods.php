@@ -496,9 +496,12 @@ class PaynlPaymentMethods extends PaymentModule
    */
     private function getPayForm($payment_option_id, $description = null, $logo = true)
     {
-      if ($payment_option_id == 10) {
-        $this->sdkLogin();
-        $banks = \Paynl\Paymentmethods::getBanks($payment_option_id);
+        $banks = array();
+
+        if ($payment_option_id == 10) {
+          $this->sdkLogin();
+          $banks = \Paynl\Paymentmethods::getBanks($payment_option_id);
+        }
 
         $this->context->smarty->assign([
             'action' => $this->context->link->getModuleLink($this->name, 'startPayment', array(), true),
@@ -508,11 +511,7 @@ class PaynlPaymentMethods extends PaymentModule
             'logoClass' => $logo ? '' : 'noLogo'
         ]);
 
-        return $this->context->smarty->fetch('module:paynlpaymentmethods/views/templates/front/payment_form_ideal.tpl');
-      } elseif (!empty($description)) {
-        $this->context->smarty->assign(['description' => $description]);
         return $this->context->smarty->fetch('module:paynlpaymentmethods/views/templates/front/payment_form.tpl');
-      }
     }
 
     private function sdkLogin()

@@ -19,7 +19,7 @@
 
 .PaynlBanks {
     position: absolute;
-    right: 320px;
+    right: 270px;
     margin-top: -50px;
 }
 
@@ -28,7 +28,7 @@
 }
 
 .PaynlBanks select {
-    width: 200px;
+    width: 250px;
 }
 
 .PaynlBanks.noLogo select.form-control {
