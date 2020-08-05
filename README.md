@@ -1,11 +1,11 @@
 <p align="center">
   <img src="https://www.pay.nl/uploads/1/brands/main_logo.png" />
 </p>
-<h1 align="center">PAY. Prestashop 1.7 plugin</h1>
+<h1 align="center">PAY. PrestaShop 1.7 plugin</h1>
 
 # Description
 
-With the PAY. plugin you can easily add different payment methods to your Prestashop 1.7 webshop. You can go to https://www.pay.nl (Dutch) for an overview of all our features and services, you can also visit https://docs.pay.nl/plugins#prestashop-1_7 for more documentation of our plugin.
+With the PAY. plugin you can easily add different payment methods to your PrestaShop 1.7 webshop. You can go to https://www.pay.nl (Dutch) for an overview of all our features and services, you can also visit https://docs.pay.nl/plugins#prestashop-1_7 for more documentation of our plugin.
 
 - [Description](#description)
 - [Available payment methods](#available-payment-methods)
