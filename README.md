@@ -51,8 +51,9 @@ Go to the *Manage* > *Services* tab in the PAY. Admin Panel to enable extra paym
 
 1. Log into the PrestaShop 1.7 admin
 2. Go to *Modules* > *Module Manager*
-3. click on updates
-4. update the plugin
+3. click on upload a module
+4. upload the newest PAY. plugin zip file
+5. it updates automatically.
 
 # Usage
 
