@@ -5,7 +5,7 @@
 
 # Description
 
-With the PAY. plugin you can easily add different payment methods to your PrestaShop 1.7 webshop. You can go to https://www.pay.nl (Dutch) for an overview of all our features and services, you can also visit https://docs.pay.nl/plugins#prestashop-1_7 for more documentation of our plugin.
+This plugin provides a wide scale of different payment methods for your PrestaShop 1.7 webshop. Go to https://www.pay.nl (Dutch) for an overview of all our features and services, you can also visit https://docs.pay.nl/plugins#prestashop-1_7 for more detailed information.
 
 - [Description](#description)
 - [Available payment methods](#available-payment-methods)
@@ -32,15 +32,15 @@ Bank Transfer | Cartasi | GivaCard | SprayPay | Przelewy24 |
 # Installation
 #### Installing
 
-Download the latest .zip release and upload into *Modules* > *Module Manager* > *Upload a module*
+Download the latest .zip file (paynlpaymentmethods_X.zip) and upload it into *Modules* > *Module Manager* > *Upload a module*
 
 ##### Setup
 
-1. Log into the PrestaShop 1.7 admin
+1. Log into your PrestaShop 1.7 admin
 2. Go to *Modules* > *Module Manager*
 3. Scroll down or search for PAY.
 4. Click Configure
-5. Enter the API token and serviceID (these can be found in the PAY. Admin Panel --> https://admin.pay.nl/programs/programs
+5. Enter the API token and serviceID (these can be found in the PAY. Admin Panel --> https://admin.pay.nl/programs/programs)
 6. Save the settings
 7. Enable the desired payment methods
 8. Save the settings
@@ -51,9 +51,9 @@ Go to the *Manage* > *Services* tab in the PAY. Admin Panel to enable extra paym
 
 1. Log into the PrestaShop 1.7 admin
 2. Go to *Modules* > *Module Manager*
-3. click on upload a module
-4. upload the newest PAY. plugin zip file
-5. it updates automatically.
+3. Click on upload a module
+4. Upload the newest PAY. plugin zip file
+5. Done
 
 # Usage
 
