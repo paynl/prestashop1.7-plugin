@@ -45,10 +45,15 @@ class PaynlPaymentMethodsExchangeModuleFrontController extends ModuleFrontContro
         */
         $module = $this->module;
 
-        $module->payLog('Exchange', 'Action: ' . $action, $cartid, $transactionId);
+        $module->payLog('Exchange', 'Action: ' . $action, $cartid, $transactionId, false);
 
-        if($_REQUEST['action'] == 'pending'){
+        if($action == 'pending'){
             die('TRUE| Ignoring pending');
+        }
+
+        # Processing a capture-action has no effect, since authorized transactions are treated as paid
+        if ($action == 'capture') {
+          die('TRUE| Ignoring capture');
         }
 
         try {

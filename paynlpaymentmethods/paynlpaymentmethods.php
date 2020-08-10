@@ -49,6 +49,8 @@ class PaynlPaymentMethods extends PaymentModule
     private $paymentMethods;
     private $payLogEnabled;
 
+  const STATUS_AUTHORIZE = 95;
+
     public function __construct()
     {
         $this->name = 'paynlpaymentmethods';
@@ -78,20 +80,33 @@ class PaynlPaymentMethods extends PaymentModule
             $this->warning = $this->l('No currency has been set for this module.');
         }
 
-        if (!$this->isRegisteredInHook('displayAdminOrder')) {
-          $this->registerHook('displayAdminOrder');
+      $this->registerHooks();
+
+    }
+
+    private function getHooks()
+    {
+      return array('paymentOptions', 'displayAdminOrder', 'actionOrderStatusPostUpdate');
         }
 
+    private function registerHooks()
+    {
+      foreach ($this->getHooks() as $hook) {
+        if ($this->isRegisteredInHook($hook)) {
+          continue;
+        }
+        $result = $this->registerHook($hook);
+        if (!$result) {
+          return false;
+        }
+      }
+      return true;
     }
 
     public function install()
     {
 
-        if (!parent::install()
-            || !$this->registerHook('paymentOptions')
-            || !$this->registerHook('paymentReturn')
-            || !$this->registerHook('displayAdminOrder')
-        ) {
+      if (!parent::install() || !$this->registerHooks()) {
             return false;
         }
 
@@ -275,6 +290,73 @@ class PaynlPaymentMethods extends PaymentModule
     }
 
 
+
+  /**
+   * @param $params
+   * @return bool
+   * @throws PrestaShopDatabaseException
+   * @throws PrestaShopException
+   * @throws PrestaShopModuleException
+   * @throws \Paynl\Error\Api
+   * @throws \Paynl\Error\Error
+   */
+  public function hookActionOrderStatusPostUpdate($params)
+  {
+
+    if (!$this->active) {
+      return false;
+    }
+
+    if (empty($params['id_order'])) {
+      throw new PrestaShopModuleException('Empty order-id in hookActionOrderStatusPostUpdate where an integer is required to find the order details.');
+    }
+
+    if (empty($params['newOrderStatus']) || !$params['newOrderStatus'] instanceof OrderState) {
+      throw new PrestaShopModuleException('Unrecognizable order-status passed to hookActionOrderStatusPostUpdate');
+    }
+
+    $order = new Order($params['id_order']);
+    $newOrderStatusId = $params['newOrderStatus']->id;
+
+    // Validate paid with current module
+    if ($order->module != $this->name) {
+      return true;
+    }
+
+    // Validate configured order-state
+    $captureOnStatusId = Configuration::get('PAYNL_CAPTURE_ORDERSTATE');
+    if (empty($captureOnStatusId)) {
+      $this->payLog('hookActionOrderStatusPostUpdate', 'Capture setting is not enabled in PAY. pluginsettings.'  , $order->id_cart);
+      return false;
+    }
+    if ($captureOnStatusId != $newOrderStatusId) {
+      $this->payLog('hookActionOrderStatusPostUpdate', 'Trying to capture, but currentstatus ' . $newOrderStatusId . ' should be ' . $captureOnStatusId . ' to capture', $order->id_cart);
+      return false;
+    }
+
+    // Validate TransactionState
+    foreach($order->getOrderPayments() as $payment)
+    {
+      $transactionStatus = $this->getTransactionStatus($payment->transaction_id);
+      $paymentDetails = $transactionStatus->getData()['paymentDetails'];
+
+      if ($paymentDetails['state'] == self::STATUS_AUTHORIZE) {
+        // All good, execute.
+       # sleep(5);
+        $result = $this->capturePayment($payment->transaction_id);
+
+        $this->payLog('hookActionOrderStatusPostUpdate', 'Capture ' . (!$result ? 'failed' : 'success'), $order->id_cart, $payment->transaction_id);
+      } else {
+        $this->payLog('hookActionOrderStatusPostUpdate', 'Capture cancelled, paymentstate is not on Authorize, but: ' . $paymentDetails['state'], $order->id_cart, $payment->transaction_id);
+      }
+    }
+
+    return true;
+  }
+
+
+
+
     public function hookPaymentOptions($params)
     {
         if (!$this->active) {
@@ -316,7 +398,7 @@ class PaynlPaymentMethods extends PaymentModule
          */
         $availablePaymentMethods = $this->getPaymentMethodsForCart($cart);
 
-        $paymentmethods = [];
+        $paymentmethods = array();
         foreach ($availablePaymentMethods as $paymentMethod) {
             $objPaymentMethod = new PaymentOption();
 
@@ -664,12 +746,34 @@ class PaynlPaymentMethods extends PaymentModule
     }
 
   /**
+   * @param $transactionId
+   * @return \Paynl\Result\Transaction\Status
+   * @throws \Paynl\Error\Api
+   * @throws \Paynl\Error\Error
+   */
+    public function getTransactionStatus($transactionId)
+    {
+      $this->sdkLogin();
+      return \Paynl\Transaction::status($transactionId);
+    }
+
+  /**
+   * @param $transactionId
+   * @return bool
+   */
+    public function capturePayment($transactionId)
+    {
+      $this->sdkLogin();
+      return \Paynl\Transaction::capture($transactionId);
+    }
+
+  /**
    * @param $method
    * @param $message
    * @param null $cartid
    * @param null $transactionId
    */
-    public function payLog($method, $message, $cartid = null, $transactionId = null)
+    public function payLog($method, $message, $cartid = null, $transactionId = null, $allowDoubleEntries = true)
     {
       if(is_null($this->payLogEnabled)) {
         $this->payLogEnabled = Configuration::get('PAYNL_PAYLOGGER') == 1;
@@ -679,7 +783,8 @@ class PaynlPaymentMethods extends PaymentModule
         $strCartId = empty($cartid) ? '' : ' CartId: '. $cartid;
         $strTransaction = empty($transactionId) ? '' : ' [ '.$transactionId .' ] ';
 
-        PrestaShopLogger::addLog('PAY. - ' . $method . ' - '. $strTransaction . $strCartId . ': ' . $message);
+        PrestaShopLogger::addLog('PAY. - ' . $method . ' - ' . $strTransaction . $strCartId . ': ' . $message, 1, null, null, null, $allowDoubleEntries);
+
       }
     }
 
@@ -1158,6 +1263,7 @@ class PaynlPaymentMethods extends PaymentModule
             Configuration::updateValue('PAYNL_PAYMENTMETHODS', Tools::getValue('PAYNL_PAYMENTMETHODS'));
             Configuration::updateValue('PAYNL_LANGUAGE', Tools::getValue('PAYNL_LANGUAGE'));
             Configuration::updateValue('PAYNL_SHOW_IMAGE', Tools::getValue('PAYNL_SHOW_IMAGE'));
+            Configuration::updateValue('PAYNL_CAPTURE_ORDERSTATE', Tools::getValue('PAYNL_CAPTURE_ORDERSTATE'));
 
         }
         $this->_html .= $this->displayConfirmation($this->l('Settings updated'));
@@ -1265,6 +1371,17 @@ class PaynlPaymentMethods extends PaymentModule
                             )
                         ),
                     ),
+                  array(
+                    'type' => 'select',
+                    'label' => $this->l('Capture order state'),
+                    'name' => 'PAYNL_CAPTURE_ORDERSTATE',
+                    'desc' => $this->l("Select on which order status the Transaction Capture command should be executed. Leave this empty to send no capture requests at all."),
+                    'options' => array(
+                      'query' => $this->getOrderStates(),
+                      'id' => 'id_order_state',
+                      'name' => 'name'
+                    )
+                  ),
                     array(
                         'type' => 'select',
                         'label' => $this->l('Payment screen language'),
@@ -1330,9 +1447,21 @@ class PaynlPaymentMethods extends PaymentModule
             'PAYNL_DESCRIPTION_PREFIX' => Tools::getValue('PAYNL_DESCRIPTION_PREFIX', Configuration::get('PAYNL_DESCRIPTION_PREFIX')),
             'PAYNL_LANGUAGE' => Tools::getValue('PAYNL_LANGUAGE', Configuration::get('PAYNL_LANGUAGE')),
             'PAYNL_SHOW_IMAGE' => Tools::getValue('PAYNL_SHOW_IMAGE', Configuration::get('PAYNL_SHOW_IMAGE')),
-            'PAYNL_PAYMENTMETHODS' => $paymentMethods
+            'PAYNL_PAYMENTMETHODS' => $paymentMethods,
+            'PAYNL_CAPTURE_ORDERSTATE' => Tools::getValue('PAYNL_CAPTURE_ORDERSTATE', Configuration::get('PAYNL_CAPTURE_ORDERSTATE')),
         );
     }
+
+  private function getOrderStates()
+  {
+    $orderStates = OrderState::getOrderStates($this->context->language->id);
+
+    $states = [['id_order_state' => null, 'name' => '']];
+    foreach($orderStates as $orderState) {
+      $states[] = ['id_order_state' => $orderState['id_order_state'], 'name' => $orderState['name']];
+    }
+    return $states;
+  }
 
     /**
      * @return array
