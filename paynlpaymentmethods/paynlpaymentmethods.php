@@ -49,7 +49,7 @@ class PaynlPaymentMethods extends PaymentModule
     private $paymentMethods;
     private $payLogEnabled;
 
-  const STATUS_AUTHORIZE = 95;
+    const STATUS_AUTHORIZE = 95;
 
     public function __construct()
     {
@@ -342,7 +342,6 @@ class PaynlPaymentMethods extends PaymentModule
 
       if ($paymentDetails['state'] == self::STATUS_AUTHORIZE) {
         // All good, execute.
-       # sleep(5);
         $result = $this->capturePayment($payment->transaction_id);
 
         $this->payLog('hookActionOrderStatusPostUpdate', 'Capture ' . (!$result ? 'failed' : 'success'), $order->id_cart, $payment->transaction_id);
