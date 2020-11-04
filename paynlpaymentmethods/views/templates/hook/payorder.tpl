@@ -38,16 +38,10 @@
                 </div>
                 <button type="button" id="pay-refund-button" class="btn btn-danger" style="display: inline">{$lang.refund_button}</button>
                 <div class="tooltipPAY">
-
-                    ? <span class="tooltipPAYtext">  {$lang.info_refund_text} </span>
-
+                    ? <span class="tooltipPAYtext"> {$lang.info_refund_text} </span>
                 </div>
-
             </div>
         {/if}
-
      </div>
-
-
     </div>
 </div>
