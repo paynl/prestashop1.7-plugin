@@ -872,7 +872,8 @@ class PaynlPaymentMethods extends PaymentModule
                 'name' => $product['name'],
                 'price' => $product['price_wt'],
                 'vatPercentage' => $product['rate'],
-                'qty' => $product['cart_quantity']
+                'qty' => $product['cart_quantity'],
+                'type' => 'ARTICLE'  
             );
         }
         $shippingCost_wt = $cart->getTotalShippingCost();
@@ -883,6 +884,7 @@ class PaynlPaymentMethods extends PaymentModule
             'price' => $shippingCost_wt,
             'tax' => $shippingCost_wt - $shippingCost,
             'qty' => 1,
+            'type' => 'SHIPPING'  
         );
 
         return $arrResult;
