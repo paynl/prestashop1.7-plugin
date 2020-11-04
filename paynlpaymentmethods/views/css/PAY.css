@@ -1,0 +1,69 @@
+.tooltipPAY
+{
+    display: inline-block;
+    border-radius: 10px;
+    background-color: #e9e9e9;
+    padding: 1px 7px;
+    color: #282828;
+    margin-left: 10px;
+    font-size: 10px;
+    font-family: Verdana;
+    cursor: default;
+    position: relative;
+    top: 0px;
+}
+
+.tooltipPAY .tooltipPAYtext {
+    font-family: Verdana;
+    visibility: hidden;
+    width: 300px;
+    background-color: #686868;
+    color: #fff;
+    text-align: left;
+    border-radius: 3px;
+    padding: 8px 13px;
+    position: absolute;
+    z-index: 1;
+    margin-left: 17px;
+    margin-top: -28px;
+    font-weight: normal;
+    font-size: 11px;
+}
+
+.tooltipPAY:hover .tooltipPAYtext {
+    visibility: visible;
+}
+
+.PAY.panel .payOption {
+    margin-right: 30px;
+    display: inline-block;
+    min-width: 350px;
+}
+.PAY.panel .payOption div.label {
+    display: inline-block;
+    color: #333;
+}
+.PAY.panel .payOption.disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+.PAY.panel .payOption.disabled * {
+    cursor: default;
+}
+.PAY.panel div.payFields div.labelvalue {
+    display: inline-block;
+    padding: 4px 7px;
+    background-color: transparent;
+    border-radius: 4px;
+    color: #333;
+    margin-right: 30px;
+}
+.PAY.panel div.payFields div.label {
+    display: inline-block;
+    padding: 8px;
+    background-color: #eaeaea;
+    margin-right: 4px;
+    margin-left: 0;
+    border-radius: 4px;
+    color: #272727;
+}

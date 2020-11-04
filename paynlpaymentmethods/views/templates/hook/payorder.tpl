@@ -1,7 +1,8 @@
-<div class="PAY panel">
-    <div class="panel-heading">
+<div class="PAY panel card">
+    <div class="panel-heading card-header">
         <i class="icon-money"></i> {$lang.title}
     </div>
+    <div class="card-body">
     <a href="https://admin.pay.nl" target="_blank">
         <img style="float: left;padding-right: 20px" src="https://static.pay.nl/generic/images/75x75/logo.png"/>
     </a>
@@ -35,20 +36,18 @@
                     <input type="text" placeholder="0,00" value="{$amountFormatted}" id="pay-refund-amount"
                            class="fixed-width-sm" style="display: inline;margin-right:10px"/>
                 </div>
-                <button type="button" id="pay-refund-button" class="btn btn-danger"
-                        style="display: inline">{$lang.refund_button}</button>
+                <button type="button" id="pay-refund-button" class="btn btn-danger" style="display: inline">{$lang.refund_button}</button>
+                <div class="tooltipPAY">
+
+                    ? <span class="tooltipPAYtext">  {$lang.info_refund_text} </span>
+
+                </div>
+
             </div>
         {/if}
-        <div class="payOption" style="display: inline-block">
-            <button type="button" id="PAY-info-button" class="btn btn-primary">Info</button>
-        </div>
+
      </div>
-    <div id="dialog-info-modal" title="PAY. Info">
-        <p><b>{$lang.info_refund_title}</b><br>
-           * {$lang.info_refund_text}
-        </p>
-        <p><b>{$lang.info_log_title}</b><br>
-            * {$lang.info_log_text}
-        </p>
+
+
     </div>
 </div>

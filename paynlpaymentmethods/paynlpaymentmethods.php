@@ -82,6 +82,10 @@ class PaynlPaymentMethods extends PaymentModule
           $this->registerHook('displayAdminOrder');
         }
 
+        if (!$this->isRegisteredInHook('actionAdminControllerSetMedia')) {
+          $this->registerHook('actionAdminControllerSetMedia');
+        }
+
     }
 
     public function install()
@@ -91,6 +95,7 @@ class PaynlPaymentMethods extends PaymentModule
             || !$this->registerHook('paymentOptions')
             || !$this->registerHook('paymentReturn')
             || !$this->registerHook('displayAdminOrder')
+            || !$this->registerHook('actionAdminControllerSetMedia')
         ) {
             return false;
         }
@@ -100,7 +105,14 @@ class PaynlPaymentMethods extends PaymentModule
         return true;
     }
 
-  /**
+    public function hookActionAdminControllerSetMedia()
+    {
+        $this->context->controller->addCSS($this->_path . 'views/css/PAY.css');
+        $this->context->controller->addJS($this->_path . 'views/js/PAY.js');
+    }
+
+
+/**
    * @param $params
    * @return bool|string|void
    */
@@ -139,10 +151,6 @@ class PaynlPaymentMethods extends PaymentModule
     }
 
     $amountFormatted = number_format($order->total_paid, 2, ',','.');
-
-    $this->context->controller->addCss($this->_path . 'css/PAY.css');
-    $this->context->controller->addJqueryUI('ui.dialog');
-    $this->context->controller->addJs($this->_path . 'views/js/PAY.js');
 
     $this->context->smarty->assign(array(
       'lang' => $this->getMultiLang(),
