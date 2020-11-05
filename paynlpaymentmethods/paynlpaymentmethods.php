@@ -726,6 +726,17 @@ class PaynlPaymentMethods extends PaymentModule
             $description = Configuration::get('PAYNL_DESCRIPTION_PREFIX') . $description;
         }
 
+        $object_string = 'prestashop ';
+        if(isset($this->version) && !empty($this->version)){
+            $object_string .= $this->version;
+        }
+        if(defined('_PS_VERSION_') && !empty(_PS_VERSION_)){
+            $object_string .= ' | ' . _PS_VERSION_;
+        }
+        if(defined('PHP_VERSION') && !empty(PHP_VERSION)){
+            $object_string .= ' | ' . PHP_VERSION;
+        }
+
         $startData = array(
             'amount' => $cart->getOrderTotal(true, Cart::BOTH, null, null, false),
             'currency' => $currency->iso_code,
@@ -736,7 +747,7 @@ class PaynlPaymentMethods extends PaymentModule
             'testmode' => Configuration::get('PAYNL_TEST_MODE'),
             'extra1' => $cart->id,
             'products' => $products,
-            'object' => 'prestashop '. $this->version,
+            'object' => substr($object_string, 0, 64),
         );
 
         $addressData = $this->_getAddressData($cart);
