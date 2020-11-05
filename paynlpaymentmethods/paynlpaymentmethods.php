@@ -736,7 +736,7 @@ class PaynlPaymentMethods extends PaymentModule
             'testmode' => Configuration::get('PAYNL_TEST_MODE'),
             'extra1' => $cart->id,
             'products' => $products,
-            'object' => 'prestashop '. $this->version,
+            'object' => substr('prestashop '. $this->version . ' | ' . _PS_VERSION_ . ' | ' . PHP_VERSION, 0, 64),
         );
 
         $addressData = $this->_getAddressData($cart);
