@@ -734,7 +734,7 @@ class PaynlPaymentMethods extends PaymentModule
             $object_string .= ' | ' . _PS_VERSION_;
         }
         if(defined('PHP_VERSION') && !empty(PHP_VERSION)){
-            $object_string .= ' | ' . PHP_VERSION;
+            $object_string .= ' | ' . (float)PHP_VERSION;
         }
 
         $startData = array(
@@ -891,8 +891,7 @@ class PaynlPaymentMethods extends PaymentModule
                 'name' => $product['name'],
                 'price' => $product['price_wt'],
                 'vatPercentage' => $product['rate'],
-                'qty' => $product['cart_quantity'],
-                'type' => 'ARTICLE'  
+                'qty' => $product['cart_quantity']
             );
         }
         $shippingCost_wt = $cart->getTotalShippingCost();
@@ -903,7 +902,6 @@ class PaynlPaymentMethods extends PaymentModule
             'price' => $shippingCost_wt,
             'tax' => $shippingCost_wt - $shippingCost,
             'qty' => 1,
-            'type' => 'SHIPPING'  
         );
 
         return $arrResult;
