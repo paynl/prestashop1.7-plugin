@@ -39,8 +39,9 @@
 
 .PAY.panel .payLogo {
     float: left;
-    margin-left: -88px;
+    margin-left: -8px;
     margin-top: -8px;
+    padding-right: 20px;
 }
 
 .PAY.panel .payOption {
