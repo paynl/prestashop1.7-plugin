@@ -43,8 +43,8 @@
     margin-top: -8px;
 }
 
-#content.bootstrap .order {
-    padding:20px 20px 20px 100px;
+.PAY.panel .order {
+    padding:20px 20px 20px 100px !important;
 }
 
 .PAY.panel .payOption {
