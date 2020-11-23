@@ -39,9 +39,12 @@
 
 .PAY.panel .payLogo {
     float: left;
-    margin-left: -8px;
+    margin-left: -88px;
     margin-top: -8px;
-    padding-right: 20px;
+}
+
+#content.bootstrap .order {
+    padding:20px 20px 20px 100px;
 }
 
 .PAY.panel .payOption {
