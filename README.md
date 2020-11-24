@@ -52,12 +52,12 @@ Go to the *Manage* > *Services* tab in the PAY. Admin Panel to enable extra paym
 1. Log into the PrestaShop 1.7 admin
 2. Go to *Modules* > *Module Manager*
 3. Click on upload a module
-4. Upload the newest PAY. plugin zip file
+4. Upload the newest PAY. plugin zip file (paynlpaymentmethods_X.zip)
 5. Done
 
 # Usage
 
-**More information on this plugin can be found on https://docs.pay.nl/plugins#prestashop-1_7**
+More information on this plugin can be found on https://docs.pay.nl/plugins#prestashop-1_7
 
 # Support
 https://www.pay.nl
