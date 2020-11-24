@@ -2,7 +2,7 @@
     <div class="panel-heading card-header">
         <i class="icon-money"></i> {$lang.title}
     </div>
-    <div class="card-body order">
+    <div class="card-body">
     <a href="https://admin.pay.nl" target="_blank">
         <img class="payLogo" src="https://static.pay.nl/generic/images/75x75/logo.png"/>
     </a>
