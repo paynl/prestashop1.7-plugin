@@ -43,6 +43,10 @@
     margin-top: -8px;
 }
 
+#content.bootstrap .PAY.panel .card-body {
+    padding-left: 100px;
+}
+
 .PAY.panel .payOption {
     margin-right: 30px;
     display: inline-block;
