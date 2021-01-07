@@ -712,8 +712,7 @@ class PaynlPaymentMethods extends PaymentModule
         $cartTotal = $cart->getOrderTotal(true, Cart::BOTH, null, null, false);
         $iPaymentFee = $this->getPaymentFee($objPaymentMethod, $cartTotal);
         $iPaymentFee = empty($iPaymentFee) ? 0 : $iPaymentFee;
-        $cartId = $cart->id;
-        $orderId = Order::getOrderByCartId($cartId);
+        $cartId = $cart->id;       
 
         $this->payLog('startPayment', 'Starting new payment with cart-total: ' . $cartTotal . '. Fee: ' . $iPaymentFee, $cartId);
 
@@ -749,7 +748,7 @@ class PaynlPaymentMethods extends PaymentModule
             'extra1' => $cart->id,
             'products' => $products,
             'object' => substr($object_string, 0, 64),
-            'orderNumber' => $orderId,
+            'orderNumber' => $cartId,
         );
 
         $addressData = $this->_getAddressData($cart);
