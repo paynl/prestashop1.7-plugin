@@ -725,16 +725,7 @@ class PaynlPaymentMethods extends PaymentModule
             $description = Configuration::get('PAYNL_DESCRIPTION_PREFIX') . $description;
         }
 
-        $object_string = 'prestashop ';
-        if(isset($this->version) && !empty($this->version)){
-            $object_string .= $this->version;
-        }
-        if(defined('_PS_VERSION_') && !empty(_PS_VERSION_)){
-            $object_string .= ' | ' . _PS_VERSION_;
-        }
-        if(defined('PHP_VERSION') && !empty(PHP_VERSION)){
-            $object_string .= ' | ' . PHP_VERSION;
-        }
+
 
         $startData = array(
             'amount' => $cart->getOrderTotal(true, Cart::BOTH, null, null, false),
@@ -746,7 +737,7 @@ class PaynlPaymentMethods extends PaymentModule
             'testmode' => Configuration::get('PAYNL_TEST_MODE'),
             'extra1' => $cart->id,
             'products' => $products,
-            'object' => substr($object_string, 0, 64),
+            'object' => $this->getObjectInfo()
         );
 
         $addressData = $this->_getAddressData($cart);
@@ -796,6 +787,21 @@ class PaynlPaymentMethods extends PaymentModule
       }
 
         return $payTransaction->getRedirectUrl();
+    }
+
+    /**
+     * @return false|string
+     */
+    private function getObjectInfo()
+    {
+        $object_string = 'prestashop | ';
+        $object_string .= !empty($this->version) ? $this->version : '-';
+        $object_string .= ' | ';
+        $object_string .= defined('_PS_VERSION_') ? _PS_VERSION_ : '-';
+        $object_string .= ' | ';
+        $object_string .= substr(phpversion(), 0, 3);
+
+        return substr($object_string, 0, 64);
     }
 
   /**
