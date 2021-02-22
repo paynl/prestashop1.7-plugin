@@ -929,7 +929,7 @@ class PaynlPaymentMethods extends PaymentModule
         $enduser['initials'] = $objShippingAddress->firstname;
         $enduser['firstName'] = $objShippingAddress->firstname;
         $enduser['lastName'] = $objShippingAddress->lastname;
-        $enduser['birthDate'] = $customer->birthday;
+        $enduser['birthDate'] = $this->getDOB($customer->birthday);
         $enduser['phoneNumber'] = $objShippingAddress->phone ? $objShippingAddress->phone : $objShippingAddress->phone_mobile;
         $enduser['emailAddress'] = $customer->email;
         $enduser['gender'] = $customer->id_gender == 1 ? 'M' : ($customer->id_gender == 2 ? 'F' : '');
@@ -964,6 +964,20 @@ class PaynlPaymentMethods extends PaymentModule
             'address' => $address,
             'invoiceAddress' => $invoiceAddress
         );
+    }
+
+    /**
+     * @param $dob
+     * @return string|null
+     */
+    private function getDOB($dob)
+    {
+        if (empty(trim($dob))) {
+            return null;
+        } elseif ($dob == '00-00-0000' || $dob == '0000-00-00') {
+            return null;
+        }
+        return $dob;
     }
 
     /**
