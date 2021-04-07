@@ -60,12 +60,13 @@ class PaynlPaymentMethodsFinishModuleFrontController extends ModuleFrontControll
             $transaction = $module->getTransaction($transactionId);
             $transactionData = $transaction->getData();
             $ppid = !empty($transactionData['paymentDetails']['paymentOptionId']) ? $transactionData['paymentDetails']['paymentOptionId'] : null;
+            $stateName = !empty($transactionData['paymentDetails']['stateName']) ? $transactionData['paymentDetails']['stateName'] : 'unknown';
         } catch (Exception $e) {
             $module->payLog('finishPostProcess', 'Could not retrieve transaction', null, $transactionId);
             return;
         }
 
-      $module->payLog('finishPostProcess', 'Returning to webshop', $transaction->getExtra1(), $transactionId);
+        $module->payLog('finishPostProcess', 'Returning to webshop. Method: ' . $transaction->getPaymentMethodName() . '. Status: ' . $stateName , $transaction->getExtra1(), $transactionId);
 
       if ($transaction->isPaid() || $transaction->isPending() || $transaction->isBeingVerified() || $transaction->isAuthorized()) {
             // naar success
@@ -86,7 +87,7 @@ class PaynlPaymentMethodsFinishModuleFrontController extends ModuleFrontControll
                 $iTotalAttempts = in_array($ppid, array(
                   self::METHOD_OVERBOEKING,
                   self::METHOD_SOFORT)
-                ) ? 2 : 20;
+                ) ? 1 : 20;
 
               if($bValidationDelay == 1 && $iAttempt < $iTotalAttempts) {
                 return;
