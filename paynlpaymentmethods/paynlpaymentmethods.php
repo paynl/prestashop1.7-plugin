@@ -794,7 +794,7 @@ class PaynlPaymentMethods extends PaymentModule
      */
     private function getObjectInfo()
     {
-        $object_string = 'prestashop | ';
+        $object_string = 'prestashop ';
         $object_string .= !empty($this->version) ? $this->version : '-';
         $object_string .= ' | ';
         $object_string .= defined('_PS_VERSION_') ? _PS_VERSION_ : '-';
