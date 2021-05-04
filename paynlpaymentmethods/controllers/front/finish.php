@@ -29,11 +29,13 @@
  */
 class PaynlPaymentMethodsFinishModuleFrontController extends ModuleFrontController
 {
+    const METHOD_OVERBOEKING = 136;
+    const METHOD_SOFORT = 556;
 
-  private $order = null;
-  private $payOrderId = null;
-  private $orderStatusId = null;
-  private $paymentSessionId = null;
+    private $order = null;
+    private $payOrderId = null;
+    private $orderStatusId = null;
+    private $paymentSessionId = null;
   /**
    * @see FrontController::postProcess()
    */
@@ -54,14 +56,17 @@ class PaynlPaymentMethodsFinishModuleFrontController extends ModuleFrontControll
        */
       $module = $this->module;
 
-      try {
-        $transaction = $module->getTransaction($transactionId);
-      } catch (Exception $e) {
-        $module->payLog('finishPostProcess', 'Could not retrieve transaction', null, $transactionId);
-        return;
-      }
+        try {
+            $transaction = $module->getTransaction($transactionId);
+            $transactionData = $transaction->getData();
+            $ppid = !empty($transactionData['paymentDetails']['paymentOptionId']) ? $transactionData['paymentDetails']['paymentOptionId'] : null;
+            $stateName = !empty($transactionData['paymentDetails']['stateName']) ? $transactionData['paymentDetails']['stateName'] : 'unknown';
+        } catch (Exception $e) {
+            $module->payLog('finishPostProcess', 'Could not retrieve transaction', null, $transactionId);
+            return;
+        }
 
-      $module->payLog('finishPostProcess', 'Returning to webshop', $transaction->getExtra1(), $transactionId);
+        $module->payLog('finishPostProcess', 'Returning to webshop. Method: ' . $transaction->getPaymentMethodName() . '. Status: ' . $stateName , $transaction->getExtra1(), $transactionId);
 
       if ($transaction->isPaid() || $transaction->isPending() || $transaction->isBeingVerified() || $transaction->isAuthorized()) {
             // naar success
@@ -79,7 +84,12 @@ class PaynlPaymentMethodsFinishModuleFrontController extends ModuleFrontControll
 
             if (!$transaction->isPaid()) {
                 $slow = '&slowvalidation=1';
-              if($bValidationDelay == 1 && $iAttempt < 20) {
+                $iTotalAttempts = in_array($ppid, array(
+                  self::METHOD_OVERBOEKING,
+                  self::METHOD_SOFORT)
+                ) ? 1 : 20;
+
+              if($bValidationDelay == 1 && $iAttempt < $iTotalAttempts) {
                 return;
               }
             }
