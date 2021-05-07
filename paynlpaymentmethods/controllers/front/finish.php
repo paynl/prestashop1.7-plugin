@@ -108,8 +108,19 @@ class PaynlPaymentMethodsFinishModuleFrontController extends ModuleFrontControll
         # Delete old payment fee
         $this->context->cart->deleteProduct(Configuration::get('PAYNL_FEE_PRODUCT_ID'), 0);
 
-        # To checkout
-        Tools::redirect('index.php?controller=order&step=1');
+          if ($this->orderStatusId == '-63') {
+              $this->errors[] = $this->module->l('The payment has been denied', 'finish');
+              $this->redirectWithNotifications('index.php?controller=order&step=1');
+          } elseif ($transaction->isCanceled()) {
+              $this->errors[] = $this->module->l('The payment has been canceled', 'finish');
+              $this->redirectWithNotifications('index.php?controller=order&step=1');
+
+          } else {
+              # To checkout
+              Tools::redirect('index.php?controller=order&step=1');
+          }
+
+
       }
 
   }
