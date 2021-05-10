@@ -548,7 +548,7 @@ class PaynlPaymentMethods extends PaymentModule
         {
           $order = new Order($orderId);
 
-          $this->payLog('processPayment', 'orderStateNamea:' . $orderStateName . '. iOrderState: ' . $iOrderState . '. ' .
+          $this->payLog('processPayment', 'orderStateName:' . $orderStateName . '. iOrderState: ' . $iOrderState . '. ' .
                     'orderRef:'. $order->reference .'. orderModule:'. $order->module, $cartId, $transactionId);
 
             /**
@@ -663,7 +663,7 @@ class PaynlPaymentMethods extends PaymentModule
 
             }
             else {
-               $this->payLog('processPayment', 'OrderStateName B:' . $orderStateName . '. iOrderState: ' . $iOrderState .'. iState:'. $iState, $cartId, $transactionId);
+               $this->payLog('processPayment 3', 'OrderStateName:' . $orderStateName . '. iOrderState: ' . $iOrderState .'. iState:'. $iState, $cartId, $transactionId);
             }
 
         }
