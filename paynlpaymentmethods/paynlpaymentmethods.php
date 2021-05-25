@@ -625,6 +625,10 @@ class PaynlPaymentMethods extends PaymentModule
                       $paymentMethodName = empty($settings->name) ? '' : $settings->name;
                     }
 
+                    if ($paymentMethodName == null  || empty($paymentMethodName)){
+                        $paymentMethodName = 'Name missing';
+                    }
+
                     /**
                     * @var $cart CartCore
                     */
