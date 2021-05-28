@@ -643,6 +643,10 @@ class PaynlPaymentMethods extends PaymentModule
                       $paymentMethodName = empty($settings->name) ? '' : $settings->name;
                     }
 
+                    if (empty($paymentMethodName)) {
+                        $paymentMethodName = 'PAY.';
+                    }
+
                     $this->payLog('processPayment', 'Creating ORDER for ppid ' . $profileId . '. Status: ' . $orderStateName . '. Method: ' . $paymentMethodName, $cartId, $transactionId);
 
                     $this->validateOrder((int)$transaction->getExtra1(), $iOrderState,
