@@ -6,6 +6,7 @@
     <a href="https://admin.pay.nl" target="_blank">
         <img class="payLogo" src="https://static.pay.nl/generic/images/75x75/logo.png"/>
     </a>
+    <input type="hidden" id="pay-currency" value="{$currency}">
     <input type="hidden" id="pay-transactionid" value="{$pay_orderid}">
     <input type="hidden" id="pay-prestaorderid" value="{$PrestaOrderId}">
     <input type="hidden" id="pay-ajaxurl" value="{$ajaxURL}">
@@ -23,10 +24,10 @@
         <div class="labelvalue" id="pay-status">{$status}</div>
         <div class="label">{$lang.paymentmethod}</div>
         <div class="labelvalue">{$method}</div>
-        <div class="label">{$lang.currency}</div>
-        <div class="labelvalue" id="pay-currency">{$currency}</div>
-        <div class="label">{$lang.amount}</div>
-        <div class="labelvalue">{$amountFormatted}</div>
+        <div class="label">{$lang.amount} (Cart)</div>
+        <div class="labelvalue">{$currency} {$amountFormatted}</div>
+        <div class="label">{$lang.amount} (PAY.)</div>
+        <div class="labelvalue">EUR {$amountPayFormatted}</div>
     </div>
     <div>
         <hr>

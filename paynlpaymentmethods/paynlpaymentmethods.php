@@ -139,10 +139,12 @@ class PaynlPaymentMethods extends PaymentModule
     $method = $order->payment;
     $currency = new Currency($orderPayment->id_currency);
     $transactionId = $orderPayment->transaction_id;
+    $payOrderAmount = 0;
 
     try {
       $transaction = $this->getTransaction($transactionId);
       $arrTransactionDetails = $transaction->getData();
+        $payOrderAmount = $transaction->getPaidAmount();
       $status = $arrTransactionDetails['paymentDetails']['stateName'];
       $method = $arrTransactionDetails['paymentDetails']['paymentProfileName'];
       $showRefundButton = $transaction->isPaid() || $transaction->isPartiallyRefunded();
@@ -151,12 +153,14 @@ class PaynlPaymentMethods extends PaymentModule
     }
 
     $amountFormatted = number_format($order->total_paid, 2, ',','.');
+    $amountPayFormatted = number_format($payOrderAmount, 2, ',','.');
 
     $this->context->smarty->assign(array(
       'lang' => $this->getMultiLang(),
       'this_version'    => $this->version,
       'PrestaOrderId' => $orderId,
       'amountFormatted' => $amountFormatted,
+      'amountPayFormatted' => $amountPayFormatted,
       'amount' => $order->total_paid,
       'currency' => $currency->iso_code,
       'pay_orderid' => $transactionId,
@@ -179,13 +183,13 @@ class PaynlPaymentMethods extends PaymentModule
     $lang['amount_to_refund'] = $this->l('Amount to refund');
     $lang['refunding'] = $this->l('Processing');
     $lang['currency'] = $this->l('Currency');
-    $lang['amount'] = $this->l('Orderamount');
+    $lang['amount'] = $this->l('Amount');
     $lang['invalidamount'] = $this->l('Invalid amount');
     $lang['succesfully_refunded'] = $this->l('Succesfully refunded');
     $lang['paymentmethod'] = $this->l('Paymentmethod');
     $lang['could_not_process_refund'] = $this->l('Could not process refund. Refund might be too fast or amount is invalid');
     $lang['info_refund_title'] = $this->l('Refund');
-    $lang['info_refund_text'] = $this->l('The orderstatus will only change to `Refunded` when the full amount is refunded. Stock wont by updated.');
+    $lang['info_refund_text'] = $this->l('The orderstatus will only change to `Refunded` when the full amount is refunded. Stock wont be updated.');
     $lang['info_log_title'] = $this->l('Logs');
     $lang['info_log_text'] = $this->l('For log information see `Advanced settings` and then `Logs`. Then filter on `PAY.`.');
 
@@ -544,7 +548,7 @@ class PaynlPaymentMethods extends PaymentModule
         {
           $order = new Order($orderId);
 
-          $this->payLog('processPayment', 'orderStateName:' . $orderStateName . '. iOrderState: ' . $iOrderState .'. ' .
+          $this->payLog('processPayment', 'orderStateName:' . $orderStateName . '. iOrderState: ' . $iOrderState . '. ' .
                     'orderRef:'. $order->reference .'. orderModule:'. $order->module, $cartId, $transactionId);
 
             /**
@@ -606,9 +610,23 @@ class PaynlPaymentMethods extends PaymentModule
             $iState = !empty($arrPayData['paymentDetails']['state']) ? $arrPayData['paymentDetails']['state'] : null;
             if ($transaction->isPaid() || $transaction->isAuthorized() || $transaction->isBeingVerified())
             {
-              $this->payLog('processPayment', 'orderStateName:' . $orderStateName . '. iOrderState: ' . $iOrderState . '. iState:' . $iState, $cartId, $transactionId);
+                /**
+                 * @var $cart CartCore
+                 */
+                $cart = new Cart((int)$cartId);
+                $currency_order = new Currency($cart->id_currency);
 
-                $amountPaid = $transaction->getPaidCurrencyAmount();
+                $amountPaid = null;
+                $cartTotalPrice = $cart->getCartTotalPrice();
+                if(in_array($cartTotalPrice, array($transaction->getPaidAmount(), $transaction->getPaidCurrencyAmount()))) {
+                    $amountPaid = $cartTotalPrice;
+                }
+
+                $this->payLog('processPayment (paid)', 'orderStateName:' . $orderStateName . '. iOrderState: ' . $iOrderState . '. iState:' . $iState. '. CurrencyOrder: ' . $currency_order->iso_code
+                                . '. CartOrderTotal: '. $cart->getOrderTotal() . '. CartTotalPrice: '. $cart->getCartTotalPrice() . '. AmountPaid : '. $amountPaid
+                  , $cartId, $transactionId);
+
+                $amountPaid = empty($amountPaid) ? $transaction->getPaidCurrencyAmount() : $amountPaid;
                 if($transaction->isAuthorized()){
                     $amountPaid = $transaction->getCurrencyAmount();
                 }
@@ -626,13 +644,8 @@ class PaynlPaymentMethods extends PaymentModule
                     }
 
                     if (empty($paymentMethodName)) {
-                       $paymentMethodName = 'PAY.';
+                        $paymentMethodName = 'PAY.';
                     }
-
-                    /**
-                    * @var $cart CartCore
-                    */
-                    $cart = new Cart((int)$cartId);
 
                     $this->payLog('processPayment', 'Creating ORDER for ppid ' . $profileId . '. Status: ' . $orderStateName . '. Method: ' . $paymentMethodName, $cartId, $transactionId);
 
@@ -644,6 +657,8 @@ class PaynlPaymentMethods extends PaymentModule
                     $order = new Order($orderId);
 
                     $message = "Validated order (" . $order->reference . ") with status: " . $orderStateName;
+                    $this->payLog('processPayment', 'Order created. Amount: '.$order->getTotalPaid() , $cartId, $transactionId);
+
                 } catch (Exception $ex) {
                     $this->payLog('processPayment', 'Could not validate(create) order.', $cartId, $transactionId);
                     $message = "Could not validate order, error: " . $ex->getMessage();
@@ -652,7 +667,7 @@ class PaynlPaymentMethods extends PaymentModule
 
             }
             else {
-              $this->payLog('processPayment', 'orderStateName:' . $orderStateName . '. iOrderState: ' . $iOrderState .'. iState:'. $iState, $cartId, $transactionId);
+               $this->payLog('processPayment 3', 'OrderStateName:' . $orderStateName . '. iOrderState: ' . $iOrderState .'. iState:'. $iState, $cartId, $transactionId);
             }
 
         }
@@ -717,7 +732,7 @@ class PaynlPaymentMethods extends PaymentModule
         $iPaymentFee = $this->getPaymentFee($objPaymentMethod, $cartTotal);
         $iPaymentFee = empty($iPaymentFee) ? 0 : $iPaymentFee;
         $cartId = $cart->id;
-        $this->payLog('startPayment', 'Starting new payment with cart-total: ' . $cartTotal . '. Fee: ' . $iPaymentFee, $cartId);
+        $this->payLog('startPayment', 'Starting new payment with cart-total: ' . $cartTotal . '. Fee: ' . $iPaymentFee . ' Currency (cart): ' . $currency->iso_code, $cartId);
 
         $this->addPaymentFee($cart, $iPaymentFee);
 
