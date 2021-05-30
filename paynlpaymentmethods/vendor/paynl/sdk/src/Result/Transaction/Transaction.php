@@ -1,20 +1,4 @@
 <?php
-/*
- * Copyright (C) 2015 Andy Pieters <andy@pay.nl>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 
 namespace Paynl\Result\Transaction;
 
@@ -54,6 +38,17 @@ class Transaction extends Result
     public function isCancelled()
     {
         return $this->isCanceled();
+    }
+
+  /**
+   *
+   * Check whether the status of the transaction is chargeback
+   *
+   * @return bool
+   */
+    public function isChargeBack()
+    {
+      return $this->data['paymentDetails']['stateName'] === 'CHARGEBACK';
     }
 
     /**
@@ -114,11 +109,23 @@ class Transaction extends Result
     }
 
     /**
+     * Check whether the payment is partial refunded
+     *
      * @return bool
      */
     public function isPartiallyRefunded()
     {
         return $this->data['paymentDetails']['stateName'] === 'PARTIAL_REFUND';
+    }
+
+  /**
+   * Check whether the payment is a partial payment.
+   *
+   * @return bool
+   */
+    public function isPartialPayment()
+    {
+        return $this->data['paymentDetails']['stateName'] === 'PARTIAL_PAYMENT';
     }
 
     /**

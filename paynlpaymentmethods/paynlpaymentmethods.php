@@ -144,7 +144,7 @@ class PaynlPaymentMethods extends PaymentModule
     try {
       $transaction = $this->getTransaction($transactionId);
       $arrTransactionDetails = $transaction->getData();
-        $payOrderAmount = $transaction->getPaidAmount();
+      $payOrderAmount = $transaction->getPaidAmount();
       $status = $arrTransactionDetails['paymentDetails']['stateName'];
       $method = $arrTransactionDetails['paymentDetails']['paymentProfileName'];
       $showRefundButton = $transaction->isPaid() || $transaction->isPartiallyRefunded();
@@ -535,8 +535,8 @@ class PaynlPaymentMethods extends PaymentModule
             $orderStateName = array_pop($orderStateName);
         }
 
-        $cartId = $transaction->getExtra1();
-
+        $cartId = $transaction->getOrderNumber();
+        $this->payLog('processPayment', 'orderStateName:' . $orderStateName . '. iOrderState: ' . $iOrderState, $cartId, $transactionId);
         if (version_compare(_PS_VERSION_, '1.7.1.0', '>=')) {
             $orderId = Order::getIdByCartId($cartId);
         } else {
@@ -649,7 +649,7 @@ class PaynlPaymentMethods extends PaymentModule
 
                     $this->payLog('processPayment', 'Creating ORDER for ppid ' . $profileId . '. Status: ' . $orderStateName . '. Method: ' . $paymentMethodName, $cartId, $transactionId);
 
-                    $this->validateOrder((int)$transaction->getExtra1(), $iOrderState,
+                    $this->validateOrder((int)$transaction->getOrderNumber(), $iOrderState,
                       $amountPaid, $paymentMethodName, null, array('transaction_id' => $transactionId), null, false, $cart->secure_key);
 
                     /** @var OrderCore $orderId */
@@ -675,19 +675,19 @@ class PaynlPaymentMethods extends PaymentModule
         return $transaction;
     }
 
-  /**
-   * @param $transactionId
-   * @return \Paynl\Result\Transaction\Transaction
-   * @throws \Paynl\Error\Api
-   * @throws \Paynl\Error\Error
-   */
+    /**
+     * @param $transactionId
+     * @return \Paynl\Result\Transaction\Status
+     * @throws \Paynl\Error\Api
+     * @throws \Paynl\Error\Error
+     * @throws \Paynl\Error\Required\ApiToken
+     * @throws \Paynl\Error\Required\ServiceId
+     */
     public function getTransaction($transactionId)
     {
         $this->sdkLogin();
 
-        $transaction = \Paynl\Transaction::get($transactionId);
-
-        return $transaction;
+        return \Paynl\Transaction::status($transactionId);
     }
 
   /**
@@ -754,6 +754,7 @@ class PaynlPaymentMethods extends PaymentModule
             'paymentMethod' => $payment_option_id,
             'description' => $description,
             'testmode' => Configuration::get('PAYNL_TEST_MODE'),
+            'orderNumber' => $cart->id,
             'extra1' => $cart->id,
             'products' => $products,
             'object' => $this->getObjectInfo()
