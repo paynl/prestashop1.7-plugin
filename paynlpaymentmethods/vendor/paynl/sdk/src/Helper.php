@@ -1,20 +1,4 @@
 <?php
-/*
- * Copyright (C) 2015 Andy Pieters <andy@pay.nl>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 
 namespace Paynl;
 
@@ -141,6 +125,9 @@ class Helper
             return 0;
         }
         $amountExclTax = $amountInclTax - $taxAmount;
+        // if $amountInclTax - $taxAmount == 0 the whole amount is tax.
+        // That would mean an infinite tax percentage, which is not possible. so in this case we return 100
+        if($amountExclTax == 0) return 100;
 
         return ($taxAmount / $amountExclTax) * 100;
     }
