@@ -53,7 +53,7 @@ class PaynlPaymentMethods extends PaymentModule
     {
         $this->name = 'paynlpaymentmethods';
         $this->tab = 'payments_gateways';
-        $this->version = '4.2.14';
+        $this->version = '4.2.15';
 
         $this->payLogEnabled = null;
         $this->ps_versions_compliancy = array('min' => '1.7', 'max' => _PS_VERSION_);
@@ -136,18 +136,27 @@ class PaynlPaymentMethods extends PaymentModule
     $orderPayment = reset($orderPayments);
 
     $status = 'unavailable';
-    $method = $order->payment;
     $currency = new Currency($orderPayment->id_currency);
     $transactionId = $orderPayment->transaction_id;
     $payOrderAmount = 0;
+    $methodName = 'PAY.';
 
     try {
-      $transaction = $this->getTransaction($transactionId);
-      $arrTransactionDetails = $transaction->getData();
-      $payOrderAmount = $transaction->getPaidAmount();
-      $status = $arrTransactionDetails['paymentDetails']['stateName'];
-      $method = $arrTransactionDetails['paymentDetails']['paymentProfileName'];
-      $showRefundButton = $transaction->isPaid() || $transaction->isPartiallyRefunded();
+        $transaction = $this->getTransaction($transactionId);
+        $arrTransactionDetails = $transaction->getData();
+        $payOrderAmount = $transaction->getPaidAmount();
+        $status = $arrTransactionDetails['paymentDetails']['stateName'];
+        $profileId = $transaction->getPaymentProfileId();
+        $settings = $this->getPaymentMethodSettings($profileId);
+
+        # Get the custom method name
+        if ($profileId == 613) {
+            $methodName = 'Sandbox';
+        } else {
+            $methodName = empty($settings->name) ? $profileId : $settings->name;
+        }
+
+        $showRefundButton = $transaction->isPaid() || $transaction->isPartiallyRefunded();
     } catch (Exception $exception) {
       $showRefundButton = false;
     }
@@ -165,7 +174,7 @@ class PaynlPaymentMethods extends PaymentModule
       'currency' => $currency->iso_code,
       'pay_orderid' => $transactionId,
       'status' => $status,
-      'method' => $method,
+      'method' => $methodName,
       'ajaxURL' => $this->context->link->getModuleLink($this->name, 'ajax', array(), true),
       'showRefundButton' => $showRefundButton,
     ));
@@ -632,15 +641,16 @@ class PaynlPaymentMethods extends PaymentModule
                 }
 
                 try {
-                    $profileId = $arrPayData['paymentDetails']['paymentOptionId'];
-                    $paymentMethodName = $arrPayData['paymentDetails']['paymentProfileName'];
+                    $profileId = $transaction->getPaymentProfileId();
 
                     # Profile 613 is for testing purposes
-                    if($profileId != 613) {
-                      $settings = $this->getPaymentMethodSettings($profileId);
+                    if ($profileId == 613) {
+                        $paymentMethodName = 'Sandbox';
+                    } else {
+                        $settings = $this->getPaymentMethodSettings($profileId);
 
-                      # Get the custom method name
-                      $paymentMethodName = empty($settings->name) ? '' : $settings->name;
+                        # Get the custom method name
+                        $paymentMethodName = empty($settings->name) ? '' : $settings->name;
                     }
 
                     if (empty($paymentMethodName)) {
@@ -686,7 +696,6 @@ class PaynlPaymentMethods extends PaymentModule
     public function getTransaction($transactionId)
     {
         $this->sdkLogin();
-
         return \Paynl\Transaction::status($transactionId);
     }
 
