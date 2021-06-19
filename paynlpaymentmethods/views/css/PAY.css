@@ -85,3 +85,78 @@
     border-radius: 4px;
     color: #272727;
 }
+
+
+.PAYNL.payment-option img {
+    float: left;
+    margin-right: 10px;
+    width: 50px;
+    cursor: pointer;
+}
+
+.PAYNL.payment-option label span {
+    font-size: 16px;
+    position: relative;
+    top: 16px;
+    padding-left: 10px;
+    cursor: pointer;
+}
+
+.PAYNL span.custom-radio {
+    margin-top: 16px;
+}
+
+.PaynlBanks {
+    position: absolute;
+    right: 270px;
+    margin-top: -50px;
+}
+
+.PaynlBanks.noLogo {
+    margin-top: -37px;
+}
+
+.PaynlBanks select {
+    width: 250px;
+}
+
+.PaynlBanks.noLogo select.form-control {
+    height: 28px;
+}
+
+.PaynlBanks span, .PaynlBanks div {
+    display: inline-block;
+}
+
+.paynl_payment_description {
+    padding-left: 40px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    padding-top: 5px;
+}
+.PAY.panel #dialog-info-modal
+{
+    display:none;
+}
+.ui-dialog
+{
+    border:0;
+    background: none;
+    background-color: #fff;
+    color: white;
+}
+.ui-dialog *
+{
+    color: #333;
+}
+.ui-dialog-title
+{
+    color: #3b3b3b;
+}
+.ui-dialog-titlebar
+{
+    background:none;
+    background-color: #5eba6c;
+    border:0;
+    border-radius: 0;
+}
