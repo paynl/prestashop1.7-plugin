@@ -1486,7 +1486,7 @@ class PaynlPaymentMethods extends PaymentModule
                     'min_amount' => isset($paymentmethod['min_amount']) ? intval($paymentmethod['min_amount'] / 100) : null,
                     'max_amount' => isset($paymentmethod['max_amount']) ? intval($paymentmethod['max_amount'] / 100) : null,
                     'description' => isset($paymentmethod['brand']['public_description']) ? $paymentmethod['brand']['public_description'] : '',
-                    'brand_id' => isset($paymentmethod['brand']['id']) ? $paymentmethod['brand']['id'] : '1'
+                    'brand_id' => isset($paymentmethod['brand']['id']) ? $paymentmethod['brand']['id'] : ''
                 );
                 $changed = true;
             }
