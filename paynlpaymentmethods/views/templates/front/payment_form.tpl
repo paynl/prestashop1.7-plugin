@@ -1,4 +1,4 @@
-<form action="{$action}" method="POST" id="payment-form">
+<form action="{$action}" method="POST" id="payment-form" class="paynl">
     <input type="hidden" name="payment_option_id" value="{$payment_option_id}"/>
     {if !empty($banks)}
         <div class="form-group row PaynlBanks {$logoClass}">

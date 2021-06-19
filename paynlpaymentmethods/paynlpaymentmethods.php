@@ -372,6 +372,8 @@ class PaynlPaymentMethods extends PaymentModule
               $objPaymentMethod->setForm($payForm);
             }
 
+            $objPaymentMethod->setModuleName('paynl');
+
             $paymentmethods[] = $objPaymentMethod;
         }
 

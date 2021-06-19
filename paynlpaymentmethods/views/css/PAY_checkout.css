@@ -1,11 +1,17 @@
-
 .payment-option img[src*="paynlpayment"]
 {
-    margin-top:10px;
+    margin-top:0px;
     float: left;
     margin-right: 10px;
     width: 50px;
     cursor: pointer;
     position: relative;
-    top: -15px;
+}
+
+.payment-options form.paynl
+{
+    padding-left: 50px;
+    margin-bottom: 40px;
+    font-size: 14px;
+    padding-top: 5px;
 }
