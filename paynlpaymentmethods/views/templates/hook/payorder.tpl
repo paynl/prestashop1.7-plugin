@@ -1,10 +1,12 @@
-<div class="PAY panel">
-    <div class="panel-heading">
+<div class="PAY panel card">
+    <div class="panel-heading card-header">
         <i class="icon-money"></i> {$lang.title}
     </div>
+    <div class="card-body">
     <a href="https://admin.pay.nl" target="_blank">
-        <img style="float: left;padding-right: 20px" src="https://static.pay.nl/generic/images/75x75/logo.png"/>
+        <img class="payLogo" src="https://static.pay.nl/generic/images/75x75/logo.png"/>
     </a>
+    <input type="hidden" id="pay-currency" value="{$currency}">
     <input type="hidden" id="pay-transactionid" value="{$pay_orderid}">
     <input type="hidden" id="pay-prestaorderid" value="{$PrestaOrderId}">
     <input type="hidden" id="pay-ajaxurl" value="{$ajaxURL}">
@@ -22,10 +24,10 @@
         <div class="labelvalue" id="pay-status">{$status}</div>
         <div class="label">{$lang.paymentmethod}</div>
         <div class="labelvalue">{$method}</div>
-        <div class="label">{$lang.currency}</div>
-        <div class="labelvalue" id="pay-currency">{$currency}</div>
-        <div class="label">{$lang.amount}</div>
-        <div class="labelvalue">{$amountFormatted}</div>
+        <div class="label">{$lang.amount} (Cart)</div>
+        <div class="labelvalue">{$currency} {$amountFormatted}</div>
+        <div class="label">{$lang.amount} (PAY.)</div>
+        <div class="labelvalue">EUR {$amountPayFormatted}</div>
     </div>
     <div>
         <hr>
@@ -35,20 +37,12 @@
                     <input type="text" placeholder="0,00" value="{$amountFormatted}" id="pay-refund-amount"
                            class="fixed-width-sm" style="display: inline;margin-right:10px"/>
                 </div>
-                <button type="button" id="pay-refund-button" class="btn btn-danger"
-                        style="display: inline">{$lang.refund_button}</button>
+                <button type="button" id="pay-refund-button" class="btn btn-danger" style="display: inline">{$lang.refund_button}</button>
+                <div class="tooltipPAY">
+                    ? <span class="tooltipPAYtext"> {$lang.info_refund_text} </span>
+                </div>
             </div>
         {/if}
-        <div class="payOption" style="display: inline-block">
-            <button type="button" id="PAY-info-button" class="btn btn-primary">Info</button>
-        </div>
      </div>
-    <div id="dialog-info-modal" title="PAY. Info">
-        <p><b>{$lang.info_refund_title}</b><br>
-           * {$lang.info_refund_text}
-        </p>
-        <p><b>{$lang.info_log_title}</b><br>
-            * {$lang.info_log_text}
-        </p>
     </div>
 </div>

@@ -47,19 +47,19 @@ Set the configuration
 ```php
 require __DIR__ . '/vendor/autoload.php';
 
-// Replace tokenCode apitoken and serviceId with your own.
-\Paynl\Config::setTokenCode('AT-1234-5678');
-\Paynl\Config::setApiToken('e41f83b246b706291ea9ad798ccfd9f0fee5e0ab');
-\Paynl\Config::setServiceId('SL-3490-4320');
+# Replace tokenCode apitoken and serviceId with your own.
+\Paynl\Config::setTokenCode('AT-####-####');
+\Paynl\Config::setApiToken('****************************************');
+\Paynl\Config::setServiceId('SL-####-####');
 ```
 
 Get available payment methods
 ```php
 require __DIR__ . '/vendor/autoload.php';
 
-\Paynl\Config::setTokenCode('AT-1234-5678');
-\Paynl\Config::setApiToken('e41f83b246b706291ea9ad798ccfd9f0fee5e0ab');
-\Paynl\Config::setServiceId('SL-3490-4320');
+\Paynl\Config::setTokenCode('AT-####-####');
+\Paynl\Config::setApiToken('****************************************');
+\Paynl\Config::setServiceId('SL-####-####');
 
 $paymentMethods = \Paynl\Paymentmethods::getList();
 var_dump($paymentMethods);
@@ -69,16 +69,16 @@ Start a transaction
 ```php
 require __DIR__ . '/vendor/autoload.php';
 
-\Paynl\Config::setTokenCode('AT-1234-5678');
-\Paynl\Config::setApiToken('e41f83b246b706291ea9ad798ccfd9f0fee5e0ab');
-\Paynl\Config::setServiceId('SL-3490-4320');
+\Paynl\Config::setTokenCode('AT-####-####');
+\Paynl\Config::setApiToken('****************************************');
+\Paynl\Config::setServiceId('SL-####-####');
 
 $result = \Paynl\Transaction::start(array(
-    // required
+    # Required
         'amount' => 10.00,
         'returnUrl' => Paynl\Helper::getBaseUrl().'/return.php',
 
-    // optional
+    # Optional
     	'currency' => 'EUR',
         'exchangeUrl' => Paynl\Helper::getBaseUrl().'/exchange.php',
         'paymentMethod' => 10,
@@ -134,10 +134,10 @@ $result = \Paynl\Transaction::start(array(
         ),
     ));
 
-// Save this transactionid and link it to your order
+# Save this transactionid and link it to your order
 $transactionId = $result->getTransactionId();
 
-// Redirect the customer to this url to complete the payment
+# Redirect the customer to this url to complete the payment
 $redirect = $result->getRedirectUrl();
 ```
 
@@ -145,18 +145,16 @@ On the return page, redirect the user to the thank you page or back to checkout
 ```php
 require __DIR__ . '/vendor/autoload.php';
 
-\Paynl\Config::setTokenCode('AT-1234-5678');
-\Paynl\Config::setApiToken('e41f83b246b706291ea9ad798ccfd9f0fee5e0ab');
+\Paynl\Config::setTokenCode('AT-####-####');
+\Paynl\Config::setApiToken('****************************************');
 
-$transaction = \Paynl\Transaction::getForReturn();
+$transaction = \Paynl\Transaction::status($transactionId);
 
-//manual transfer transactions are always pending when the user is returned
-if( $transaction->isPaid() || $transaction->isPending()){
-    // redirect to thank you page
-    
+# Manual transfer transactions are always pending when the user is returned
+if( $transaction->isPaid() || $transaction->isPending()) {
+   # Redirect to thank you page
 } elseif($transaction->isCanceled()) {
-    // redirect back to checkout
-   
+   # Redirect back to checkout
 }
 ```
 
@@ -164,22 +162,22 @@ On the exchange script, process the order
 ```php
 require __DIR__ . '/vendor/autoload.php';
 
-\Paynl\Config::setTokenCode('AT-1234-5678');
-\Paynl\Config::setApiToken('e41f83b246b706291ea9ad798ccfd9f0fee5e0ab');
+\Paynl\Config::setTokenCode('AT-####-####');
+\Paynl\Config::setApiToken('****************************************');
 
-$transaction = \Paynl\Transaction::getForExchange();
+$transaction = \Paynl\Transaction::status($transactionId);
 
-if($transaction->isPaid() || $transaction->isAuthorized()){
-    // process the payment
-} elseif($transaction->isCanceled()){
-    // payment canceled, restock items
+if($transaction->isPaid() || $transaction->isAuthorized()) {
+    # Process the payment
+} elseif($transaction->isCanceled()) {
+    # Payment canceled, restock items
 }
 
-// always start your response with TRUE|
+# Always respond with TRUE|
 echo "TRUE| ";
 
-// Optionally you can send a message after TRUE|, you can view these messages in the logs.
-// https://admin.pay.nl/logs/payment_state
+# Optionally you can send a message after TRUE|, you can view these messages in the logs.
+# https://admin.pay.nl/logs/payment_state
 echo ($transaction->isPaid() || $transaction->isAuthorized())?'Paid':'Not paid';
 
 

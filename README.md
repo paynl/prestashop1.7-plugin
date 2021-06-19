@@ -1,16 +1,20 @@
-# PAY. PrestaShop 1.7 plugin
+<p align="center">
+  <img src="https://www.pay.nl/uploads/1/brands/main_logo.png" />
+</p>
+<h1 align="center">PAY. PrestaShop 1.7 plugin</h1>
 
----
-- [Summary](#summary)
-- [Quickstart](#quickstart)
-- [Setup](#setup)
+# Description
 
----
-### Summary
+This plugin provides a wide scale of different payment methods for your PrestaShop 1.7 webshop. Go to https://www.pay.nl (Dutch) for an overview of all our features and services, you can also visit https://docs.pay.nl/plugins#prestashop-1_7 for more detailed information.
 
-With this plug-in by PAY. you can easily add all desired payment methods to your PrestaShop 1.7 webshop. Please refer to https://www.pay.nl (Dutch) for an overview of all features and services. 
+- [Description](#description)
+- [Available payment methods](#available-payment-methods)
+- [Installation](#installation)
+- [Update instructions](#update-instructions)
+- [Usage](#usage)
+- [Support](#support)
 
-##### Available payment methods:
+# Available payment methods
 
 Bank Payments  | Creditcards | Gift cards & Vouchers | Pay by invoice | Others | 
 :-----------: | :-----------: | :-----------: | :-----------: | :-----------: |
@@ -25,21 +29,37 @@ Bank Transfer | Cartasi | GivaCard | SprayPay | Przelewy24 |
 | Multibanco | | Paysafecard | | Payconiq
 
 
-### Quickstart
+# Installation
+#### Installing
 
-##### Installing
-
-Download the latest .zip release and upload into *Modules* > *Module Manager* > *Upload a module*
+Download the latest .zip file (paynlpaymentmethods_X.zip) and upload it into *Modules* > *Module Manager* > *Upload a module*
 
 ##### Setup
 
-1. Log into the PrestaShop 1.7 admin
+1. Log into your PrestaShop 1.7 admin
 2. Go to *Modules* > *Module Manager*
 3. Scroll down or search for PAY.
 4. Click Configure
-5. Enter the API token and serviceID (these can be found in the PAY. Admin Panel --> https://admin.pay.nl/programs/programs
+5. Enter the API token and serviceID (these can be found in the PAY. Admin Panel --> https://admin.pay.nl/programs/programs)
 6. Save the settings
 7. Enable the desired payment methods
 8. Save the settings
 
 Go to the *Manage* > *Services* tab in the PAY. Admin Panel to enable extra payment methods
+
+#### Update instructions
+
+1. Log into the PrestaShop 1.7 admin
+2. Go to *Modules* > *Module Manager*
+3. Click on upload a module
+4. Upload the newest PAY. plugin zip file (paynlpaymentmethods_X.zip)
+5. Done
+
+# Usage
+
+More information on this plugin can be found on https://docs.pay.nl/plugins#prestashop-1_7
+
+# Support
+https://www.pay.nl
+
+Contact us: support@pay.nl

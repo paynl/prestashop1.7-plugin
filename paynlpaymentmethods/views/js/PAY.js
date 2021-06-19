@@ -24,7 +24,7 @@ jQuery(document).ready(function () {
         var PrestaOrderId = jQuery('#pay-prestaorderid').val();
         var ajaxurl = jQuery('#pay-ajaxurl').val();
         var presentationAmount = amount.toFixed(2);
-        var currency = jQuery('#pay-currency').text();
+        var currency = jQuery('#pay-currency').val();
         var lang_areyoursure = jQuery('#pay-lang-areyoursure').val();
         var lang_refunding = jQuery('#pay-lang-refunding').val();
         var lang_sucrefund = jQuery("#pay-lang-succesfullyrefunded").val();
@@ -55,7 +55,7 @@ jQuery(document).ready(function () {
                     success: function (data) {
                         if (data.success) {
                             jQuery('#pay-status').text(' - ');
-                            jQuery(payOption).text(lang_sucrefund + ' ' + currency + ' ' + presentationAmount);
+                            jQuery(payOption).text(lang_sucrefund + ': ' + currency + ' ' + presentationAmount);
                         } else {
                             jQuery(refundButton).text(lang_refundbutton);
                             alert(lang_couldnotprocess);
