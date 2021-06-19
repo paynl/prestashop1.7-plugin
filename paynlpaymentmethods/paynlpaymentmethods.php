@@ -93,8 +93,7 @@ class PaynlPaymentMethods extends PaymentModule
 
     public function hookDisplayHeader(array $params)
     {
-      $this->context->controller->addCss($this->_path . 'css/PAY.css');
-      $this->context->controller->addJs($this->_path . 'views/js/PAY_CHECKOUT.js');
+      $this->context->controller->addCSS($this->_path . 'views/css/PAY_checkout.css');
     }
 
 
@@ -207,12 +206,12 @@ class PaynlPaymentMethods extends PaymentModule
     return $lang;
   }
 
-  /**
-   * @param $transactionId
-   * @param null $amount
-   * @param string|null $strCurrency
-   * @return array
-   */
+    /**
+     * @param $transactionId
+     * @param null $amount
+     * @param null $strCurrency
+     * @return array
+     */
   public function doRefund($transactionId, $amount = null, $strCurrency = null)
   {
     try {
@@ -298,6 +297,10 @@ class PaynlPaymentMethods extends PaymentModule
     }
 
 
+    /**
+     * @param $params
+     * @return array|false
+     */
     public function hookPaymentOptions($params)
     {
         if (!$this->active) {

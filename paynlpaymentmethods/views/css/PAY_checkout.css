@@ -1,0 +1,11 @@
+
+.payment-option img[src*="paynlpayment"]
+{
+    margin-top:10px;
+    float: left;
+    margin-right: 10px;
+    width: 50px;
+    cursor: pointer;
+    position: relative;
+    top: -15px;
+}
