@@ -93,6 +93,7 @@ class PaynlPaymentMethods extends PaymentModule
 
     public function hookDisplayHeader(array $params)
     {
+      $this->context->controller->addJs($this->_path . 'views/js/PAY_checkout.js');
       $this->context->controller->addCSS($this->_path . 'views/css/PAY_checkout.css');
     }
 
