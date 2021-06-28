@@ -1,0 +1,23 @@
+.PAYNL.payment-option img {
+    margin-top: 0px;
+    float: left;
+    margin-right: 10px;
+    width: 50px;
+    cursor: pointer;
+    position: relative;
+    top: -15px;
+}
+
+.payment-options form.paynl {
+    padding-left: 50px;
+    font-size: 14px;
+    padding-top: 5px;
+}
+
+.payment-options .paynl_payment_description {
+    margin-bottom: 40px;
+}
+
+.PAYNL.firstMethod {
+    margin-top: 20px;
+}
