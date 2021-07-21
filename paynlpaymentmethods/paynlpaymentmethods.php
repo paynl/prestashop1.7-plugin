@@ -541,6 +541,25 @@ class PaynlPaymentMethods extends PaymentModule
         return $this->context->smarty->fetch('module:paynlpaymentmethods/views/templates/front/payment_form.tpl');
     }
 
+    private function getCartTotalPrice($cart)
+    {
+        $summary = $cart->getSummaryDetails();
+
+        $id_order = (int) Order::getIdByCartId($this->id);
+        $order = new Order($id_order);
+
+        if (Validate::isLoadedObject($order)) {
+            $taxCalculationMethod = $order->getTaxCalculationMethod();
+        } else {
+            $taxCalculationMethod = Group::getPriceDisplayMethod(Group::getCurrent()->id);
+        }
+        
+        return $taxCalculationMethod == PS_TAX_EXC ?
+            $summary['total_price_without_tax'] :
+            $summary['total_price'];
+        
+    }
+
     private function sdkLogin()
     {
         $apitoken = Tools::getValue('PAYNL_API_TOKEN', Configuration::get('PAYNL_API_TOKEN'));
@@ -662,13 +681,13 @@ class PaynlPaymentMethods extends PaymentModule
                 $currency_order = new Currency($cart->id_currency);
 
                 $amountPaid = null;
-                $cartTotalPrice = $cart->getCartTotalPrice();
+                $cartTotalPrice = (version_compare(_PS_VERSION_, '1.7.7.0', '>=')) ? $cart->getCartTotalPrice() : $this->getCartTotalPrice($cart);
                 if(in_array($cartTotalPrice, array($transaction->getPaidAmount(), $transaction->getPaidCurrencyAmount()))) {
                     $amountPaid = $cartTotalPrice;
                 }
 
                 $this->payLog('processPayment (paid)', 'orderStateName:' . $orderStateName . '. iOrderState: ' . $iOrderState . '. iState:' . $iState. '. CurrencyOrder: ' . $currency_order->iso_code
-                                . '. CartOrderTotal: '. $cart->getOrderTotal() . '. CartTotalPrice: '. $cart->getCartTotalPrice() . '. AmountPaid : '. $amountPaid
+                                . '. CartOrderTotal: '. $cart->getOrderTotal() . '. CartTotalPrice: '. $cartTotalPrice . '. AmountPaid : '. $amountPaid
                   , $cartId, $transactionId);
 
                 $amountPaid = empty($amountPaid) ? $transaction->getPaidCurrencyAmount() : $amountPaid;
