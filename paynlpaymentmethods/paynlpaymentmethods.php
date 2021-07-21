@@ -564,9 +564,9 @@ class PaynlPaymentMethods extends PaymentModule
     {
         $apitoken = Tools::getValue('PAYNL_API_TOKEN', Configuration::get('PAYNL_API_TOKEN'));
         $serviceId = Tools::getValue('PAYNL_SERVICE_ID', Configuration::get('PAYNL_SERVICE_ID'));
-        $gateway = trim(Tools::getValue('PAYNL_FAILOVER_GATEWAY', Configuration::get('PAYNL_FAILOVER_GATEWAY')));
+        $gateway = Tools::getValue('PAYNL_FAILOVER_GATEWAY', Configuration::get('PAYNL_FAILOVER_GATEWAY'));
 
-        if(!empty($gateway)) {
+        if(!empty(trim($gateway))) {
             \Paynl\Config::setApiBase($gateway);
         }
         \Paynl\Config::setApiToken($apitoken);
