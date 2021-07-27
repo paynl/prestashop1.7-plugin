@@ -12,13 +12,13 @@ $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_2b04fe9fdd308d7d0
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_4237c6f83fc2696b6ac87ca894607c03'] = 'Bedrag';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_643562a9ae7099c8aabfdc93478db117'] = 'Bezig met verwerken';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_386c339d37e737a436499d423a77df0c'] = 'Valuta';
-$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_b2f40690858b404ed10e62bdf422c704'] = 'Bedrag';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_b2f40690858b404ed10e62bdf422c704'] = 'Orderbedrag';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_a9ced76f2dd6907220fa95b3a136b04a'] = 'Ongeldig bedrag';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_0767b61acf9e2b7c9c346788ff9d778d'] = 'Terugbetaling gelukt';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_27e600a9fa8e36c761aad9cb1ba5a156'] = 'Betaalmethode';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_9b24ac685f7ec44b2895b9d172d22ccc'] = 'Terugbetalen mislukt. Probeer het later nog eens of pas het bedrag aan.';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_76f0ed934de85cc7131910b32ede7714'] = 'Terugbetaling';
-$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_1eb975026e9703d4f7cf01a3669dad59'] = 'De orderstatus verandert pas naar `Refunded` wanneer het volledige bedrag is teruggestort. De voorraad wordt niet bijgewerkt.';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_1eb975026e9703d4f7cf01a3669dad59'] = 'De orderstatus wordt alleen bij een volledige terugbetaling aangepast naar `Terugbetaald`. De voorraad wordt hierbij niet aangepast.';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_b2d37ae1cedf42ff874289b721860af2'] = 'Log-informatie';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_4f6cbea9f2eade99f783747f7cafb211'] = 'Ga hiervoor naar `Geavanceerde instellingen` en open `Logboeken` en filter bij (indien ingeschakeld bij de plugin instellingen) `Bericht` op `PAY.`';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_020c2091aec3019d02193cef080bcf97'] = 'Betaalmethode toeslag';
@@ -47,7 +47,7 @@ $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_b989ff7da93d9c834
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_71268b7a2a120a7b132e7e3833567700'] = 'Wanneer de betaling is voltooid, wacht tot PAY. de betaling valideert voordat u doorverwezen wordt naar de succespagina';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_00d23a76e43b46dae9ec7aa9dcbebb32'] = 'Ingeschakeld';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_b9f5c797ebbf55adccdd8539a65a0241'] = 'Uitgeschakeld';
-$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_4b3d4f142a58a2fb3b7714f7693708c4'] = 'PAY Loggen	';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_4b3d4f142a58a2fb3b7714f7693708c4'] = 'PAY Loggen';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_56d40defec5b7682e494af89a7a4d2a9'] = 'Log communicatie en procesinformatie van PAY.';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_4245499695408b974322be6f01b0d17a'] = 'Test modus';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_61142607f22ea506073bcb1c1c74133e'] = 'Start de transacties in sandbox modus om te testen';
