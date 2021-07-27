@@ -359,7 +359,7 @@ class PaynlPaymentMethods extends PaymentModule
             global $cookie;
             $iso_code = Language::getIsoById( (int)$cookie->id_lang );
             $name = $paymentMethod->name;
-            if(!empty($paymentMethod->{'name_'.$iso_code})){
+            if(isset($paymentMethod->{'name_'.$iso_code}) && !empty($paymentMethod->{'name_'.$iso_code})){
                 $name = $paymentMethod->{'name_'.$iso_code};
             }
 
@@ -379,7 +379,7 @@ class PaynlPaymentMethods extends PaymentModule
             }
 
             $strDescription = empty($paymentMethod->description) ? null : $paymentMethod->description;
-            if(!empty($paymentMethod->{'description_'.$iso_code})){
+            if(isset($paymentMethod->{'description_'.$iso_code}) && !empty($paymentMethod->{'description_'.$iso_code})){
                 $strDescription = $paymentMethod->{'description_'.$iso_code};
             }
 
