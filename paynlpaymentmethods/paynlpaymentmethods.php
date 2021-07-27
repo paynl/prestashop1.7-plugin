@@ -1416,7 +1416,7 @@ class PaynlPaymentMethods extends PaymentModule
                         'type' => 'select',
                         'label' => $this->l('Payment screen language'),
                         'name' => 'PAYNL_LANGUAGE',
-                        'desc' => $this->l("Select the language to show the payment screen in, automatic uses the browser preference"),
+                        'desc' => $this->l('Select the language to show the payment screen in, automatic uses the browser preference'),
                         'options' => array(
                             'query' => $this->getLanguages(),
                             'id' => 'language_id',

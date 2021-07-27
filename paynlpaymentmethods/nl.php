@@ -54,6 +54,7 @@ $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_61142607f22ea5060
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_4861c3d5c88af6037e2bfb0d5c309ce1'] = 'Weergave afbeeldingen';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_f7d5170bde3cbe04f1e4c3cb3459dc08'] = 'Laat de afbeeldingen van de betaalmethoden zien in de checkout.';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_3d8bf69f189462bae437c9b50d32f4e1'] = 'Betaalscherm taal';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_1efea134dc382b9d18ef9ed8a21e178f'] = 'Selecteer de taal om het betaalscherm in te tonen, de browservoorkeur wordt automatisch gebruikt';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_c9cc8cce247e49bae79f15173ce97354'] = 'Opslaan';
 $_MODULE['<{paynlpaymentmethods}prestashop>finish_6de7ebd0b87eecf7124b51534c2910be'] = 'De betaling is afgekeurd';
 $_MODULE['<{paynlpaymentmethods}prestashop>finish_caaf77b3c36dcc77d3ae08b76a7a34c0'] = 'De betaling is geannuleerd';
