@@ -356,7 +356,14 @@ class PaynlPaymentMethods extends PaymentModule
         foreach ($availablePaymentMethods as $paymentMethod) {
             $objPaymentMethod = new PaymentOption();
 
-            $objPaymentMethod->setCallToActionText($paymentMethod->name)
+            global $cookie;
+            $iso_code = Language::getIsoById( (int)$cookie->id_lang );
+            $name = $paymentMethod->name;
+            if(!empty($paymentMethod->{'name_'.$iso_code})){
+                $name = $paymentMethod->{'name_'.$iso_code};
+            }
+
+            $objPaymentMethod->setCallToActionText($name)
                 ->setAction($this->context->link->getModuleLink($this->name, 'startPayment', array(),
                     true))
                 ->setInputs([
@@ -372,6 +379,9 @@ class PaynlPaymentMethods extends PaymentModule
             }
 
             $strDescription = empty($paymentMethod->description) ? null : $paymentMethod->description;
+            if(!empty($paymentMethod->{'description_'.$iso_code})){
+                $strDescription = $paymentMethod->{'description_'.$iso_code};
+            }
 
             try {
               $payForm = $this->getPayForm($paymentMethod->id, $strDescription, $bShowLogo);
@@ -1551,18 +1561,15 @@ class PaynlPaymentMethods extends PaymentModule
     {
 
         $this->context->controller->addJs($this->_path . 'views/js/jquery-ui/jquery-ui.js');
-        $this->context->controller->addJs($this->_path . 'views/js/angular/angular.js');
-
-        $this->context->controller->addJs($this->_path . 'views/js/angular-ui-sortable/sortable.js');
-        $this->context->controller->addJs($this->_path . 'views/js/angular-ui-switch/angular-ui-switch.js');
-
-        $this->context->controller->addCss($this->_path . 'views/js/angular-ui-switch/angular-ui-switch.css');
+       
         $this->context->controller->addCss($this->_path . 'css/admin.css');
 
         $this->smarty->assign(array(
             'available_countries' => $this->getCountries(),
             'available_carriers' => $this->getCarriers(),
-            'image_url' => $this->_path . 'views/images/'
+            'image_url' => $this->_path . 'views/images/',
+            'languages' => Language::getLanguages(true),
+            'paymentmethods' => (array) $this->getPaymentMethodsCombined()
         ));
 
         return $this->display(__FILE__, 'admin_paymentmethods.tpl');
