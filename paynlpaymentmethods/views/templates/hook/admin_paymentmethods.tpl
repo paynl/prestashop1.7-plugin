@@ -216,12 +216,16 @@
         return $paymentmethods;
     }
 
-    function submitPaynlForm(){
+    function updatePaynlForm(){
         //Get the updated data and assign it to the PAYNL_PAYMENTMETHODS field
         var $updatedata = paynlFormData();
         if($updatedata){
             $('#PAYNL_PAYMENTMETHODS').val(JSON.stringify($updatedata));
-        }        
+        }                      
+    }
+
+    function submitPaynlForm(){
+        updatePaynlForm();
         var $form = document.getElementById('module_form');
         $form.submit();
         return false;
@@ -246,7 +250,17 @@
         }
     });
 
-    $("#sortable_paymentmethods").sortable({ handle: '.sortHandle' });
+    $("#sortable_paymentmethods").sortable({ handle: '.sortHandle', update: function( ) {
+        updatePaynlForm();
+    }});
+
+    $("#sortable_paymentmethods").find('input').keyup(function() {
+        updatePaynlForm();
+    });
+
+    $("#sortable_paymentmethods").find('select').on('change', function() {
+        updatePaynlForm();
+    });
 
     $('.paynl_switch').each(function(){
         $(this).click(function(){
@@ -261,6 +275,7 @@
                 $button.find('input').prop('checked', true);  
                 $button.parent().parent().parent().find('.'+$button.find('input').attr('name') + '_required').removeClass('hidden');     
             }
+            updatePaynlForm();            
         });
     });
 
