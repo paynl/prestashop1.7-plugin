@@ -1064,6 +1064,10 @@ class PaynlPaymentMethods extends PaymentModule
             'country' => $invoiceCountry->iso_code
         );
 
+        /** @var Company $invoiceAddress */
+        $enduser['company']['name'] = $objInvoiceAddress->company;
+        $enduser['company']['vatNumber'] = $objInvoiceAddress->vat_number;
+
         return array(
             'enduser' => $enduser,
             'address' => $address,
