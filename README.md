@@ -29,6 +29,12 @@ Bank Transfer | Cartasi | GivaCard | SprayPay | Przelewy24 |
 | Multibanco | | Paysafecard | | Payconiq
 
 
+# Requirements
+
+    PHP 7.2 or higher
+    Tested up to PrestaShop 1.7.7.6
+
+
 # Installation
 #### Installing
 
