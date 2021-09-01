@@ -1320,14 +1320,14 @@ class PaynlPaymentMethods extends PaymentModule
                         'type' => 'text',
                         'label' => $this->l('APIToken'),
                         'name' => 'PAYNL_API_TOKEN',
-                        'desc' => $this->l('You can find your API token at the bottom of https://admin.pay.nl/my_merchant'),
+                        'desc' => $this->l('You can find your API token at the bottom of https://admin.pay.nl/my_merchant, not registered at PAY? Sign up at https://www.pay.nl/en?register'),
                         'required' => true
                     ),
                     array(
                         'type' => 'text',
                         'label' => $this->l('ServiceId'),
                         'name' => 'PAYNL_SERVICE_ID',
-                        'desc' => $this->l('The SL-code of your service on https://admin.pay.nl/programs/programs'),
+                        'desc' => $this->l('The SL-code of your service on https://admin.pay.nl/programs/programs, not registered at PAY? Sign up at https://www.pay.nl/en?register'),
                         'required' => true
                     ),
                     array(
