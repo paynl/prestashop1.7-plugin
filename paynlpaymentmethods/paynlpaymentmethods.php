@@ -458,6 +458,19 @@ class PaynlPaymentMethods extends PaymentModule
             }
         }
 
+        // check customer type
+        $invoiceAddressId = $cart->id_address_invoice;
+        $objInvoiceAddress = new Address($invoiceAddressId);
+        
+        if (isset($objInvoiceAddress->company) && isset($paymentMethod->customer_type)) {        
+            if(!empty(trim($objInvoiceAddress->company)) && $paymentMethod->customer_type == 'private'){
+                return false;
+            }    
+            if(empty(trim($objInvoiceAddress->company)) && $paymentMethod->customer_type == 'business'){
+                return false;
+            }                      
+        }
+
         return true;
     }
 
