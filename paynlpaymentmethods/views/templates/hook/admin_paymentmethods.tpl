@@ -166,6 +166,19 @@
                                     </p>
                                 </div>
                             </div>
+                            <div class="form-group">
+                                <label class="control-label col-lg-3 align-right">{l s='Customer type' mod='paynlpaymentmethods'}</label>
+                                <div class="col-lg-9">                                    
+                                    <select name="customer_type">
+                                        <option value="both" {if $paymentmethod->customer_type == 'both'}selected{/if}>Show for both</option>
+                                        <option value="private" {if $paymentmethod->customer_type == 'private'}selected{/if}>Private only</option>
+                                        <option value="business" {if $paymentmethod->customer_type == 'business'}selected{/if}>Businesses only</option>
+                                    </select>                                    
+                                    <p class="help-block">
+                                        {l s='Customer type' mod='paynlpaymentmethods'}
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </form>
@@ -208,7 +221,7 @@
 
                 //Add all select data
                 $(this).find('select').each(function(){
-                   $paymentmethod[$(this).attr("name")] = $(this).find("option:selected").map(function(){ return this.value }).get();
+                    $paymentmethod[$(this).attr("name")] = $(this).find("option:selected").val();
                 });
                 $paymentmethods.push($paymentmethod);              
             }            
