@@ -1549,7 +1549,7 @@ class PaynlPaymentMethods extends PaymentModule
 
             # Nieuwe payment methods voorzien van standaard values.
             foreach ($paymentmethods as $paymentmethod) {
-                $resultArray[] = array(
+                $resultArray[] = (object) [
                     'id' => $paymentmethod['id'],
                     'name' => empty($paymentmethod['visibleName']) ? $paymentmethod['name'] : $paymentmethod['visibleName'],
                     'enabled' => false,
@@ -1557,7 +1557,7 @@ class PaynlPaymentMethods extends PaymentModule
                     'max_amount' => isset($paymentmethod['max_amount']) ? intval($paymentmethod['max_amount'] / 100) : null,
                     'description' => isset($paymentmethod['brand']['public_description']) ? $paymentmethod['brand']['public_description'] : '',
                     'brand_id' => isset($paymentmethod['brand']['id']) ? $paymentmethod['brand']['id'] : ''
-                );
+                ];
                 $changed = true;
             }
 
