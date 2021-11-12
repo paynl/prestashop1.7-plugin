@@ -112,8 +112,28 @@ class PaynlPaymentMethods extends PaymentModule
         }
 
         $this->createPaymentFeeProduct();
+        $this->createDatabaseTable();
 
         return true;
+    }
+
+    public function createDatabaseTable()
+    {       
+        return Db::getInstance()->execute('
+			CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'pay_transactions` (
+                `id` int(11) NOT NULL AUTO_INCREMENT,
+				`transaction_id` varchar(255) DEFAULT NULL,
+                `cart_id` int(11) DEFAULT NULL,
+                `customer_id` int(11) DEFAULT NULL,
+                `payment_option_id` int(11) DEFAULT NULL,
+                `amount` decimal(20,6) DEFAULT NULL,
+                `hash` varchar(255) DEFAULT NULL,
+                `order_reference` varchar(255) DEFAULT NULL,
+                `status` varchar(255) DEFAULT NULL,
+                `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+                `updated_at` datetime NOT NULL DEFAULT current_timestamp(),
+				PRIMARY KEY (`id`)
+			) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8 ;');     
     }
 
     public function hookActionAdminControllerSetMedia()
@@ -546,20 +566,29 @@ class PaynlPaymentMethods extends PaymentModule
    */
     private function getPayForm($payment_option_id, $description = null, $logo = true)
     {
-        $banks = array();
+        $paymentOptions = array();
 
         if ($payment_option_id == 10) {
           $this->sdkLogin();
-          $banks = \Paynl\Paymentmethods::getBanks($payment_option_id);
+          $paymentOptions = \Paynl\Paymentmethods::getBanks($payment_option_id);
+          $paymentOptionText = 'Please select your bank';
         }
 
+        if($payment_option_id == 1729){
+            $this->sdkLogin();
+            $terminals = \Paynl\Instore::getAllTerminals();            
+            $paymentOptions = $terminals->getList();     
+            $paymentOptionText = 'Please select a pin-terminal';
+        }
+  
         $this->context->smarty->assign([
             'action' => $this->context->link->getModuleLink($this->name, 'startPayment', array(), true),
-            'banks' => $banks,
+            'banks' => $paymentOptions,
             'payment_option_id' => $payment_option_id,
+            'payment_option_text' => $paymentOptionText,
             'description' => $description,
             'logoClass' => $logo ? '' : 'noLogo'
-        ]);
+        ]);  
 
         return $this->context->smarty->fetch('module:paynlpaymentmethods/views/templates/front/payment_form.tpl');
     }
@@ -729,7 +758,11 @@ class PaynlPaymentMethods extends PaymentModule
                     # Profile 613 is for testing purposes
                     if ($profileId == 613) {
                         $paymentMethodName = 'Sandbox';
-                    } else {
+                    }
+                    else if ($profileId == 1633) {
+                        $paymentMethodName = 'PAY. Instore';
+                    }                   
+                    else {
                         $settings = $this->getPaymentMethodSettings($profileId);
 
                         # Get the custom method name
@@ -871,6 +904,8 @@ class PaynlPaymentMethods extends PaymentModule
       $payTransactionData = $payTransaction->getData();
       $payTransactionId = !empty($payTransactionData['transaction']['transactionId']) ? $payTransactionData['transaction']['transactionId'] : '';
 
+      $this->addTransaction($payTransactionId, $cart->id, $cart->id_customer, $payment_option_id, $cart->getOrderTotal(true, Cart::BOTH, null, null, false));
+     
       if ($this->shouldValidateOnStart($payment_option_id)) {
 
         $this->payLog('startPayment', 'Pre-Creating order for pp : ' . $payment_option_id, $cartId, $payTransactionId);
@@ -898,7 +933,52 @@ class PaynlPaymentMethods extends PaymentModule
         $this->payLog('startPayment', 'Not pre-creating the order, waiting for payment.', $cartId, $payTransactionId);
       }
 
+      if ($payment_option_id == 1729) {
+            $this->payLog('startPayment', 'Starting Instore Payment', $cartId, $payTransactionId);
+            $terminalId = null;
+            if (isset($extra_data['bank'])) {
+                $terminalId = $extra_data['bank'];
+            }
+            try {
+                if (empty($terminalId)) {
+                    throw new \Exception('Please select a pin-terminal', 201);
+                }                
+                $instorePayment = \Paynl\Instore::payment(['transactionId' => $payTransactionId, 'terminalId' => $terminalId]);
+                $hash = $instorePayment->getHash();
+
+                $this->addTransactionHash($payTransactionId, $hash);
+
+                return $instorePayment->getRedirectUrl();
+            } catch (\Exception $e) {
+                $this->payLog('startPayment', 'Instore Payment error: ' . $e->getMessage(), $cartId, $payTransactionId);
+                return $this->context->link->getModuleLink($this->name, 'finish', array('terminalerror' => true, 'error' => $e->getMessage()), true);
+            }
+        }
+
         return $payTransaction->getRedirectUrl();
+    }
+
+    public static function addTransaction($transaction_id, $cart_id, $customer_id, $payment_option_id, $amount)
+    {
+        $db = Db::getInstance();
+    
+        $data = array(
+            'transaction_id' => $transaction_id,
+            'cart_id' => $cart_id,
+            'customer_id' => $customer_id,
+            'payment_option_id' => $payment_option_id,
+            'amount' => $amount 
+        );        
+
+        $db->insert('pay_transactions', $data);
+    }
+
+    public static function addTransactionHash($transaction_id, $hash)
+    {
+        $db = Db::getInstance();
+
+        $sql = "UPDATE `"._DB_PREFIX_."pay_transactions` SET `hash` = '" . $hash . "', `updated_at` = now() WHERE `"._DB_PREFIX_."pay_transactions`.`transaction_id` = '" . $transaction_id . "';";
+        $db->execute($sql);        
     }
 
     /**

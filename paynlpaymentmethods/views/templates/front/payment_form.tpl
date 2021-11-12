@@ -3,7 +3,7 @@
     {if !empty($banks)}
         <div class="form-group row PaynlBanks {$logoClass}">
             <select class="form-control form-control-select" id="bank" name="bank">
-                <option value="">{l s='Please select your bank' mod='paynlpaymentmethods'}</option>
+                <option value="">{$payment_option_text}</option>
                 {foreach from=$banks item=bank}
                     <option value="{$bank['id']}">{$bank['name']}</option>
                 {/foreach}
