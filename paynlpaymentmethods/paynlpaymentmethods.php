@@ -574,10 +574,10 @@ class PaynlPaymentMethods extends PaymentModule
           $paymentOptionText = 'Please select your bank';
         }
 
-        if($payment_option_id == 1729){
+        if ($payment_option_id == 1729) {
             $this->sdkLogin();
-            $terminals = \Paynl\Instore::getAllTerminals();            
-            $paymentOptions = $terminals->getList();     
+            $terminals = \Paynl\Instore::getAllTerminals();
+            $paymentOptions = $terminals->getList();
             $paymentOptionText = 'Please select a pin-terminal';
         }
   

@@ -51,8 +51,8 @@ class PaynlPaymentMethodsFinishModuleFrontController extends ModuleFrontControll
       $this->orderStatusId = Tools::getValue('orderStatusId');
       $this->paymentSessionId = Tools::getValue('paymentSessionId');
 
-      if(isset($_GET['terminalerror'])){
-        $this->terminalError($_GET['error']);  
+      if (Tools::getValue('terminalerror') == 1) {
+        $this->terminalError(Tools::getValue('error'));
       }
 
       /**
@@ -87,9 +87,9 @@ class PaynlPaymentMethodsFinishModuleFrontController extends ModuleFrontControll
             $slow = '';
 
             $dbTransaction = Db::getInstance()->getRow("SELECT * FROM `" . _DB_PREFIX_ . "pay_transactions` WHERE `transaction_id` = '" . $transactionId . "';");
-            if($dbTransaction['payment_option_id'] == 1729 && !empty($dbTransaction['hash'])){  
-              $pinStatus = $this->handlePin($dbTransaction['hash'], $transactionId);                
-            }  
+            if ($dbTransaction['payment_option_id'] == 1729 && !empty($dbTransaction['hash'])) {
+              $pinStatus = $this->handlePin($dbTransaction['hash'], $transactionId);
+            }
 
             if (!$transaction->isPaid()) {
                 $slow = '&slowvalidation=1';
@@ -134,20 +134,21 @@ class PaynlPaymentMethodsFinishModuleFrontController extends ModuleFrontControll
 
   }
 
-  public function terminalError($error){
-      $this->errors[] = $this->module->l($error, 'finish');
-      $this->redirectWithNotifications('index.php?controller=order&step=1');
+  public function terminalError($error)
+  {
+    $this->errors[] = $this->module->l($error, 'finish');
+    $this->redirectWithNotifications('index.php?controller=order&step=1');
   }
 
   private function handlePin($hash, $transactionId)
-  {      
-      $status = \Paynl\Instore::status(['hash' => $hash]);
-      Db::getInstance()->execute("UPDATE `"._DB_PREFIX_."pay_transactions` SET `status` = '" . $status->getTransactionState() . "', `updated_at` = now() WHERE `"._DB_PREFIX_."pay_transactions`.`transaction_id` = '" . $transactionId . "';");
-      if (in_array($status->getTransactionState(), ['cancelled', 'expired', 'error'])) {
-        $this->errors[] = $this->module->l('The payment could not be completed', 'finish');
-        $this->redirectWithNotifications('index.php?controller=order&step=1');
-      }
-      return $status;
+  {
+    $status = \Paynl\Instore::status(['hash' => $hash]);
+    Db::getInstance()->execute("UPDATE `" . _DB_PREFIX_ . "pay_transactions` SET `status` = '" . $status->getTransactionState() . "', `updated_at` = now() WHERE `" . _DB_PREFIX_ . "pay_transactions`.`transaction_id` = '" . $transactionId . "';");
+    if (in_array($status->getTransactionState(), ['cancelled', 'expired', 'error'])) {
+      $this->errors[] = $this->module->l('The payment could not be completed', 'finish');
+      $this->redirectWithNotifications('index.php?controller=order&step=1');
+    }
+    return $status;
   }
 
   public function initContent()
