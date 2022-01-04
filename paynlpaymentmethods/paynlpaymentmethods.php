@@ -1333,14 +1333,14 @@ class PaynlPaymentMethods extends PaymentModule
                         'type' => 'text',
                         'label' => $this->l('APIToken'),
                         'name' => 'PAYNL_API_TOKEN',
-                        'desc' => $this->l('You can find your API token ') . '<a href="https://admin.pay.nl/company/tokens">here</a>' . $this->l(', not registered at PAY? Sign up ') . '<a href="https://www.pay.nl/en?register">here</a>',
+                        'desc' => $this->l('You can find your API-token ') . '<a href="https://admin.pay.nl/company/tokens">' . $this->l('here') . '</a>' . $this->l(', not registered at PAY? Sign up ') . '<a href="https://www.pay.nl/en?register">' . $this->l('here') . '</a>',
                         'required' => true
                     ),
                     array(
                         'type' => 'text',
                         'label' => $this->l('ServiceId'),
                         'name' => 'PAYNL_SERVICE_ID',
-                        'desc' => $this->l('You can find the SL-code of your service ') . '<a href="https://admin.pay.nl/programs/programs">here</a>' . $this->l(', not registered at PAY? Sign up ') . '<a href="https://www.pay.nl/en?register">here</a>',
+                        'desc' => $this->l('You can find the SL-code of your service ') . '<a href="https://admin.pay.nl/programs/programs">' . $this->l('here') . '</a>' . $this->l(', not registered at PAY? Sign up ') . '<a href="https://www.pay.nl/en?register">' . $this->l('here') . '</a>',
                         'required' => true
                     ),
                     array(
