@@ -1331,7 +1331,7 @@ class PaynlPaymentMethods extends PaymentModule
                 'input' => array(
                     array(
                         'type' => 'text',
-                        'label' => $this->l('APIToken'),
+                        'label' => $this->l('API-token'),
                         'name' => 'PAYNL_API_TOKEN',
                         'desc' => $this->l('You can find your API-token ') . '<a href="https://admin.pay.nl/company/tokens">' . $this->l('here') . '</a>' . $this->l(', not registered at PAY? Sign up ') . '<a href="https://www.pay.nl/en?register">' . $this->l('here') . '</a>',
                         'required' => true
