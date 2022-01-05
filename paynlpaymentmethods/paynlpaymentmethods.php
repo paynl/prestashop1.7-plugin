@@ -1331,16 +1331,16 @@ class PaynlPaymentMethods extends PaymentModule
                 'input' => array(
                     array(
                         'type' => 'text',
-                        'label' => $this->l('APIToken'),
+                        'label' => $this->l('API-token'),
                         'name' => 'PAYNL_API_TOKEN',
-                        'desc' => $this->l('You can find your API token at the bottom of https://admin.pay.nl/my_merchant, not registered at PAY? Sign up at https://www.pay.nl/en?register'),
+                        'desc' => $this->l('You can find your API-token ') . '<a href="https://admin.pay.nl/company/tokens">' . $this->l('here') . '</a>' . $this->l(', not registered at PAY? Sign up ') . '<a href="https://www.pay.nl/en?register">' . $this->l('here') . '</a>',
                         'required' => true
                     ),
                     array(
                         'type' => 'text',
                         'label' => $this->l('ServiceId'),
                         'name' => 'PAYNL_SERVICE_ID',
-                        'desc' => $this->l('The SL-code of your service on https://admin.pay.nl/programs/programs, not registered at PAY? Sign up at https://www.pay.nl/en?register'),
+                        'desc' => $this->l('You can find the SL-code of your service ') . '<a href="https://admin.pay.nl/programs/programs">' . $this->l('here') . '</a>' . $this->l(', not registered at PAY? Sign up ') . '<a href="https://www.pay.nl/en?register">' . $this->l('here') . '</a>',
                         'required' => true
                     ),
                     array(
