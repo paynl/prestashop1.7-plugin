@@ -44,6 +44,7 @@ $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_b1b404a85c213977a
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_e8e81817f5892a440e72854b1b5eeb1f'] = 'Je kunt je SL-code ';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_adc1e83ea8057c3b182f292b223612da'] = 'Transactieomschrijving voorvoegsel';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_2ab45b27dbaf728ece860448598238ae'] = 'Een tekst die voor de transactieomschrijving wordt gezet';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_99a8c83c65d822871e36ab3c9f989110'] = 'Failover gateway';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_063515f416b7d05ff5d1c8103e3786d5'] = 'Laat dit leeg tenzij we bij PAY. u adviseren om dit in te vullen met een gateway die wij u geven';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_b989ff7da93d9c8344a4c4e765cab502'] = 'Validatievertraging';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_71268b7a2a120a7b132e7e3833567700'] = 'Wanneer de betaling is voltooid, wacht tot PAY. de betaling valideert voordat u doorverwezen wordt naar de succespagina';
@@ -63,6 +64,7 @@ $_MODULE['<{paynlpaymentmethods}prestashop>finish_caaf77b3c36dcc77d3ae08b76a7a34
 $_MODULE['<{paynlpaymentmethods}prestashop>startpayment_e2b7dec8fa4b498156dfee6e4c84b156'] = 'Deze betaalmethode is niet beschikbaar';
 $_MODULE['<{paynlpaymentmethods}prestashop>payment_form_ideal_eb45bd2725cb8ac50d0795432a918f86'] = 'Bank';
 $_MODULE['<{paynlpaymentmethods}prestashop>payment_form_ideal_3ee7960dc804545cf3cc91a1fbc155ca'] = 'Kies uw bank a.u.b.';
+$_MODULE['<{paynlpaymentmethods}prestashop>payment_form_3ee7960dc804545cf3cc91a1fbc155ca'] = 'Kies uw bank a.u.b.';
 $_MODULE['<{paynlpaymentmethods}prestashop>payment_form_3ee7960dc804545cf3cc91a1fbc155ca'] = 'Selecteer uw bank';
 $_MODULE['<{paynlpaymentmethods}prestashop>admin_paymentmethods_0da8d9a75492046bea7f314521e07cae'] = 'Betaalmethoden';
 $_MODULE['<{paynlpaymentmethods}prestashop>admin_paymentmethods_49ee3087348e8d44e1feda1917443987'] = 'Naam';
