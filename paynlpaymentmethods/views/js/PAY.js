@@ -29,7 +29,7 @@ jQuery(document).ready(function () {
         var lang_refunding = jQuery('#pay-lang-refunding').val();
         var lang_sucrefund = jQuery("#pay-lang-succesfullyrefunded").val();
         var lang_refundbutton = jQuery("#pay-lang-refundbutton").val();
-        var lang_couldnotprocess = jQuery("#pay-lang-couldnotprocesscapture").val();
+        var lang_couldnotprocess = jQuery("#pay-lang-couldnotprocess").val();
 
         presentationAmount = presentationAmount.replace('.', ',');
 
