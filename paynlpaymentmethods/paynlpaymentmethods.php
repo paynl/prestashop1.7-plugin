@@ -167,9 +167,13 @@ class PaynlPaymentMethods extends PaymentModule
             $methodName = empty($settings->name) ? $profileId : $settings->name;
         }
 
-        $showRefundButton = $transaction->isPaid() || $transaction->isPartiallyRefunded();
+        $showCaptureButton = $transaction->isAuthorized();
+        $showCaptureRemainingButton = $arrTransactionDetails['paymentDetails']['state'] == 97;
+        $showRefundButton = $transaction->isPaid() || $transaction->isPartiallyRefunded() && !$transaction->isAuthorized();
     } catch (Exception $exception) {
-      $showRefundButton = false;
+        $showRefundButton = false;
+        $showCaptureButton = false;
+        $showCaptureRemainingButton = false;
     }
 
     $amountFormatted = number_format($order->total_paid, 2, ',','.');
@@ -187,7 +191,10 @@ class PaynlPaymentMethods extends PaymentModule
       'status' => $status,
       'method' => $methodName,
       'ajaxURL' => $this->context->link->getModuleLink($this->name, 'ajax', array(), true),
+      'captureURL' => $this->context->link->getModuleLink($this->name, 'capture', array(), true),
       'showRefundButton' => $showRefundButton,
+      'showCaptureButton' => $showCaptureButton,
+      'showCaptureRemainingButton' => $showCaptureRemainingButton,
     ));
 
     return $this->display(__FILE__, 'payorder.tpl');
@@ -197,23 +204,35 @@ class PaynlPaymentMethods extends PaymentModule
   {
     $lang['title'] = $this->l('PAY.');
     $lang['are_you_sure'] = $this->l('Are you sure want to refund this amount');
+    $lang['are_you_sure_capture'] = $this->l('Are you sure you want to capture this transaction for this amount');
+    $lang['are_you_sure_capture_remaining'] = $this->l('Are you sure you want to capture the remaining amount of this transaction?');
     $lang['refund_button'] = $this->l('REFUND');
+    $lang['capture_button'] = $this->l('CAPTURE');
+    $lang['capture_remaining_button'] = $this->l('CAPTURE REMAINING');
     $lang['my_text'] = $this->l('Are you sure?');
     $lang['refund_not_possible'] = $this->l('Refund is not possible');
     $lang['amount_to_refund'] = $this->l('Amount to refund');
+    $lang['amount_to_capture'] = $this->l('Amount to capture');
     $lang['refunding'] = $this->l('Processing');
+    $lang['capturing'] = $this->l('Processing');
     $lang['currency'] = $this->l('Currency');
     $lang['amount'] = $this->l('Amount');
     $lang['invalidamount'] = $this->l('Invalid amount');
     $lang['succesfully_refunded'] = $this->l('Succesfully refunded');
+    $lang['succesfully_captured'] = $this->l('Succesfully captured');
+    $lang['succesfully_captured_remaining'] = $this->l('Succesfully captured the remaining amount.');
     $lang['paymentmethod'] = $this->l('Paymentmethod');
     $lang['could_not_process_refund'] = $this->l('Could not process refund. Refund might be too fast or amount is invalid');
+    $lang['could_not_process_capture'] = $this->l('Could not process this capture.');
     $lang['info_refund_title'] = $this->l('Refund');
     $lang['info_refund_text'] = $this->l('The orderstatus will only change to `Refunded` when the full amount is refunded. Stock wont be updated.');
     $lang['info_log_title'] = $this->l('Logs');
     $lang['info_log_text'] = $this->l('For log information see `Advanced settings` and then `Logs`. Then filter on `PAY.`.');
+    $lang['info_capture_title'] = $this->l('Capture');
+    $lang['info_capture_text'] = $this->l('The order will be captured via PAY. and the customer will receive the invoice of the order from the payment method they ordered with.');
+    $lang['info_capture_remaining_text'] = $this->l('This order has already been partially captured, therefore you can only capture the remaining amount. The order will be captured via PAY. and the customer will receive the invoice of the order from the payment method they ordered with.');
 
-    return $lang;
+      return $lang;
   }
 
     /**
@@ -235,6 +254,20 @@ class PaynlPaymentMethods extends PaymentModule
 
     return array('result' => $result, 'data' => $refundResult);
   }
+
+    public function doCapture($transactionId, $amount = null)
+    {
+        try {
+            $this->sdkLogin();
+            $result = true;
+            $captureResult = \Paynl\Transaction::capture($transactionId, $amount);
+        } catch (Exception $objException) {
+            $captureResult = $objException->getMessage();
+            $result = false;
+        }
+
+        return array('result' => $result, 'data' => $captureResult);
+    }
 
   /**
    * Update order status
@@ -461,14 +494,14 @@ class PaynlPaymentMethods extends PaymentModule
         // check customer type
         $invoiceAddressId = $cart->id_address_invoice;
         $objInvoiceAddress = new Address($invoiceAddressId);
-        
-        if (isset($objInvoiceAddress->company) && isset($paymentMethod->customer_type)) {        
+
+        if (isset($objInvoiceAddress->company) && isset($paymentMethod->customer_type)) {
             if(!empty(trim($objInvoiceAddress->company)) && $paymentMethod->customer_type == 'private'){
                 return false;
-            }    
+            }
             if(empty(trim($objInvoiceAddress->company)) && $paymentMethod->customer_type == 'business'){
                 return false;
-            }                      
+            }
         }
 
         return true;
@@ -576,11 +609,11 @@ class PaynlPaymentMethods extends PaymentModule
         } else {
             $taxCalculationMethod = Group::getPriceDisplayMethod(Group::getCurrent()->id);
         }
-        
+
         return $taxCalculationMethod == PS_TAX_EXC ?
             $summary['total_price_without_tax'] :
             $summary['total_price'];
-        
+
     }
 
     private function sdkLogin()
@@ -1578,7 +1611,7 @@ class PaynlPaymentMethods extends PaymentModule
     {
 
         $this->context->controller->addJs($this->_path . 'views/js/jquery-ui/jquery-ui.js');
-       
+
         $this->context->controller->addCss($this->_path . 'css/admin.css');
 
         $this->smarty->assign(array(
