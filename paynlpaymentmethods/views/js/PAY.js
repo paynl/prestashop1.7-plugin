@@ -27,9 +27,10 @@ jQuery(document).ready(function () {
         var currency = jQuery('#pay-currency').val();
         var lang_areyoursure = jQuery('#pay-lang-areyoursure').val();
         var lang_refunding = jQuery('#pay-lang-refunding').val();
-        var lang_sucrefund = jQuery("#pay-lang-succesfullyrefunded").val();
-        var lang_refundbutton = jQuery("#pay-lang-refundbutton").val();
+        var lang_succes = jQuery("#pay-lang-succesfullyrefunded").val() + ': ' + currency + ' ' + presentationAmount;
+        var lang_button = jQuery("#pay-lang-refundbutton").val();
         var lang_couldnotprocess = jQuery("#pay-lang-couldnotprocess").val();
+        var errorMessage = 'Refund failed';
 
         presentationAmount = presentationAmount.replace('.', ',');
 
@@ -41,32 +42,13 @@ jQuery(document).ready(function () {
             jQuery.extend(data, {prestaorderid: PrestaOrderId});
 
 
-            var refundButton = jQuery(this);
+            var actionButton = jQuery(this);
             var payOption = jQuery(this).parent();
 
-            jQuery(refundButton).text(lang_refunding);
+            jQuery(actionButton).text(lang_refunding);
 
-            setTimeout(function () {
-                jQuery.ajax({
-                    url: ajaxurl,
-                    type: 'POST',
-                    data: data,
-                    dataType: 'json',
-                    success: function (data) {
-                        if (data.success) {
-                            jQuery('#pay-status').text(' - ');
-                            jQuery(payOption).text(lang_sucrefund + ': ' + currency + ' ' + presentationAmount);
-                        } else {
-                            jQuery(refundButton).text(lang_refundbutton);
-                            alert(lang_couldnotprocess);
-                        }
-                    },
-                    error: function () {
-                        jQuery(refundButton).text(lang_refundbutton);
-                        alert('Refund failed');
-                    }
-                });
-            }, 750);
+            exchangeCall(ajaxurl, data, payOption, lang_succes, actionButton, lang_button, lang_couldnotprocess, errorMessage);
+
         }
     });
 
@@ -92,46 +74,27 @@ jQuery(document).ready(function () {
         var currency = jQuery('#pay-currency').val();
         var lang_areyoursurecapture = jQuery('#pay-lang-areyoursurecapture').val();
         var lang_capturing = jQuery('#pay-lang-capturing').val();
-        var lang_succapture = jQuery("#pay-lang-succesfullycaptured").val();
-        var lang_capturebutton = jQuery("#pay-lang-capture-button").val();
+        var lang_succes = jQuery("#pay-lang-succesfullycaptured").val() + ': ' + currency + ' ' + presentationAmount;
+        var lang_button = jQuery("#pay-lang-capture-button").val();
         var lang_couldnotprocess = jQuery("#pay-lang-couldnotprocesscapture").val();
+        var errorMessage = 'Capture failed';
 
         presentationAmount = presentationAmount.replace('.', ',');
 
 
         if (confirm(lang_areyoursurecapture + ': ' + currency + ' ' + presentationAmount + ' ?')) {
 
-            var captureData = {};
-            jQuery.extend(captureData, {amount: amount});
-            jQuery.extend(captureData, {orderid: transactionid});
-            jQuery.extend(captureData, {prestaorderid: PrestaOrderId});
+            var data = {};
+            jQuery.extend(data, {amount: amount});
+            jQuery.extend(data, {orderid: transactionid});
+            jQuery.extend(data, {prestaorderid: PrestaOrderId});
 
-            var captureButton = jQuery(this);
+            var actionButton = jQuery(this);
             var payOption = jQuery(this).parent();
 
-            jQuery(captureButton).text(lang_capturing);
+            jQuery(actionButton).text(lang_capturing);
 
-            setTimeout(function () {
-                jQuery.ajax({
-                    url: ajaxurl,
-                    type: 'POST',
-                    data: captureData,
-                    dataType: 'json',
-                    success: function (data) {
-                        if (data.success) {
-                            jQuery('#pay-status').text(' - ');
-                            jQuery(payOption).text(lang_succapture + ': ' + currency + ' ' + presentationAmount);
-                        } else {
-                            jQuery(captureButton).text(lang_capturebutton);
-                            alert(lang_couldnotprocess);
-                        }
-                    },
-                    error: function () {
-                        jQuery(captureButton).text(lang_capturebutton);
-                        alert('Capture failed');
-                    }
-                });
-            }, 750);
+            exchangeCall(ajaxurl, data, payOption, lang_succes, actionButton, lang_button, lang_couldnotprocess, errorMessage);
         }
     });
 
@@ -143,43 +106,48 @@ jQuery(document).ready(function () {
         var ajaxurl = jQuery('#pay-captureurl').val();
         var lang_areyoursurecapture = jQuery('#pay-lang-areyoursurecaptureremaining').val();
         var lang_capturing = jQuery('#pay-lang-capturing').val();
-        var lang_succapture = jQuery("#pay-lang-succesfullycapturedremaining").val();
-        var lang_capturebutton = jQuery("#pay-lang-capture-remaining-button").val();
+        var lang_succes = jQuery("#pay-lang-succesfullycapturedremaining").val();
+        var lang_button = jQuery("#pay-lang-capture-remaining-button").val();
         var lang_couldnotprocess = jQuery("#pay-lang-couldnotprocesscapture").val();
+        var errorMessage = 'Capture failed';
 
         if (confirm(lang_areyoursurecapture)) {
 
-            var captureData = {};
-            jQuery.extend(captureData, {amount: amount});
-            jQuery.extend(captureData, {orderid: transactionid});
-            jQuery.extend(captureData, {prestaorderid: PrestaOrderId});
+            var data = {};
+            jQuery.extend(data, {amount: amount});
+            jQuery.extend(data, {orderid: transactionid});
+            jQuery.extend(data, {prestaorderid: PrestaOrderId});
 
-            var captureButton = jQuery(this);
+            var actionButton = jQuery(this);
             var payOption = jQuery(this).parent();
 
-            jQuery(captureButton).text(lang_capturing);
+            jQuery(actionButton).text(lang_capturing);
 
-            setTimeout(function () {
-                jQuery.ajax({
-                    url: ajaxurl,
-                    type: 'POST',
-                    data: captureData,
-                    dataType: 'json',
-                    success: function (data) {
-                        if (data.success) {
-                            jQuery('#pay-status').text(' - ');
-                            jQuery(payOption).text(lang_succapture);
-                        } else {
-                            jQuery(captureButton).text(lang_capturebutton);
-                            alert(lang_couldnotprocess);
-                        }
-                    },
-                    error: function () {
-                        jQuery(captureButton).text(lang_capturebutton);
-                        alert('Capture failed');
-                    }
-                });
-            }, 750);
+            exchangeCall(ajaxurl, data, payOption, lang_succes, actionButton, lang_button, lang_couldnotprocess, errorMessage);
         }
     });
+
+    function exchangeCall(ajaxurl, data, payOption, lang_succes, actionButton, lang_button, lang_couldnotprocess, errorMessage){
+        setTimeout(function () {
+            jQuery.ajax({
+                url: ajaxurl,
+                type: 'POST',
+                data: data,
+                dataType: 'json',
+                success: function (data) {
+                    if (data.success) {
+                        jQuery('#pay-status').text(' - ');
+                        jQuery(payOption).text(lang_succes);
+                    } else {
+                        jQuery(actionButton).text(lang_button);
+                        alert(lang_couldnotprocess);
+                    }
+                },
+                error: function () {
+                    jQuery(actionButton).text(lang_button);
+                    alert(errorMessage);
+                }
+            });
+        }, 750);
+    }
 });
