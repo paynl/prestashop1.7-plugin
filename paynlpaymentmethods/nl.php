@@ -44,6 +44,7 @@ $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_b1b404a85c213977a
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_e8e81817f5892a440e72854b1b5eeb1f'] = 'Je kunt je SL-code ';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_adc1e83ea8057c3b182f292b223612da'] = 'Transactieomschrijving voorvoegsel';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_2ab45b27dbaf728ece860448598238ae'] = 'Een tekst die voor de transactieomschrijving wordt gezet';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_99a8c83c65d822871e36ab3c9f989110'] = 'Failover gateway';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_063515f416b7d05ff5d1c8103e3786d5'] = 'Laat dit leeg tenzij we bij PAY. u adviseren om dit in te vullen met een gateway die wij u geven';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_b989ff7da93d9c8344a4c4e765cab502'] = 'Validatievertraging';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_71268b7a2a120a7b132e7e3833567700'] = 'Wanneer de betaling is voltooid, wacht tot PAY. de betaling valideert voordat u doorverwezen wordt naar de succespagina';
