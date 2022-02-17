@@ -351,7 +351,7 @@ class PaynlPaymentMethods extends PaymentModule
          * @var $cart Cart
          */
         $availablePaymentMethods = $this->getPaymentMethodsForCart($cart);
-        if(!isset($availablePaymentMethods[0]->brand_id)){
+        if (!isset($availablePaymentMethods[0]->brand_id)) {
             // Set brand_id if missing.
             $this->getPaymentMethodsCombined();
             $availablePaymentMethods = $this->getPaymentMethodsForCart($cart);
