@@ -641,6 +641,25 @@ class PaynlPaymentMethods extends PaymentModule
             $orderId = Order::getOrderByCartId($cartId);
         }
 
+        /**
+         * @var $cart CartCore
+         */
+        $cart = new Cart((int)$cartId);
+        $currency_order = new Currency($cart->id_currency);
+
+        $amountPaid = null;    
+        
+        $transactionPaid = [
+            $transaction->getCurrencyAmount(),
+            $transaction->getPaidCurrencyAmount(),
+            $transaction->getPaidAmount(),
+        ];
+
+        $cartTotalPrice = (version_compare(_PS_VERSION_, '1.7.7.0', '>=')) ? $cart->getCartTotalPrice() : $this->getCartTotalPrice($cart);
+        if(in_array($cartTotalPrice, $transactionPaid)) {
+            $amountPaid = $cartTotalPrice;
+        }
+
         if ($orderId)
         {
           $order = new Order($orderId);
@@ -682,11 +701,7 @@ class PaynlPaymentMethods extends PaymentModule
 
             $orderPayment->payment_method = $arrPayData['paymentDetails']['paymentProfileName'];
 
-            $orderPayment->amount = $transaction->getPaidCurrencyAmount();
-
-            if($transaction->isAuthorized()){
-                $orderPayment->amount = $transaction->getCurrencyAmount();
-            }
+            $orderPayment->amount = $amountPaid;
 
             $orderPayment->transaction_id = $transactionId;
             $orderPayment->id_currency = $order->id_currency;
@@ -707,26 +722,10 @@ class PaynlPaymentMethods extends PaymentModule
             $iState = !empty($arrPayData['paymentDetails']['state']) ? $arrPayData['paymentDetails']['state'] : null;
             if ($transaction->isPaid() || $transaction->isAuthorized() || $transaction->isBeingVerified())
             {
-                /**
-                 * @var $cart CartCore
-                 */
-                $cart = new Cart((int)$cartId);
-                $currency_order = new Currency($cart->id_currency);
-
-                $amountPaid = null;
-                $cartTotalPrice = (version_compare(_PS_VERSION_, '1.7.7.0', '>=')) ? $cart->getCartTotalPrice() : $this->getCartTotalPrice($cart);
-                if(in_array($cartTotalPrice, array($transaction->getPaidAmount(), $transaction->getPaidCurrencyAmount()))) {
-                    $amountPaid = $cartTotalPrice;
-                }
-
+               
                 $this->payLog('processPayment (paid)', 'orderStateName:' . $orderStateName . '. iOrderState: ' . $iOrderState . '. iState:' . $iState. '. CurrencyOrder: ' . $currency_order->iso_code
                                 . '. CartOrderTotal: '. $cart->getOrderTotal() . '. CartTotalPrice: '. $cartTotalPrice . '. AmountPaid : '. $amountPaid
                   , $cartId, $transactionId);
-
-                $amountPaid = empty($amountPaid) ? $transaction->getPaidCurrencyAmount() : $amountPaid;
-                if($transaction->isAuthorized()){
-                    $amountPaid = $transaction->getCurrencyAmount();
-                }
 
                 try {
                     $profileId = $transaction->getPaymentProfileId();
