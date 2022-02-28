@@ -49,6 +49,9 @@ class PaynlPaymentMethods extends PaymentModule
     private $paymentMethods;
     private $payLogEnabled;
 
+    const METHOD_INSTORE = 1729;
+    const METHOD_INSTORE_PROFILE_ID = 1633;
+
     public function __construct()
     {
         $this->name = 'paynlpaymentmethods';
@@ -574,7 +577,7 @@ class PaynlPaymentMethods extends PaymentModule
           $paymentOptionText = 'Please select your bank';
         }
 
-        if ($payment_option_id == 1729) {
+        if ($payment_option_id == self::METHOD_INSTORE) {
             $this->sdkLogin();
             $terminals = \Paynl\Instore::getAllTerminals();
             $paymentOptions = $terminals->getList();
@@ -759,7 +762,7 @@ class PaynlPaymentMethods extends PaymentModule
                     if ($profileId == 613) {
                         $paymentMethodName = 'Sandbox';
                     }
-                    else if ($profileId == 1633) {
+                    else if ($profileId == METHOD_INSTORE_PROFILE_ID) {
                         $paymentMethodName = 'PAY. Instore';
                     }                   
                     else {
@@ -904,7 +907,7 @@ class PaynlPaymentMethods extends PaymentModule
       $payTransactionData = $payTransaction->getData();
       $payTransactionId = !empty($payTransactionData['transaction']['transactionId']) ? $payTransactionData['transaction']['transactionId'] : '';
 
-      $this->addTransaction($payTransactionId, $cart->id, $cart->id_customer, $payment_option_id, $cart->getOrderTotal(true, Cart::BOTH, null, null, false));
+      $this->addTransaction($payTransactionId, $cart->id, $cart->id_customer, $payment_option_id, $cart->getOrderTotal(true, Cart::BOTH));
      
       if ($this->shouldValidateOnStart($payment_option_id)) {
 
@@ -933,7 +936,7 @@ class PaynlPaymentMethods extends PaymentModule
         $this->payLog('startPayment', 'Not pre-creating the order, waiting for payment.', $cartId, $payTransactionId);
       }
 
-      if ($payment_option_id == 1729) {
+      if ($payment_option_id == self::METHOD_INSTORE) {
             $this->payLog('startPayment', 'Starting Instore Payment', $cartId, $payTransactionId);
             $terminalId = null;
             if (isset($extra_data['bank'])) {
@@ -977,8 +980,8 @@ class PaynlPaymentMethods extends PaymentModule
     {
         $db = Db::getInstance();
 
-        $sql = "UPDATE `"._DB_PREFIX_."pay_transactions` SET `hash` = '" . $hash . "', `updated_at` = now() WHERE `"._DB_PREFIX_."pay_transactions`.`transaction_id` = '" . $transaction_id . "';";
-        $db->execute($sql);        
+        $sql = "UPDATE `" . _DB_PREFIX_ . "pay_transactions` SET `hash` = '" . $hash . "', `updated_at` = now() WHERE `" . _DB_PREFIX_ . "pay_transactions`.`transaction_id` = '" . $transaction_id . "';";
+        $db->execute($sql);
     }
 
     /**

@@ -31,6 +31,7 @@ class PaynlPaymentMethodsFinishModuleFrontController extends ModuleFrontControll
 {
     const METHOD_OVERBOEKING = 136;
     const METHOD_SOFORT = 556;
+    const METHOD_INSTORE = 1729;
 
     private $order = null;
     private $payOrderId = null;
@@ -87,7 +88,7 @@ class PaynlPaymentMethodsFinishModuleFrontController extends ModuleFrontControll
             $slow = '';
 
             $dbTransaction = Db::getInstance()->getRow("SELECT * FROM `" . _DB_PREFIX_ . "pay_transactions` WHERE `transaction_id` = '" . $transactionId . "';");
-            if ($dbTransaction['payment_option_id'] == 1729 && !empty($dbTransaction['hash'])) {
+            if ($dbTransaction['payment_option_id'] == self::METHOD_INSTORE && !empty($dbTransaction['hash'])) {
               $pinStatus = $this->handlePin($dbTransaction['hash'], $transactionId);
             }
 
@@ -134,21 +135,37 @@ class PaynlPaymentMethodsFinishModuleFrontController extends ModuleFrontControll
 
   }
 
+  /**
+   * Show terminal errors
+   *
+   * @param $error
+   */
   public function terminalError($error)
   {
     $this->errors[] = $this->module->l($error, 'finish');
     $this->redirectWithNotifications('index.php?controller=order&step=1');
   }
 
+  /**
+   * Check the status of the pin
+   *
+   * @param $hash
+   * @param $transactionId
+   */
   private function handlePin($hash, $transactionId)
   {
-    $status = \Paynl\Instore::status(['hash' => $hash]);
-    Db::getInstance()->execute("UPDATE `" . _DB_PREFIX_ . "pay_transactions` SET `status` = '" . $status->getTransactionState() . "', `updated_at` = now() WHERE `" . _DB_PREFIX_ . "pay_transactions`.`transaction_id` = '" . $transactionId . "';");
-    if (in_array($status->getTransactionState(), ['cancelled', 'expired', 'error'])) {
-      $this->errors[] = $this->module->l('The payment could not be completed', 'finish');
+    try {
+      $status = \Paynl\Instore::status(['hash' => $hash]);
+      Db::getInstance()->execute("UPDATE `" . _DB_PREFIX_ . "pay_transactions` SET `status` = '" . $status->getTransactionState() . "', `updated_at` = now() WHERE `" . _DB_PREFIX_ . "pay_transactions`.`transaction_id` = '" . $transactionId . "';");
+      if (in_array($status->getTransactionState(), ['cancelled', 'expired', 'error'])) {
+        $this->errors[] = $this->module->l('The payment could not be completed', 'finish');
+        $this->redirectWithNotifications('index.php?controller=order&step=1');
+      }
+      return $status;
+    } catch (Exception $objException) {
+      $this->errors[] = $this->module->l('The payment could not be completed due to an error. Error: ' . $objException->getMessage(), 'finish');
       $this->redirectWithNotifications('index.php?controller=order&step=1');
     }
-    return $status;
   }
 
   public function initContent()
