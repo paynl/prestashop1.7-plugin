@@ -33,6 +33,7 @@ if (!class_exists('\Paynl\Paymentmethods')) {
 
 use Paynl\Result\Transaction\Refund;
 use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
+use PaynlPaymentMethods\PrestaShop\Helper\PayHelper;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -77,6 +78,7 @@ class PaynlPaymentMethods extends PaymentModule
         $this->displayName = $this->l('PAY.');
         $this->description = $this->l('PAY. payment methods for PrestaShop');
 
+        PayHelper::logText('voorbeeld aanroep');
         if (!count(Currency::checkPaymentCurrencies($this->id))) {
             $this->warning = $this->l('No currency has been set for this module.');
         }

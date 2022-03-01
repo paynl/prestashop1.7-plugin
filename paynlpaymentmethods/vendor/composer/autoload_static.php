@@ -10,6 +10,7 @@ class ComposerStaticInita3a46c0e362da920ffeb331fe601b182
         'P' => 
         array (
             'Paynl\\' => 6,
+            'PaynlPaymentMethods\\PrestaShop\\' => 31,
         ),
         'C' => 
         array (
@@ -21,6 +22,10 @@ class ComposerStaticInita3a46c0e362da920ffeb331fe601b182
         'Paynl\\' => 
         array (
             0 => __DIR__ . '/..' . '/paynl/sdk/src',
+        ),
+        'PaynlPaymentMethods\\PrestaShop\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/src',
         ),
         'Curl\\' => 
         array (
