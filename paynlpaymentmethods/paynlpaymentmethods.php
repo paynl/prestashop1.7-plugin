@@ -908,8 +908,10 @@ class PaynlPaymentMethods extends PaymentModule
       $payTransactionData = $payTransaction->getData();
       $payTransactionId = !empty($payTransactionData['transaction']['transactionId']) ? $payTransactionData['transaction']['transactionId'] : '';
 
-      PayHelper::addTransaction($payTransactionId, $cart->id, $cart->id_customer, $payment_option_id, $cart->getOrderTotal(true, Cart::BOTH));
-     
+      if ($payment_option_id == self::METHOD_INSTORE) {
+        PayHelper::addTransaction($payTransactionId, $cart->id, $cart->id_customer, $payment_option_id, $cart->getOrderTotal(true, Cart::BOTH));
+      }
+      
       if ($this->shouldValidateOnStart($payment_option_id)) {
 
         $this->payLog('startPayment', 'Pre-Creating order for pp : ' . $payment_option_id, $cartId, $payTransactionId);
