@@ -78,7 +78,6 @@ class PaynlPaymentMethods extends PaymentModule
         $this->displayName = $this->l('PAY.');
         $this->description = $this->l('PAY. payment methods for PrestaShop');
 
-        PayHelper::logText('voorbeeld aanroep');
         if (!count(Currency::checkPaymentCurrencies($this->id))) {
             $this->warning = $this->l('No currency has been set for this module.');
         }
@@ -909,7 +908,7 @@ class PaynlPaymentMethods extends PaymentModule
       $payTransactionData = $payTransaction->getData();
       $payTransactionId = !empty($payTransactionData['transaction']['transactionId']) ? $payTransactionData['transaction']['transactionId'] : '';
 
-      $this->addTransaction($payTransactionId, $cart->id, $cart->id_customer, $payment_option_id, $cart->getOrderTotal(true, Cart::BOTH));
+      PayHelper::addTransaction($payTransactionId, $cart->id, $cart->id_customer, $payment_option_id, $cart->getOrderTotal(true, Cart::BOTH));
      
       if ($this->shouldValidateOnStart($payment_option_id)) {
 
@@ -951,7 +950,7 @@ class PaynlPaymentMethods extends PaymentModule
                 $instorePayment = \Paynl\Instore::payment(['transactionId' => $payTransactionId, 'terminalId' => $terminalId]);
                 $hash = $instorePayment->getHash();
 
-                $this->addTransactionHash($payTransactionId, $hash);
+                PayHelper::addTransactionHash($payTransactionId, $hash);
 
                 return $instorePayment->getRedirectUrl();
             } catch (\Exception $e) {
@@ -961,29 +960,6 @@ class PaynlPaymentMethods extends PaymentModule
         }
 
         return $payTransaction->getRedirectUrl();
-    }
-
-    public static function addTransaction($transaction_id, $cart_id, $customer_id, $payment_option_id, $amount)
-    {
-        $db = Db::getInstance();
-    
-        $data = array(
-            'transaction_id' => $transaction_id,
-            'cart_id' => $cart_id,
-            'customer_id' => $customer_id,
-            'payment_option_id' => $payment_option_id,
-            'amount' => $amount 
-        );        
-
-        $db->insert('pay_transactions', $data);
-    }
-
-    public static function addTransactionHash($transaction_id, $hash)
-    {
-        $db = Db::getInstance();
-
-        $sql = "UPDATE `" . _DB_PREFIX_ . "pay_transactions` SET `hash` = '" . $hash . "', `updated_at` = now() WHERE `" . _DB_PREFIX_ . "pay_transactions`.`transaction_id` = '" . $transaction_id . "';";
-        $db->execute($sql);
     }
 
     /**
