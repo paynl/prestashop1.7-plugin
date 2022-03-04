@@ -187,11 +187,13 @@ class PaynlPaymentMethods extends PaymentModule
         # Get the custom method name
         if ($profileId == 613) {
             $methodName = 'Sandbox';
+        } else if ($profileId == self::METHOD_INSTORE_PROFILE_ID) {
+            $settings = $this->getPaymentMethodSettings(self::METHOD_INSTORE);
+            $methodName = empty($settings->name) ? $profileId : $settings->name;
         } else {
             $methodName = empty($settings->name) ? $profileId : $settings->name;
         }
-
-        $showRefundButton = $transaction->isPaid() || $transaction->isPartiallyRefunded();
+        $showRefundButton = ($transaction->isPaid() || $transaction->isPartiallyRefunded()) && ($profileId != self::METHOD_INSTORE_PROFILE_ID  && $profileId != self::METHOD_INSTORE);
     } catch (Exception $exception) {
       $showRefundButton = false;
     }
@@ -571,6 +573,7 @@ class PaynlPaymentMethods extends PaymentModule
     private function getPayForm($payment_option_id, $description = null, $logo = true)
     {
         $paymentOptions = array();
+        $paymentOptionText = null;
 
         if ($payment_option_id == 10) {
           $this->sdkLogin();
@@ -763,9 +766,10 @@ class PaynlPaymentMethods extends PaymentModule
                     if ($profileId == 613) {
                         $paymentMethodName = 'Sandbox';
                     }
-                    else if ($profileId == METHOD_INSTORE_PROFILE_ID) {
-                        $paymentMethodName = 'PAY. Instore';
-                    }                   
+                    else if ($profileId == self::METHOD_INSTORE_PROFILE_ID) {
+                        $settings = $this->getPaymentMethodSettings(self::METHOD_INSTORE);
+                        $paymentMethodName = empty($settings->name) ? $profileId : $settings->name;
+                    }                    
                     else {
                         $settings = $this->getPaymentMethodSettings($profileId);
 
