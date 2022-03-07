@@ -51,7 +51,7 @@ class PaynlPaymentMethodsExchangeModuleFrontController extends ModuleFrontContro
             die('TRUE| Ignoring pending');
         }
 
-        if($_REQUEST['action'] == 'partial_payment'){
+        if ($_REQUEST['action'] == 'partial_payment') {
             die('TRUE| Partial payment accepted');
         }
 
