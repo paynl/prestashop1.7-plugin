@@ -33,7 +33,8 @@ if (!class_exists('\Paynl\Paymentmethods')) {
 
 use Paynl\Result\Transaction\Refund;
 use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
-use PaynlPaymentMethods\PrestaShop\Helper\PayHelper;
+use PaynlPaymentMethods\PrestaShop\Transaction;
+use PaynlPaymentMethods\PrestaShop\PaymentMethod;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -48,10 +49,7 @@ class PaynlPaymentMethods extends PaymentModule
     private $statusRefund;
     private $statusCanceled;
     private $paymentMethods;
-    private $payLogEnabled;
-
-    const METHOD_INSTORE = 1729;
-    const METHOD_INSTORE_PROFILE_ID = 1633;
+    private $payLogEnabled;    
 
     public function __construct()
     {
@@ -187,13 +185,13 @@ class PaynlPaymentMethods extends PaymentModule
         # Get the custom method name
         if ($profileId == 613) {
             $methodName = 'Sandbox';
-        } else if ($profileId == self::METHOD_INSTORE_PROFILE_ID) {
-            $settings = $this->getPaymentMethodSettings(self::METHOD_INSTORE);
+        } else if ($profileId == PaymentMethod::METHOD_INSTORE_PROFILE_ID) {
+            $settings = $this->getPaymentMethodSettings(PaymentMethod::METHOD_INSTORE);
             $methodName = empty($settings->name) ? $profileId : $settings->name;
         } else {
             $methodName = empty($settings->name) ? $profileId : $settings->name;
         }
-        $showRefundButton = ($transaction->isPaid() || $transaction->isPartiallyRefunded()) && ($profileId != self::METHOD_INSTORE_PROFILE_ID  && $profileId != self::METHOD_INSTORE);
+        $showRefundButton = ($transaction->isPaid() || $transaction->isPartiallyRefunded()) && ($profileId != PaymentMethod::METHOD_INSTORE_PROFILE_ID  && $profileId != PaymentMethod::METHOD_INSTORE);
     } catch (Exception $exception) {
       $showRefundButton = false;
     }
@@ -581,7 +579,7 @@ class PaynlPaymentMethods extends PaymentModule
           $paymentOptionText = 'Please select your bank';
         }
 
-        if ($payment_option_id == self::METHOD_INSTORE) {
+        if ($payment_option_id == PaymentMethod::METHOD_INSTORE) {
             $this->sdkLogin();
             $terminals = \Paynl\Instore::getAllTerminals();
             $paymentOptions = $terminals->getList();
@@ -766,8 +764,8 @@ class PaynlPaymentMethods extends PaymentModule
                     if ($profileId == 613) {
                         $paymentMethodName = 'Sandbox';
                     }
-                    else if ($profileId == self::METHOD_INSTORE_PROFILE_ID) {
-                        $settings = $this->getPaymentMethodSettings(self::METHOD_INSTORE);
+                    else if ($profileId == PaymentMethod::METHOD_INSTORE_PROFILE_ID) {
+                        $settings = $this->getPaymentMethodSettings(PaymentMethod::METHOD_INSTORE);
                         $paymentMethodName = empty($settings->name) ? $profileId : $settings->name;
                     }                    
                     else {
@@ -912,8 +910,8 @@ class PaynlPaymentMethods extends PaymentModule
       $payTransactionData = $payTransaction->getData();
       $payTransactionId = !empty($payTransactionData['transaction']['transactionId']) ? $payTransactionData['transaction']['transactionId'] : '';
 
-      if ($payment_option_id == self::METHOD_INSTORE) {
-        PayHelper::addTransaction($payTransactionId, $cart->id, $cart->id_customer, $payment_option_id, $cart->getOrderTotal(true, Cart::BOTH));
+      if ($payment_option_id == PaymentMethod::METHOD_INSTORE) {
+        Transaction::addTransaction($payTransactionId, $cart->id, $cart->id_customer, $payment_option_id, $cart->getOrderTotal());
       }
       
       if ($this->shouldValidateOnStart($payment_option_id)) {
@@ -943,7 +941,7 @@ class PaynlPaymentMethods extends PaymentModule
         $this->payLog('startPayment', 'Not pre-creating the order, waiting for payment.', $cartId, $payTransactionId);
       }
 
-      if ($payment_option_id == self::METHOD_INSTORE) {
+      if ($payment_option_id == PaymentMethod::METHOD_INSTORE) {
             $this->payLog('startPayment', 'Starting Instore Payment', $cartId, $payTransactionId);
             $terminalId = null;
             if (isset($extra_data['bank'])) {
@@ -956,7 +954,7 @@ class PaynlPaymentMethods extends PaymentModule
                 $instorePayment = \Paynl\Instore::payment(['transactionId' => $payTransactionId, 'terminalId' => $terminalId]);
                 $hash = $instorePayment->getHash();
 
-                PayHelper::addTransactionHash($payTransactionId, $hash);
+                Transaction::addTransactionHash($payTransactionId, $hash);
 
                 return $instorePayment->getRedirectUrl();
             } catch (\Exception $e) {

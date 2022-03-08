@@ -1,13 +1,12 @@
 <?php
 
 
-namespace PaynlPaymentMethods\PrestaShop\Helper;
+namespace PaynlPaymentMethods\PrestaShop;
 
-use PrestaShopLogger;
 use Db;
 
-class PayHelper
-{   
+class Transaction
+{
 
     /**
      * Adds the transaction to the pay_transactions table
@@ -22,14 +21,14 @@ class PayHelper
     public static function addTransaction($transaction_id, $cart_id, $customer_id, $payment_option_id, $amount)
     {
         $db = Db::getInstance();
-    
+
         $data = array(
             'transaction_id' => $transaction_id,
             'cart_id' => $cart_id,
             'customer_id' => $customer_id,
             'payment_option_id' => $payment_option_id,
-            'amount' => $amount 
-        );        
+            'amount' => $amount
+        );
 
         $db->insert('pay_transactions', $data);
     }
@@ -45,8 +44,20 @@ class PayHelper
     {
         $db = Db::getInstance();
 
-        $sql = "UPDATE `" . _DB_PREFIX_ . "pay_transactions` SET `hash` = '" . $hash . "', `updated_at` = now() WHERE `" . _DB_PREFIX_ . "pay_transactions`.`transaction_id` = '" . $transaction_id . "';";
+        $sql = "UPDATE `" . _DB_PREFIX_ . "pay_transactions` SET `hash` = '" . Db::getInstance()->escape($hash) . "', `updated_at` = now() WHERE `" . _DB_PREFIX_ . "pay_transactions`.`transaction_id` = '" . Db::getInstance()->escape($transaction_id) . "';";
         $db->execute($sql);
     }
 
+    /**
+     * Returns the transaction based on transaction_id from the pay_transactions table
+     *
+     * @param int $transaction_id
+     * @return array   
+     *      
+     */
+    public static function get($transaction_id)
+    {
+        $transaction = Db::getInstance()->getRow("SELECT * FROM `" . _DB_PREFIX_ . "pay_transactions` WHERE `transaction_id` = '" . Db::getInstance()->escape($transaction_id) . "';");
+        return $transaction;
+    }
 }
