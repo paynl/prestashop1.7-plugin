@@ -695,15 +695,7 @@ class PaynlPaymentMethods extends PaymentModule
                 if (empty($orderPayment)) {
                     $orderPayment = new OrderPayment();
                     $orderPayment->order_reference = $order->reference;
-                }
-
-                /**
-                 * @var $orderPayment OrderPaymentCore
-                 */
-                if (empty($orderPayment)) {
-                    $orderPayment = new OrderPayment();
-                    $orderPayment->order_reference = $order->reference;
-                }
+                }                
 
                 if (empty($orderPayment->payment_method)) {
                     $orderPayment->payment_method = $paymentMethodName;
