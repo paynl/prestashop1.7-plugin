@@ -678,7 +678,7 @@ class PaynlPaymentMethods extends PaymentModule
 
 
         if ($orderId) {
-        {
+
           $order = new Order($orderId);
 
             $this->payLog('processPayment', 'orderStateName:' . $orderStateName . '. iOrderState: ' . $iOrderState . '. ' .
