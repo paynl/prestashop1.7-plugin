@@ -33,8 +33,6 @@ if (!class_exists('\Paynl\Paymentmethods')) {
 
 use Paynl\Result\Transaction\Refund;
 use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
-use PaynlPaymentMethods\PrestaShop\Transaction;
-use PaynlPaymentMethods\PrestaShop\PaymentMethod;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -55,7 +53,7 @@ class PaynlPaymentMethods extends PaymentModule
     {
         $this->name = 'paynlpaymentmethods';
         $this->tab = 'payments_gateways';
-        $this->version = '4.3.0';
+        $this->version = '4.4.0';
 
         $this->payLogEnabled = null;
         $this->ps_versions_compliancy = array('min' => '1.7', 'max' => _PS_VERSION_);
@@ -74,7 +72,7 @@ class PaynlPaymentMethods extends PaymentModule
         $this->statusRefund = Configuration::get('PS_OS_REFUND');
 
         $this->displayName = $this->l('PAY.');
-        $this->description = $this->l('PAY. payment methods for PrestaShop');
+        $this->description = $this->l('PAY. Payment Methods for PrestaShop');
 
         if (!count(Currency::checkPaymentCurrencies($this->id))) {
             $this->warning = $this->l('No currency has been set for this module.');
@@ -114,21 +112,6 @@ class PaynlPaymentMethods extends PaymentModule
         }
 
         $this->createPaymentFeeProduct();
-
-        Db::getInstance()->execute('CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'pay_transactions` (
-                `id` int(11) NOT NULL AUTO_INCREMENT,
-				        `transaction_id` varchar(255) DEFAULT NULL,
-                `cart_id` int(11) DEFAULT NULL,
-                `customer_id` int(11) DEFAULT NULL,
-                `payment_option_id` int(11) DEFAULT NULL,
-                `amount` decimal(20,6) DEFAULT NULL,
-                `hash` varchar(255) DEFAULT NULL,
-                `order_reference` varchar(255) DEFAULT NULL,
-                `status` varchar(255) DEFAULT NULL,
-                `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-                `updated_at` datetime NOT NULL DEFAULT current_timestamp(),
-				PRIMARY KEY (`id`)
-			) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8 ;');
 
         return true;
     }
@@ -178,12 +161,13 @@ class PaynlPaymentMethods extends PaymentModule
         $settings = $this->getPaymentMethodSettings($profileId);
 
         # Get the custom method name
-        if ($profileId == PaymentMethod::METHOD_SANDBOX) {
+        if ($profileId == 613) {
             $methodName = 'Sandbox';
         } else {
             $methodName = empty($settings->name) ? $profileId : $settings->name;
         }
-        $showRefundButton = ($transaction->isPaid() || $transaction->isPartiallyRefunded()) && ($profileId != PaymentMethod::METHOD_INSTORE_PROFILE_ID  && $profileId != PaymentMethod::METHOD_INSTORE);
+
+        $showRefundButton = $transaction->isPaid() || $transaction->isPartiallyRefunded();
     } catch (Exception $exception) {
       $showRefundButton = false;
     }
@@ -567,27 +551,17 @@ class PaynlPaymentMethods extends PaymentModule
    */
     private function getPayForm($payment_option_id, $description = null, $logo = true)
     {
-        $paymentOptions = array();
-        $paymentOptionText = null;
+        $banks = array();
 
-        if ($payment_option_id == PaymentMethod::METHOD_IDEAL) {
+        if ($payment_option_id == 10) {
           $this->sdkLogin();
-          $paymentOptions = \Paynl\Paymentmethods::getBanks($payment_option_id);
-          $paymentOptionText = 'Please select your bank';
-        }
-
-        if ($payment_option_id == PaymentMethod::METHOD_INSTORE) {
-            $this->sdkLogin();
-            $terminals = \Paynl\Instore::getAllTerminals();
-            $paymentOptions = $terminals->getList();
-            $paymentOptionText = 'Please select a pin-terminal';
+          $banks = \Paynl\Paymentmethods::getBanks($payment_option_id);
         }
 
         $this->context->smarty->assign([
             'action' => $this->context->link->getModuleLink($this->name, 'startPayment', array(), true),
-            'banks' => $paymentOptions,
+            'banks' => $banks,
             'payment_option_id' => $payment_option_id,
-            'payment_option_text' => $paymentOptionText,
             'description' => $description,
             'logoClass' => $logo ? '' : 'noLogo'
         ]);
@@ -663,20 +637,22 @@ class PaynlPaymentMethods extends PaymentModule
         if (version_compare(_PS_VERSION_, '1.7.1.0', '>=')) {
             $orderId = Order::getIdByCartId($cartId);
         } else {
-            # Deprecated since prestashop 1.7.1.0
+            //Deprecated since prestashop 1.7.1.0
             $orderId = Order::getOrderByCartId($cartId);
         }
 
         $profileId = $transaction->getPaymentProfileId();
 
-        if ($profileId == PaymentMethod::METHOD_SANDBOX) {
+        # Profile 613 is for testing purposes
+        if ($profileId == 613) {
             $paymentMethodName = 'Sandbox';
         } else {
             $settings = $this->getPaymentMethodSettings($profileId);
+            # Get the custom method name
             $paymentMethodName = empty($settings->name) ? '' : $settings->name;
         }
 
-        if (empty(trim($paymentMethodName))) {
+        if (empty($paymentMethodName)) {
             $paymentMethodName = 'PAY.';
         }
 
@@ -871,10 +847,6 @@ class PaynlPaymentMethods extends PaymentModule
         $payTransactionData = $payTransaction->getData();
         $payTransactionId = !empty($payTransactionData['transaction']['transactionId']) ? $payTransactionData['transaction']['transactionId'] : '';
 
-      if ($payment_option_id == PaymentMethod::METHOD_INSTORE) {
-        Transaction::addTransaction($payTransactionId, $cart->id, $cart->id_customer, $payment_option_id, $cart->getOrderTotal());
-      }
-
       if ($this->shouldValidateOnStart($payment_option_id)) {
 
         $this->payLog('startPayment', 'Pre-Creating order for pp : ' . $payment_option_id, $cartId, $payTransactionId);
@@ -901,28 +873,6 @@ class PaynlPaymentMethods extends PaymentModule
       {
         $this->payLog('startPayment', 'Not pre-creating the order, waiting for payment.', $cartId, $payTransactionId);
       }
-
-      if ($payment_option_id == PaymentMethod::METHOD_INSTORE) {
-            $this->payLog('startPayment', 'Starting Instore Payment', $cartId, $payTransactionId);
-            $terminalId = null;
-            if (isset($extra_data['bank'])) {
-                $terminalId = $extra_data['bank'];
-            }
-            try {
-                if (empty($terminalId)) {
-                    throw new \Exception('Please select a pin-terminal', 201);
-                }
-                $instorePayment = \Paynl\Instore::payment(['transactionId' => $payTransactionId, 'terminalId' => $terminalId]);
-                $hash = $instorePayment->getHash();
-
-                Transaction::addTransactionHash($payTransactionId, $hash);
-
-                return $instorePayment->getRedirectUrl();
-            } catch (\Exception $e) {
-                $this->payLog('startPayment', 'Instore Payment error: ' . $e->getMessage(), $cartId, $payTransactionId);
-                return $this->context->link->getModuleLink($this->name, 'finish', array('terminalerror' => true, 'error' => $e->getMessage()), true);
-            }
-        }
 
         return $payTransaction->getRedirectUrl();
     }
