@@ -47,12 +47,12 @@ class PaynlPaymentMethodsExchangeModuleFrontController extends ModuleFrontContro
 
         $module->payLog('Exchange', 'Action: ' . $action, $cartid, $transactionId);
 
-        if($_REQUEST['action'] == 'pending'){
+        if ($action == 'pending') {
             die('TRUE| Ignoring pending');
         }
 
-        if ($_REQUEST['action'] == 'partial_payment') {
-            die('TRUE| Partial payment accepted');
+        if ($action == 'partial_payment') {
+            die('TRUE| Processing partial payment');
         }
 
         try {
