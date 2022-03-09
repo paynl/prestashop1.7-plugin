@@ -663,10 +663,6 @@ class PaynlPaymentMethods extends PaymentModule
             $this->payLog('processPayment', 'orderStateName:' . $orderStateName . '. iOrderState: ' . $iOrderState . '. ' .
                 'orderRef:' . $order->reference . '. orderModule:' . $order->module, $cartId, $transactionId);
 
-            /**
-             * @var $order OrderCore
-             */
-
             # Check if the order is processed by PAY.
             if ($order->module !== 'paynlpaymentmethods') {
                 $message = 'Not a PAY. order. Customer seemed to used different provider. Not updating the order.';
@@ -675,12 +671,10 @@ class PaynlPaymentMethods extends PaymentModule
 
             if ($order->hasBeenPaid() && !$transaction->isRefunded(false)) {
                 $message = 'Order is already paid | OrderReference: ' . $order->reference;
-
                 return $transaction;
             }
 
             if (!$transaction->isRefunded(false)) {
-
                 $orderPayment = null;
                 $arrOrderPayment = OrderPayment::getByOrderReference($order->reference);
                 foreach ($arrOrderPayment as $objOrderPayment) {
@@ -773,10 +767,8 @@ class PaynlPaymentMethods extends PaymentModule
                     $message = "Could not validate order, error: " . $ex->getMessage();
                     Throw new Exception($message);
                 }
-
-            }
-            else {
-               $this->payLog('processPayment 3', 'OrderStateName:' . $orderStateName . '. iOrderState: ' . $iOrderState .'. iState:'. $iState, $cartId, $transactionId);
+            } else {
+                $this->payLog('processPayment 3', 'OrderStateName:' . $orderStateName . '. iOrderState: ' . $iOrderState . '. iState:' . $iState, $cartId, $transactionId);
             }
 
         }
@@ -825,6 +817,7 @@ class PaynlPaymentMethods extends PaymentModule
      * @param array $extra_data
      *
      * @return string
+     * @throws PrestaShopException
      */
     public function startPayment(Cart $cart, $payment_option_id, $extra_data = array())
     {
@@ -834,7 +827,8 @@ class PaynlPaymentMethods extends PaymentModule
         /** @var CurrencyCore $currency */
 
         $objPaymentMethod = $this->getPaymentMethod($payment_option_id);
-        // make sure no fee is in the cart
+
+        # Make sure no fee is in the cart
         $cart->deleteProduct(Configuration::get('PAYNL_FEE_PRODUCT_ID'),0);
         $cartTotal = $cart->getOrderTotal(true, Cart::BOTH, null, null, false);
         $iPaymentFee = $this->getPaymentFee($objPaymentMethod, $cartTotal);
@@ -851,8 +845,6 @@ class PaynlPaymentMethods extends PaymentModule
         if (Configuration::get('PAYNL_DESCRIPTION_PREFIX')) {
             $description = Configuration::get('PAYNL_DESCRIPTION_PREFIX') . $description;
         }
-
-
 
         $startData = array(
             'amount' => $cart->getOrderTotal(true, Cart::BOTH, null, null, false),
@@ -878,14 +870,9 @@ class PaynlPaymentMethods extends PaymentModule
         # Retrieve language
         $startData['language'] = $this->getLanguageForOrder($cart);
 
-
-      /**
-       * @var $payTransaction Paynl\Result\Transaction\Start
-       */
-      $payTransaction = \Paynl\Transaction::start($startData);
-
-      $payTransactionData = $payTransaction->getData();
-      $payTransactionId = !empty($payTransactionData['transaction']['transactionId']) ? $payTransactionData['transaction']['transactionId'] : '';
+        $payTransaction = \Paynl\Transaction::start($startData);
+        $payTransactionData = $payTransaction->getData();
+        $payTransactionId = !empty($payTransactionData['transaction']['transactionId']) ? $payTransactionData['transaction']['transactionId'] : '';
 
       if ($this->shouldValidateOnStart($payment_option_id)) {
 
@@ -895,24 +882,20 @@ class PaynlPaymentMethods extends PaymentModule
         $this->context->cart->getPackageList(true);
 
         $paymentMethodSettings = $this->getPaymentMethodSettings($payment_option_id);
+        $paymentMethodName = empty($paymentMethodSettings->name) ? 'PAY. Overboeking' : $paymentMethodSettings->name;
 
-        $this->validateOrder($cart->id, $this->statusPending, 0, $paymentMethodSettings->name, null, array(), null, false, $cart->secure_key);
+        $this->validateOrder($cart->id, $this->statusPending, 0, $paymentMethodName, null, array(), null, false, $cart->secure_key);
 
         $orderId = Order::getIdByCartId($cartId);
         $order = new Order($orderId);
 
         $orderPayment = new OrderPayment();
         $orderPayment->order_reference = $order->reference;
-        
-        $settings = $this->getPaymentMethodSettings($payment_option_id);
-        $paymentMethodName = empty($settings->name) ? 'PAY Overboeking' : $settings->name;
-
         $orderPayment->payment_method = $paymentMethodName;
         $orderPayment->amount = $startData['amount'];
         $orderPayment->transaction_id = $payTransactionData['transaction']['transactionId'];
         $orderPayment->id_currency = $cart->id_currency;
         $orderPayment->save();
-
       } else
       {
         $this->payLog('startPayment', 'Not pre-creating the order, waiting for payment.', $cartId, $payTransactionId);
