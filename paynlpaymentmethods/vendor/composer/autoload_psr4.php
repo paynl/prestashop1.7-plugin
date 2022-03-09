@@ -7,5 +7,6 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Paynl\\' => array($vendorDir . '/paynl/sdk/src'),
+    'PaynlPaymentMethods\\PrestaShop\\' => array($baseDir . '/src'),
     'Curl\\' => array($vendorDir . '/php-curl-class/php-curl-class/src/Curl'),
 );
