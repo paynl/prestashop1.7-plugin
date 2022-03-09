@@ -648,7 +648,6 @@ class PaynlPaymentMethods extends PaymentModule
             $paymentMethodName = 'Sandbox';
         } else {
             $settings = $this->getPaymentMethodSettings($profileId);
-
             # Get the custom method name
             $paymentMethodName = empty($settings->name) ? '' : $settings->name;
         }
@@ -657,8 +656,13 @@ class PaynlPaymentMethods extends PaymentModule
             $paymentMethodName = 'PAY.';
         }
 
+        $cart = new Cart((int)$cartId);
+        $cartTotalPrice = (version_compare(_PS_VERSION_, '1.7.7.0', '>=')) ? $cart->getCartTotalPrice() : $this->getCartTotalPrice($cart);
+        $amountPaid = in_array($cartTotalPrice, array($transaction->getCurrencyAmount(), $transaction->getPaidCurrencyAmount(), $transaction->getPaidAmount())) ? $cartTotalPrice : null;
+
         if ($orderId) {
-            $order = new Order($orderId);
+
+          $order = new Order($orderId);
 
             $this->payLog('processPayment', 'orderStateName:' . $orderStateName . '. iOrderState: ' . $iOrderState . '. ' .
                 'orderRef:' . $order->reference . '. orderModule:' . $order->module, $cartId, $transactionId);
@@ -682,31 +686,19 @@ class PaynlPaymentMethods extends PaymentModule
                         $orderPayment = $objOrderPayment;
                     }
                 }
-
-                /**
-                 * @var $orderPayment OrderPaymentCore
-                 */
                 if (empty($orderPayment)) {
                     $orderPayment = new OrderPayment();
                     $orderPayment->order_reference = $order->reference;
-                }                
-
+                }
                 if (empty($orderPayment->payment_method)) {
                     $orderPayment->payment_method = $paymentMethodName;
                 }
-
                 if (empty($orderPayment->amount)) {
-                    $orderPayment->amount = $transaction->getPaidCurrencyAmount();
-
-                    if ($transaction->isAuthorized()) {
-                        $orderPayment->amount = $transaction->getCurrencyAmount();
-                    }
+                    $orderPayment->amount = $amountPaid;
                 }
-
                 if (empty($orderPayment->transaction_id)) {
                     $orderPayment->transaction_id = $transactionId;
                 }
-
                 if (empty($orderPayment->transaction_id)) {
                     $orderPayment->id_currency = $order->id_currency;
                 }
@@ -725,37 +717,19 @@ class PaynlPaymentMethods extends PaymentModule
             $message = "Updated order (" . $order->reference . ") to: " . $orderStateName;
         } else {
             $iState = !empty($arrPayData['paymentDetails']['state']) ? $arrPayData['paymentDetails']['state'] : null;
-            if ($transaction->isPaid() || $transaction->isAuthorized() || $transaction->isBeingVerified())
-            {
-                /**
-                 * @var $cart CartCore
-                 */
-                $cart = new Cart((int)$cartId);
-                $currency_order = new Currency($cart->id_currency);
-
-                $amountPaid = null;
-                $cartTotalPrice = (version_compare(_PS_VERSION_, '1.7.7.0', '>=')) ? $cart->getCartTotalPrice() : $this->getCartTotalPrice($cart);
-                if(in_array($cartTotalPrice, array($transaction->getPaidAmount(), $transaction->getPaidCurrencyAmount()))) {
-                    $amountPaid = $cartTotalPrice;
-                }
-
-                $this->payLog('processPayment (paid)', 'orderStateName:' . $orderStateName . '. iOrderState: ' . $iOrderState . '. iState:' . $iState. '. CurrencyOrder: ' . $currency_order->iso_code
-                                . '. CartOrderTotal: '. $cart->getOrderTotal() . '. CartTotalPrice: '. $cartTotalPrice . '. AmountPaid : '. $amountPaid
-                  , $cartId, $transactionId);
-
-                $amountPaid = empty($amountPaid) ? $transaction->getPaidCurrencyAmount() : $amountPaid;
-                if($transaction->isAuthorized()){
-                    $amountPaid = $transaction->getCurrencyAmount();
-                }
-
+            if ($transaction->isPaid() || $transaction->isAuthorized() || $transaction->isBeingVerified()) {
                 try {
-                    
-                    $this->payLog('processPayment', 'Creating ORDER for ppid ' . $profileId . '. Status: ' . $orderStateName . '. Method: ' . $paymentMethodName, $cartId, $transactionId);
+                    $currency_order = new Currency($cart->id_currency);
 
-                    $this->validateOrder((int)$transaction->getOrderNumber(), $iOrderState,
-                      $amountPaid, $paymentMethodName, null, array('transaction_id' => $transactionId), null, false, $cart->secure_key);
+                    $this->payLog('processPayment (paid)', 'orderStateName:' . $orderStateName . '. iOrderState: ' . $iOrderState . '. iState:' . $iState .
+                      '. CurrencyOrder: ' . $currency_order->iso_code . '. CartOrderTotal: ' . $cart->getOrderTotal() .
+                      '. CartTotalPrice: ' . $cartTotalPrice .
+                      '. paymentMethodName: ' . $paymentMethodName .
+                      '. profileId: ' . $profileId .
+                      '. AmountPaid : ' . $amountPaid, $cartId, $transactionId);
 
-                    /** @var OrderCore $orderId */
+                    $this->validateOrder((int)$cartId, $iOrderState, $amountPaid, $paymentMethodName, null, array('transaction_id' => $transactionId), null, false, $cart->secure_key);
+
                     $orderId = Order::getIdByCartId($cartId);
                     $order = new Order($orderId);
 
@@ -770,7 +744,6 @@ class PaynlPaymentMethods extends PaymentModule
             } else {
                 $this->payLog('processPayment 3', 'OrderStateName:' . $orderStateName . '. iOrderState: ' . $iOrderState . '. iState:' . $iState, $cartId, $transactionId);
             }
-
         }
 
         return $transaction;
