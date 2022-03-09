@@ -24,6 +24,8 @@ class Instore extends PaymentMethod
      *
      * @param $hash
      * @param $transactionId
+     * @param $object
+     * @return \Paynl\Result\Instore\Status
      */
     public static function handlePin($hash, $transactionId, $object)
     {

@@ -74,49 +74,38 @@ class PaynlPaymentMethodsFinishModuleFrontController extends ModuleFrontControll
         $module->payLog('finishPostProcess', 'Returning to webshop. Method: ' . $transaction->getPaymentMethodName() . '. Status: ' . $stateName , $transaction->getOrderNumber(), $transactionId);
 
       if ($transaction->isPaid() || $transaction->isPending() || $transaction->isBeingVerified() || $transaction->isAuthorized()) {
-            // naar success
-            /**
-             * @var $cart CartCore
-             */
-            $cart = $this->context->cart;
 
-            /**
-             * @var $customer CustomerCore
-             */
-            $customer = new Customer($cart->id_customer);
+          $cart = $this->context->cart;
+          $customer = new Customer($cart->id_customer);
+          $slow = '';
 
-            $slow = '';
-
-            $dbTransaction = Transaction::get($transactionId);
-            if ($dbTransaction['payment_option_id'] == PaymentMethod::METHOD_INSTORE && !empty($dbTransaction['hash'])) {
+          $dbTransaction = Transaction::get($transactionId);
+          if ($dbTransaction['payment_option_id'] == PaymentMethod::METHOD_INSTORE && !empty($dbTransaction['hash'])) {
               Instore::handlePin($dbTransaction['hash'], $transactionId, $this);
-            }
+          }
 
-            if (!$transaction->isPaid()) {
-                $slow = '&slowvalidation=1';
-                $iTotalAttempts = in_array($ppid, array(
-                  PaymentMethod::METHOD_OVERBOEKING,
-                  PaymentMethod::METHOD_SOFORT)
-                ) ? 1 : 20;
+          if (!$transaction->isPaid()) {
+              $slow = '&slowvalidation=1';
+              $iTotalAttempts = in_array($ppid, array(PaymentMethod::METHOD_OVERBOEKING, PaymentMethod::METHOD_SOFORT)) ? 1 : 20;
 
-              if($bValidationDelay == 1 && $iAttempt < $iTotalAttempts) {
-                return;
+              if ($bValidationDelay == 1 && $iAttempt < $iTotalAttempts) {
+                  return;
               }
-            }
+          }
 
-            unset($this->context->cart);
-            unset($this->context->cookie->id_cart);
+          unset($this->context->cart);
+          unset($this->context->cookie->id_cart);
 
-            $cartId = $transaction->getOrderNumber();
-            $orderId = Order::getIdByCartId($cartId);
+          $cartId = $transaction->getOrderNumber();
+          $orderId = Order::getIdByCartId($cartId);
 
-            $this->order = $orderId;
+          $this->order = $orderId;
 
-            Tools::redirect('index.php?controller=order-confirmation'.$slow.'&id_cart=' . $cartId . '&id_module=' . $this->module->id . '&id_order=' . $orderId . '&key=' . $customer->secure_key);
+          Tools::redirect('index.php?controller=order-confirmation' . $slow . '&id_cart=' . $cartId . '&id_module=' . $this->module->id . '&id_order=' . $orderId . '&key=' . $customer->secure_key);
 
       } else {
-        # Delete old payment fee
-        $this->context->cart->deleteProduct(Configuration::get('PAYNL_FEE_PRODUCT_ID'), 0);
+          # Delete old payment fee
+          $this->context->cart->deleteProduct(Configuration::get('PAYNL_FEE_PRODUCT_ID'), 0);
 
           if ($this->orderStatusId == '-63') {
               $this->errors[] = $this->module->l('The payment has been denied', 'finish');
@@ -129,8 +118,6 @@ class PaynlPaymentMethodsFinishModuleFrontController extends ModuleFrontControll
               # To checkout
               Tools::redirect('index.php?controller=order&step=1');
           }
-
-
       }
 
   }

@@ -114,17 +114,10 @@ class PaynlPaymentMethods extends PaymentModule
         }
 
         $this->createPaymentFeeProduct();
-        $this->createDatabaseTable();
 
-        return true;
-    }
-
-    public function createDatabaseTable()
-    {
-        return Db::getInstance()->execute('
-			CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'pay_transactions` (
+        Db::getInstance()->execute('CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'pay_transactions` (
                 `id` int(11) NOT NULL AUTO_INCREMENT,
-				`transaction_id` varchar(255) DEFAULT NULL,
+				        `transaction_id` varchar(255) DEFAULT NULL,
                 `cart_id` int(11) DEFAULT NULL,
                 `customer_id` int(11) DEFAULT NULL,
                 `payment_option_id` int(11) DEFAULT NULL,
@@ -136,6 +129,8 @@ class PaynlPaymentMethods extends PaymentModule
                 `updated_at` datetime NOT NULL DEFAULT current_timestamp(),
 				PRIMARY KEY (`id`)
 			) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8 ;');
+
+        return true;
     }
 
     public function hookActionAdminControllerSetMedia()
@@ -183,11 +178,8 @@ class PaynlPaymentMethods extends PaymentModule
         $settings = $this->getPaymentMethodSettings($profileId);
 
         # Get the custom method name
-        if ($profileId == 613) {
+        if ($profileId == PaymentMethod::METHOD_SANDBOX) {
             $methodName = 'Sandbox';
-        } else if ($profileId == PaymentMethod::METHOD_INSTORE_PROFILE_ID) {
-            $settings = $this->getPaymentMethodSettings(PaymentMethod::METHOD_INSTORE);
-            $methodName = empty($settings->name) ? $profileId : $settings->name;
         } else {
             $methodName = empty($settings->name) ? $profileId : $settings->name;
         }
@@ -578,7 +570,7 @@ class PaynlPaymentMethods extends PaymentModule
         $paymentOptions = array();
         $paymentOptionText = null;
 
-        if ($payment_option_id == 10) {
+        if ($payment_option_id == PaymentMethod::METHOD_IDEAL) {
           $this->sdkLogin();
           $paymentOptions = \Paynl\Paymentmethods::getBanks($payment_option_id);
           $paymentOptionText = 'Please select your bank';
@@ -671,27 +663,20 @@ class PaynlPaymentMethods extends PaymentModule
         if (version_compare(_PS_VERSION_, '1.7.1.0', '>=')) {
             $orderId = Order::getIdByCartId($cartId);
         } else {
-            //Deprecated since prestashop 1.7.1.0
+            # Deprecated since prestashop 1.7.1.0
             $orderId = Order::getOrderByCartId($cartId);
         }
 
         $profileId = $transaction->getPaymentProfileId();
 
-        # Profile 613 is for testing purposes
-        if ($profileId == 613) {
+        if ($profileId == PaymentMethod::METHOD_SANDBOX) {
             $paymentMethodName = 'Sandbox';
-        }
-        elseif ($profileId == PaymentMethod::METHOD_INSTORE_PROFILE_ID) {
-                $settings = $this->getPaymentMethodSettings(PaymentMethod::METHOD_INSTORE);
-                $paymentMethodName = empty($settings->name) ? $profileId : $settings->name;
-
         } else {
             $settings = $this->getPaymentMethodSettings($profileId);
-            # Get the custom method name
             $paymentMethodName = empty($settings->name) ? '' : $settings->name;
         }
 
-        if (empty($paymentMethodName)) {
+        if (empty(trim($paymentMethodName))) {
             $paymentMethodName = 'PAY.';
         }
 
