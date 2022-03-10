@@ -135,6 +135,8 @@ class PaynlPaymentMethods extends PaymentModule
                 `updated_at` datetime NOT NULL DEFAULT current_timestamp(),
 				PRIMARY KEY (`id`)
 			) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8 ;');
+
+        return true;
     }
 
     public function hookActionAdminControllerSetMedia()
