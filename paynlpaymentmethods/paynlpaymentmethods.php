@@ -133,7 +133,8 @@ class PaynlPaymentMethods extends PaymentModule
                 `status` varchar(255) DEFAULT NULL,
                 `created_at` datetime NOT NULL DEFAULT current_timestamp(),
                 `updated_at` datetime NOT NULL DEFAULT current_timestamp(),
-				PRIMARY KEY (`id`)
+				PRIMARY KEY (`id`),
+                INDEX (`transaction_id`)
 			) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8 ;');
 
         return true;
@@ -189,6 +190,13 @@ class PaynlPaymentMethods extends PaymentModule
         } else {
             $methodName = empty($settings->name) ? $profileId : $settings->name;
         }
+
+        if ($methodName == $profileId) {            
+            if (count(Transaction::get($transactionId) > 0)) {
+                $methodName = 'PAY. Instore';
+            }
+        }
+
         $showRefundButton = ($transaction->isPaid() || $transaction->isPartiallyRefunded()) && ($profileId != PaymentMethod::METHOD_INSTORE_PROFILE_ID  && $profileId != PaymentMethod::METHOD_INSTORE);
     } catch (Exception $exception) {
       $showRefundButton = false;
@@ -684,6 +692,9 @@ class PaynlPaymentMethods extends PaymentModule
 
         if (empty(trim($paymentMethodName))) {
             $paymentMethodName = 'PAY.';
+            if (count(Transaction::get($transactionId) > 0)) {
+                $paymentMethodName = 'PAY. Instore';
+            }
         }
 
         $cart = new Cart((int)$cartId);
