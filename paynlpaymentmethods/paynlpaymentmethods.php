@@ -114,7 +114,13 @@ class PaynlPaymentMethods extends PaymentModule
         }
 
         $this->createPaymentFeeProduct();
+        $this->createDatabaseTable();
 
+        return true;
+    }
+
+    public function createDatabaseTable()
+    {
         Db::getInstance()->execute('CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'pay_transactions` (
                 `id` int(11) NOT NULL AUTO_INCREMENT,
 				        `transaction_id` varchar(255) DEFAULT NULL,
@@ -129,8 +135,6 @@ class PaynlPaymentMethods extends PaymentModule
                 `updated_at` datetime NOT NULL DEFAULT current_timestamp(),
 				PRIMARY KEY (`id`)
 			) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8 ;');
-
-        return true;
     }
 
     public function hookActionAdminControllerSetMedia()
