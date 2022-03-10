@@ -55,7 +55,7 @@ class PaynlPaymentMethods extends PaymentModule
     {
         $this->name = 'paynlpaymentmethods';
         $this->tab = 'payments_gateways';
-        $this->version = '4.3.0';
+        $this->version = '4.4.0';
 
         $this->payLogEnabled = null;
         $this->ps_versions_compliancy = array('min' => '1.7', 'max' => _PS_VERSION_);
@@ -74,7 +74,7 @@ class PaynlPaymentMethods extends PaymentModule
         $this->statusRefund = Configuration::get('PS_OS_REFUND');
 
         $this->displayName = $this->l('PAY.');
-        $this->description = $this->l('PAY. payment methods for PrestaShop');
+        $this->description = $this->l('PAY. Payment Methods for PrestaShop');
 
         if (!count(Currency::checkPaymentCurrencies($this->id))) {
             $this->warning = $this->l('No currency has been set for this module.');
