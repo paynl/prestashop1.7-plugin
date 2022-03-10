@@ -3,7 +3,7 @@
 /**
  * @param $module PaynlPaymentMethods
  */
-function upgrade_module_4_4_0($module)
+function upgrade_module_4_4($module)
 {
     $results = array();
     $results[] = $module->createDatabaseTable();
