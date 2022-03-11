@@ -225,7 +225,6 @@
                     if ($(this).prop('multiple')) {
                         var values = new Array();
                         $(this).find("option:selected").each(function() {
-                            console.log(this.value);
                             values.push(this.value);
                         });
                         $paymentmethod[$(this).attr("name")] = values;
