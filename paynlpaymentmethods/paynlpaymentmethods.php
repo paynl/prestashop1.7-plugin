@@ -193,7 +193,7 @@ class PaynlPaymentMethods extends PaymentModule
 
         if ($methodName == $profileId) {            
             if (count(Transaction::get($transactionId) > 0)) {
-                $methodName = 'PAY. Instore';
+                $methodName = 'PAY. PIN (Instore)';
             }
         }
 
@@ -693,7 +693,7 @@ class PaynlPaymentMethods extends PaymentModule
         if (empty(trim($paymentMethodName))) {
             $paymentMethodName = 'PAY.';
             if (count(Transaction::get($transactionId) > 0)) {
-                $paymentMethodName = 'PAY. Instore';
+                $paymentMethodName = 'PAY. PIN (Instore)';
             }
         }
 
