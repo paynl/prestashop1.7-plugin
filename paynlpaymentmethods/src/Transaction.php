@@ -51,13 +51,13 @@ class Transaction
     /**
      * Returns the transaction based on transaction_id from the pay_transactions table
      *
-     * @param int $transaction_id
-     * @return array   
-     *      
+     * @param $transaction_id
+     * @return array
      */
     public static function get($transaction_id)
     {
-        $transaction = Db::getInstance()->getRow("SELECT * FROM `" . _DB_PREFIX_ . "pay_transactions` WHERE `transaction_id` = '" . Db::getInstance()->escape($transaction_id) . "';");
-        return $transaction;
+        $result = Db::getInstance()->getRow("SELECT * FROM `" . _DB_PREFIX_ . "pay_transactions` WHERE `transaction_id` = '" . Db::getInstance()->escape($transaction_id) . "';");
+
+        return is_array($result) ? $result : array();
     }
 }
