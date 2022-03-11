@@ -222,6 +222,13 @@
                 //Add all select data
                 $(this).find('select').each(function(){
                     $paymentmethod[$(this).attr("name")] = $(this).find("option:selected").val();
+                    if ($(this).prop('multiple')) {
+                        var values = new Array();
+                        $(this).find("option:selected").each(function() {
+                            values.push(this.value);
+                        });
+                        $paymentmethod[$(this).attr("name")] = values;
+                    }    
                 });
                 $paymentmethods.push($paymentmethod);              
             }            
