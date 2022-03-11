@@ -1549,6 +1549,7 @@ class PaynlPaymentMethods extends PaymentModule
             $this->sdkLogin();
             $paymentmethods = \Paynl\Paymentmethods::getList();
             $paymentmethods = (array)$paymentmethods;
+            $languages = Language::getLanguages(true);
             foreach ($savedPaymentMethods as $paymentmethod) {
               if (isset($paymentmethods[$paymentmethod->id])) {
                 # The paymentmethod allready exists in the config. Check if fields are set..
@@ -1574,6 +1575,62 @@ class PaynlPaymentMethods extends PaymentModule
                   $changed = true;
                 }
 
+                if (!isset($paymentmethod->limit_countries)) {
+                    $paymentmethod->limit_countries = false;
+                    $changed = true;
+                }
+
+                if (!isset($paymentmethod->allowed_countries)) {
+                    $paymentmethod->allowed_countries = [];
+                    $changed = true;
+                }
+                if (isset($paymentmethod->allowed_countries) && !is_array($paymentmethod->allowed_countries)) {
+                    $paymentmethod->allowed_countries = [];
+                    $changed = true;
+                }
+
+                if (!isset($paymentmethod->limit_carriers)) {
+                    $paymentmethod->limit_carriers = false;
+                    $changed = true;
+                }
+
+                if (!isset($paymentmethod->allowed_carriers)) {
+                    $paymentmethod->allowed_carriers = [];
+                    $changed = true;
+                }
+                if (isset($paymentmethod->allowed_carriers) && !is_array($paymentmethod->allowed_carriers)) {
+                    $paymentmethod->allowed_carriers = [];
+                    $changed = true;
+                }
+
+                if (!isset($paymentmethod->fee_percentage)) {
+                    $paymentmethod->fee_percentage = false;
+                    $changed = true;
+                }
+
+                if (!isset($paymentmethod->fee_value)) {
+                    $paymentmethod->fee_value = '';
+                    $changed = true;
+                }
+
+                if (!isset($paymentmethod->customer_type)) {
+                    $paymentmethod->customer_type = 'both';
+                    $changed = true;
+                }
+
+                foreach ($languages as $language) {
+                    $key_name = 'name_' . $language['iso_code'];
+                    if (!isset($paymentmethod->$key_name)) {
+                        $paymentmethod->$key_name = '';
+                        $changed = true;
+                    }
+                    $key_description = 'description_' . $language['iso_code'];
+                    if (!isset($paymentmethod->$key_description)) {
+                        $paymentmethod->$key_description = '';
+                        $changed = true;
+                    }
+                }
+
                 $resultArray[] = $paymentmethod;
                 unset($paymentmethods[$paymentmethod->id]);
               }
@@ -1581,15 +1638,29 @@ class PaynlPaymentMethods extends PaymentModule
 
             # Nieuwe payment methods voorzien van standaard values.
             foreach ($paymentmethods as $paymentmethod) {
-                $resultArray[] = (object) [
+                $defaultArray = [
                     'id' => $paymentmethod['id'],
                     'name' => empty($paymentmethod['visibleName']) ? $paymentmethod['name'] : $paymentmethod['visibleName'],
                     'enabled' => false,
                     'min_amount' => isset($paymentmethod['min_amount']) ? intval($paymentmethod['min_amount'] / 100) : null,
                     'max_amount' => isset($paymentmethod['max_amount']) ? intval($paymentmethod['max_amount'] / 100) : null,
                     'description' => isset($paymentmethod['brand']['public_description']) ? $paymentmethod['brand']['public_description'] : '',
-                    'brand_id' => isset($paymentmethod['brand']['id']) ? $paymentmethod['brand']['id'] : ''
+                    'brand_id' => isset($paymentmethod['brand']['id']) ? $paymentmethod['brand']['id'] : '',
+                    'limit_countries' => false,
+                    'allowed_countries' => [],
+                    'limit_carriers' => false,
+                    'allowed_carriers' => [],
+                    'fee_percentage' => false,
+                    'fee_value' => '',
+                    'customer_type' => 'both'
                 ];
+
+                foreach ($languages as $language) {
+                    $defaultArray['name_' . $language['iso_code']] = '';
+                    $defaultArray['description_' . $language['iso_code']] = '';
+                }
+
+                $resultArray[] = (object) $defaultArray;
                 $changed = true;
             }
 
