@@ -587,7 +587,7 @@ class PaynlPaymentMethods extends PaymentModule
         if ($payment_option_id == PaymentMethod::METHOD_IDEAL) {
           $this->sdkLogin();
           $paymentOptions = \Paynl\Paymentmethods::getBanks($payment_option_id);
-          $paymentOptionText = 'Please select your bank';
+          $paymentOptionText = $this->l('Please select your bank');
         }
 
         if ($payment_option_id == PaymentMethod::METHOD_INSTORE) {
