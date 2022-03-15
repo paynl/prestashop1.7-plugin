@@ -23,6 +23,7 @@ $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_b2d37ae1cedf42ff8
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_4f6cbea9f2eade99f783747f7cafb211'] = 'Ga hiervoor naar `Geavanceerde instellingen` en open `Logboeken` en filter bij (indien ingeschakeld bij de plugin instellingen) `Bericht` op `PAY.`';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_020c2091aec3019d02193cef080bcf97'] = 'Betaalmethode toeslag';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_3ee7960dc804545cf3cc91a1fbc155ca'] = 'Selecteer uw bank a.u.b.';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_cf633a48ceceb64b509b34070ff248e7'] = 'Selecteer een pin-terminal a.u.b';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_9f06b28a40790c4c4df5739bce3c1eb0'] = 'Verzendkosten';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_68bf367e228f45ba83cb8831a5ee6447'] = 'Nederlands';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_78463a384a5aa4fad5fa73e2f506ecfc'] = 'Engels';

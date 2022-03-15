@@ -594,7 +594,7 @@ class PaynlPaymentMethods extends PaymentModule
             $this->sdkLogin();
             $terminals = \Paynl\Instore::getAllTerminals();
             $paymentOptions = $terminals->getList();
-            $paymentOptionText = 'Please select a pin-terminal';
+            $paymentOptionText = $this->l('Please select a pin-terminal');
         }
 
         $this->context->smarty->assign([
