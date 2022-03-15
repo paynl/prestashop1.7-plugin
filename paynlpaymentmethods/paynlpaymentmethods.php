@@ -1066,6 +1066,34 @@ class PaynlPaymentMethods extends PaymentModule
             'type' => 'SHIPPING'
         );
 
+        $free_shipping_coupon_applied = false;
+        $cartDetails = $cart->GetSummaryDetails();
+        $discounts = (isset($cartDetails['discounts'])) ? $cartDetails['discounts'] : array();
+
+        foreach ($discounts as $discount) {
+            if ($discount['reduction_amount'] > 0 || $discount['reduction_percent'] > 0 || ($discount['free_shipping'] == 1 && !$free_shipping_coupon_applied)) {
+                $discountValue = $discount['value_real'];
+                $discountTax = $discount['value_tax_exc'];
+                if ($discount['free_shipping'] == 1 && $free_shipping_coupon_applied) {
+                    $discountValue -= $shippingCost_wt;
+                    $discountTax -= $shippingCost;
+                }
+                if ($discount > 0) {
+                    $arrResult[] = array(
+                        'id' => $discount['code'],
+                        'name' => $discount['description'],
+                        'price' => -$discountValue,
+                        'tax' => $discountTax - $discountValue,
+                        'qty' => 1,
+                        'type' => 'DISCOUNT'
+                    );
+                    if ($discount['free_shipping'] == 1) {
+                        $free_shipping_coupon_applied = true;
+                    }
+                }
+            }
+        }
+
         return $arrResult;
     }
 
