@@ -182,19 +182,18 @@ class PaynlPaymentMethods extends PaymentModule
         $payOrderAmount = $transaction->getPaidAmount();
         $status = $arrTransactionDetails['paymentDetails']['stateName'];
         $profileId = $transaction->getPaymentProfileId();
-        $settings = $this->getPaymentMethodSettings($profileId);
 
         # Get the custom method name
         if ($profileId == PaymentMethod::METHOD_SANDBOX) {
             $methodName = 'Sandbox';
         } else {
-            $methodName = empty($settings->name) ? $profileId : $settings->name;
-        }
-
-        if ($methodName == $profileId) {            
-            if (count(Transaction::get($transactionId) > 0)) {
-                $methodName = 'PAY. PIN (Instore)';
+            $dbTransaction = Transaction::get($transactionId);
+            if (!empty($dbTransaction['payment_option_id'])) {
+                $settings = $this->getPaymentMethodSettings($dbTransaction['payment_option_id']);
+            } else {
+                $settings = $this->getPaymentMethodSettings($profileId);
             }
+            $methodName = empty($settings->name) ? $profileId : $settings->name;
         }
 
         $showRefundButton = ($transaction->isPaid() || $transaction->isPartiallyRefunded()) && ($profileId != PaymentMethod::METHOD_INSTORE_PROFILE_ID  && $profileId != PaymentMethod::METHOD_INSTORE);
@@ -686,15 +685,17 @@ class PaynlPaymentMethods extends PaymentModule
         if ($profileId == PaymentMethod::METHOD_SANDBOX) {
             $paymentMethodName = 'Sandbox';
         } else {
-            $settings = $this->getPaymentMethodSettings($profileId);
+            $dbTransaction = Transaction::get($transactionId);
+            if (!empty($dbTransaction['payment_option_id'])) {
+                $settings = $this->getPaymentMethodSettings($dbTransaction['payment_option_id']);
+            } else {
+                $settings = $this->getPaymentMethodSettings($profileId);
+            }
             $paymentMethodName = empty($settings->name) ? '' : $settings->name;
         }
 
         if (empty(trim($paymentMethodName))) {
-            $paymentMethodName = 'PAY.';
-            if (count(Transaction::get($transactionId) > 0)) {
-                $paymentMethodName = 'PAY. PIN (Instore)';
-            }
+            $paymentMethodName = 'PAY.';            
         }
 
         $cart = new Cart((int)$cartId);
