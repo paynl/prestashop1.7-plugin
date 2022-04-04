@@ -39,6 +39,7 @@ class PaynlPaymentMethodsExchangeModuleFrontController extends ModuleFrontContro
         # PAY. action
         $action = Tools::getValue('action');
         $cartid = Tools::getValue('extra1');
+        $paymentoption = Tools::getValue('payment_profile_id');
 
         /**
         * @var $module PaynlPaymentMethods
@@ -55,7 +56,7 @@ class PaynlPaymentMethodsExchangeModuleFrontController extends ModuleFrontContro
             die('TRUE| Processing partial payment');
         }
 
-        if ($action == 'cancel') {
+        if ($action == 'cancel' && $paymentoption != 136) {
             die('TRUE| Status updated to CANCELED');
         }
 
