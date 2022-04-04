@@ -585,16 +585,16 @@ class PaynlPaymentMethods extends PaymentModule
         $paymentOptionText = null;
 
         if ($payment_option_id == PaymentMethod::METHOD_IDEAL) {
-          $this->sdkLogin();
-          $paymentOptions = \Paynl\Paymentmethods::getBanks($payment_option_id);
-          $paymentOptionText = 'Please select your bank';
+            $this->sdkLogin();
+            $paymentOptions = \Paynl\Paymentmethods::getBanks($payment_option_id);
+            $paymentOptionText = $this->l('Please select your bank');
         }
 
         if ($payment_option_id == PaymentMethod::METHOD_INSTORE) {
             $this->sdkLogin();
             $terminals = \Paynl\Instore::getAllTerminals();
             $paymentOptions = $terminals->getList();
-            $paymentOptionText = 'Please select a pin-terminal';
+            $paymentOptionText = $this->l('Please select a pin-terminal');
         }
 
         $this->context->smarty->assign([
