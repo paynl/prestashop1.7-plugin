@@ -181,21 +181,8 @@ class PaynlPaymentMethods extends PaymentModule
         $arrTransactionDetails = $transaction->getData();
         $payOrderAmount = $transaction->getPaidAmount();
         $status = $arrTransactionDetails['paymentDetails']['stateName'];
-        $profileId = $transaction->getPaymentProfileId();
-
-        # Get the custom method name
-        if ($profileId == PaymentMethod::METHOD_SANDBOX) {
-            $methodName = 'Sandbox';
-        } else {
-            $dbTransaction = Transaction::get($transactionId);
-            if (!empty($dbTransaction['payment_option_id'])) {
-                $settings = $this->getPaymentMethodSettings($dbTransaction['payment_option_id']);
-            } else {
-                $settings = $this->getPaymentMethodSettings($profileId);
-            }
-            $methodName = empty($settings->name) ? $profileId : $settings->name;
-        }
-
+        $profileId = $transaction->getPaymentProfileId();        
+        $methodName = $this->getPaymentMethodSettingsName($transactionId, $profileId);      
         $showRefundButton = ($transaction->isPaid() || $transaction->isPartiallyRefunded()) && ($profileId != PaymentMethod::METHOD_INSTORE_PROFILE_ID  && $profileId != PaymentMethod::METHOD_INSTORE);
     } catch (Exception $exception) {
       $showRefundButton = false;
@@ -680,23 +667,8 @@ class PaynlPaymentMethods extends PaymentModule
             $orderId = Order::getOrderByCartId($cartId);
         }
 
-        $profileId = $transaction->getPaymentProfileId();
-
-        if ($profileId == PaymentMethod::METHOD_SANDBOX) {
-            $paymentMethodName = 'Sandbox';
-        } else {
-            $dbTransaction = Transaction::get($transactionId);
-            if (!empty($dbTransaction['payment_option_id'])) {
-                $settings = $this->getPaymentMethodSettings($dbTransaction['payment_option_id']);
-            } else {
-                $settings = $this->getPaymentMethodSettings($profileId);
-            }
-            $paymentMethodName = empty($settings->name) ? '' : $settings->name;
-        }
-
-        if (empty(trim($paymentMethodName))) {
-            $paymentMethodName = 'PAY.';            
-        }
+        $profileId = $transaction->getPaymentProfileId();        
+        $paymentMethodName = $this->getPaymentMethodSettingsName($transactionId, $profileId); 
 
         $cart = new Cart((int)$cartId);
         $cartTotalPrice = (version_compare(_PS_VERSION_, '1.7.7.0', '>=')) ? $cart->getCartTotalPrice() : $this->getCartTotalPrice($cart);
@@ -889,9 +861,9 @@ class PaynlPaymentMethods extends PaymentModule
         $payTransactionData = $payTransaction->getData();
         $payTransactionId = !empty($payTransactionData['transaction']['transactionId']) ? $payTransactionData['transaction']['transactionId'] : '';
 
-      if ($payment_option_id == PaymentMethod::METHOD_INSTORE) {
+      
         Transaction::addTransaction($payTransactionId, $cart->id, $cart->id_customer, $payment_option_id, $cart->getOrderTotal());
-      }
+      
 
       if ($this->shouldValidateOnStart($payment_option_id)) {
 
@@ -975,6 +947,26 @@ class PaynlPaymentMethods extends PaymentModule
       }
     }
     return false;
+  }
+
+  private function getPaymentMethodSettingsName($transactionId = null, $profileId = null)
+  {
+    $paymentMethodName = '';
+    if ($profileId == PaymentMethod::METHOD_SANDBOX) {
+        $paymentMethodName = 'Sandbox';
+    } else {
+        $dbTransaction = Transaction::get($transactionId);
+        if (!empty($dbTransaction['payment_option_id'])) {
+            $settings = $this->getPaymentMethodSettings($dbTransaction['payment_option_id']);
+        } else {
+            $settings = $this->getPaymentMethodSettings($profileId);
+        }
+        $paymentMethodName = empty($settings->name) ? '' : $settings->name;
+    }
+    if (empty(trim($paymentMethodName))) {
+        $paymentMethodName = 'PAY.';            
+    }
+    return $paymentMethodName;
   }
 
 
