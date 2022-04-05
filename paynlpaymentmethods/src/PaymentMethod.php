@@ -3,6 +3,8 @@
 
 namespace PaynlPaymentMethods\PrestaShop;
 
+use Configuration;
+
 class PaymentMethod
 {
     const METHOD_SANDBOX = 613;
