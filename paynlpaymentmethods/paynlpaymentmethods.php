@@ -1069,16 +1069,16 @@ class PaynlPaymentMethods extends PaymentModule
         $free_shipping_coupon_applied = false;
         $cartDetails = $cart->GetSummaryDetails();
         $discounts = (isset($cartDetails['discounts'])) ? $cartDetails['discounts'] : array();
-
+    
         foreach ($discounts as $discount) {
-            if ($discount['reduction_amount'] > 0 || $discount['reduction_percent'] > 0 || ($discount['free_shipping'] == 1 && !$free_shipping_coupon_applied)) {
-                $discountValue = $discount['value_real'];
-                $discountTax = $discount['value_tax_exc'];
-                if ($discount['free_shipping'] == 1 && $free_shipping_coupon_applied) {
+            if ((!empty($discount['reduction_amount']) && $discount['reduction_amount'] > 0) || (!empty($discount['reduction_percent']) && $discount['reduction_percent'] > 0) || (!empty($discount['free_shipping']) && $discount['free_shipping'] === 1 && $free_shipping_coupon_applied === false)) {
+                $discountValue = !empty($discount['value_real']) ? $discount['value_real'] : 0;
+                $discountTax =  !empty($discount['value_tax_exc']) ? $discount['value_tax_exc'] : 0;
+                if ($discount['free_shipping'] === 1 && $free_shipping_coupon_applied === true) {
                     $discountValue -= $shippingCost_wt;
                     $discountTax -= $shippingCost;
                 }
-                if ($discount > 0) {
+                if ($discountValue > 0) {
                     $arrResult[] = array(
                         'id' => $discount['code'],
                         'name' => $discount['description'],
@@ -1087,7 +1087,7 @@ class PaynlPaymentMethods extends PaymentModule
                         'qty' => 1,
                         'type' => 'DISCOUNT'
                     );
-                    if ($discount['free_shipping'] == 1) {
+                    if ($discount['free_shipping'] === 1) {
                         $free_shipping_coupon_applied = true;
                     }
                 }
