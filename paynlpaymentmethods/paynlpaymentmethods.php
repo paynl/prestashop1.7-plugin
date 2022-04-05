@@ -182,7 +182,7 @@ class PaynlPaymentMethods extends PaymentModule
         $payOrderAmount = $transaction->getPaidAmount();
         $status = $arrTransactionDetails['paymentDetails']['stateName'];
         $profileId = $transaction->getPaymentProfileId();        
-        $methodName = $this->getPaymentMethodSettingsName($transactionId, $profileId);      
+        $methodName = PaymentMethod::getName($transactionId, $profileId);
         $showRefundButton = ($transaction->isPaid() || $transaction->isPartiallyRefunded()) && ($profileId != PaymentMethod::METHOD_INSTORE_PROFILE_ID  && $profileId != PaymentMethod::METHOD_INSTORE);
     } catch (Exception $exception) {
       $showRefundButton = false;
@@ -668,7 +668,7 @@ class PaynlPaymentMethods extends PaymentModule
         }
 
         $profileId = $transaction->getPaymentProfileId();        
-        $paymentMethodName = $this->getPaymentMethodSettingsName($transactionId, $profileId); 
+        $paymentMethodName = PaymentMethod::getName($transactionId, $profileId);
 
         $cart = new Cart((int)$cartId);
         $cartTotalPrice = (version_compare(_PS_VERSION_, '1.7.7.0', '>=')) ? $cart->getCartTotalPrice() : $this->getCartTotalPrice($cart);
@@ -872,7 +872,7 @@ class PaynlPaymentMethods extends PaymentModule
         # Flush the package list, so the fee is added to it.
         $this->context->cart->getPackageList(true);
 
-        $paymentMethodSettings = $this->getPaymentMethodSettings($payment_option_id);
+        $paymentMethodSettings = PaymentMethod::getPaymentMethodSettings($payment_option_id);
         $paymentMethodName = empty($paymentMethodSettings->name) ? 'PAY. Overboeking' : $paymentMethodSettings->name;
 
         $this->validateOrder($cart->id, $this->statusPending, 0, $paymentMethodName, null, array(), null, false, $cart->secure_key);
@@ -932,42 +932,6 @@ class PaynlPaymentMethods extends PaymentModule
         return substr($object_string, 0, 64);
     }
 
-  /**
-   * Retrieve the settings of a specific payment with payment_profile_id
-   *
-   * @param $payment_profile_id
-   * @return bool
-   */
-  private function getPaymentMethodSettings($payment_profile_id)
-  {
-    $paymentMethods = json_decode(Configuration::get('PAYNL_PAYMENTMETHODS'));
-    foreach ($paymentMethods as $objPaymentSettings) {
-      if ($objPaymentSettings->id == $payment_profile_id) {
-        return $objPaymentSettings;
-      }
-    }
-    return false;
-  }
-
-  private function getPaymentMethodSettingsName($transactionId = null, $profileId = null)
-  {
-    $paymentMethodName = '';
-    if ($profileId == PaymentMethod::METHOD_SANDBOX) {
-        $paymentMethodName = 'Sandbox';
-    } else {
-        $dbTransaction = Transaction::get($transactionId);
-        if (!empty($dbTransaction['payment_option_id'])) {
-            $settings = $this->getPaymentMethodSettings($dbTransaction['payment_option_id']);
-        } else {
-            $settings = $this->getPaymentMethodSettings($profileId);
-        }
-        $paymentMethodName = empty($settings->name) ? '' : $settings->name;
-    }
-    if (empty(trim($paymentMethodName))) {
-        $paymentMethodName = 'PAY.';            
-    }
-    return $paymentMethodName;
-  }
 
 
   private function getPaymentMethod($payment_option_id)
