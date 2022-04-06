@@ -21,7 +21,7 @@ class PaymentMethod
      */
     public static function getName($transactionId = null, $profileId = null)
     {
-        if ($profileId == PaymentMethod::METHOD_SANDBOX) {
+        if ($profileId == self::METHOD_SANDBOX) {
             $paymentMethodName = 'Sandbox';
         } else {
             $dbTransaction = Transaction::get($transactionId);
