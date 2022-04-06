@@ -1066,6 +1066,34 @@ class PaynlPaymentMethods extends PaymentModule
             'type' => 'SHIPPING'
         );
 
+        $free_shipping_coupon_applied = false;
+        $cartDetails = $cart->GetSummaryDetails();
+        $discounts = (isset($cartDetails['discounts'])) ? $cartDetails['discounts'] : array();
+    
+        foreach ($discounts as $discount) {
+            if ((!empty($discount['reduction_amount']) && $discount['reduction_amount'] > 0) || (!empty($discount['reduction_percent']) && $discount['reduction_percent'] > 0) || (!empty($discount['free_shipping']) && $discount['free_shipping'] === 1 && $free_shipping_coupon_applied === false)) {
+                $discountValue = !empty($discount['value_real']) ? $discount['value_real'] : 0;
+                $discountTax =  !empty($discount['value_tax_exc']) ? $discount['value_tax_exc'] : 0;
+                if ($discount['free_shipping'] === 1 && $free_shipping_coupon_applied === true) {
+                    $discountValue -= $shippingCost_wt;
+                    $discountTax -= $shippingCost;
+                }
+                if ($discountValue > 0) {
+                    $arrResult[] = array(
+                        'id' => $discount['code'],
+                        'name' => $discount['description'],
+                        'price' => -$discountValue,
+                        'tax' => $discountTax - $discountValue,
+                        'qty' => 1,
+                        'type' => 'DISCOUNT'
+                    );
+                    if ($discount['free_shipping'] === 1) {
+                        $free_shipping_coupon_applied = true;
+                    }
+                }
+            }
+        }
+
         return $arrResult;
     }
 
