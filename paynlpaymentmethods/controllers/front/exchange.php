@@ -56,10 +56,6 @@ class PaynlPaymentMethodsExchangeModuleFrontController extends ModuleFrontContro
             die('TRUE| Processing partial payment');
         }
 
-        if ($action == 'cancel' && $paymentoption != 136) {
-            die('TRUE| Status updated to CANCELED');
-        }
-
         try {
             $message = '';
             $module->processPayment($transactionId, $message);
