@@ -39,7 +39,6 @@ class PaynlPaymentMethodsExchangeModuleFrontController extends ModuleFrontContro
         # PAY. action
         $action = Tools::getValue('action');
         $cartid = Tools::getValue('extra1');
-        $paymentoption = Tools::getValue('payment_profile_id');
 
         /**
         * @var $module PaynlPaymentMethods

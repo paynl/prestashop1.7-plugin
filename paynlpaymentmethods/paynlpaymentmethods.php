@@ -697,10 +697,6 @@ class PaynlPaymentMethods extends PaymentModule
             }
         }
 
-        if ($transaction->isCanceled() && $profileId != PaymentMethod::METHOD_OVERBOEKING) {
-            $message = "Status updated to CANCELED";
-        }
-
         $cart = new Cart((int)$cartId);
         $cartTotalPrice = (version_compare(_PS_VERSION_, '1.7.7.0', '>=')) ? $cart->getCartTotalPrice() : $this->getCartTotalPrice($cart);
         $amountPaid = in_array($cartTotalPrice, array($transaction->getCurrencyAmount(), $transaction->getPaidCurrencyAmount(), $transaction->getPaidAmount())) ? $cartTotalPrice : null;
@@ -787,6 +783,10 @@ class PaynlPaymentMethods extends PaymentModule
                     Throw new Exception($message);
                 }
             } else {
+                if ($transaction->isCanceled()) {
+                    $message = "Status updated to CANCELED";
+                }
+
                 $this->payLog('processPayment 3', 'OrderStateName:' . $orderStateName . '. iOrderState: ' . $iOrderState . '. iState:' . $iState, $cartId, $transactionId);
             }
         }
