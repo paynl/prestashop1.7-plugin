@@ -80,8 +80,8 @@ class PaynlPaymentMethodsFinishModuleFrontController extends ModuleFrontControll
           $slow = '';
 
           $dbTransaction = Transaction::get($transactionId);
-          if ($dbTransaction['payment_option_id'] == PaymentMethod::METHOD_INSTORE && !empty($dbTransaction['hash'])) {
-              Instore::handlePin($dbTransaction['hash'], $transactionId, $this);
+          if (!empty($dbTransaction['hash']) && !empty($dbTransaction['payment_option_id']) && $dbTransaction['payment_option_id'] == PaymentMethod::METHOD_INSTORE) {
+            Instore::handlePin($dbTransaction['hash'], $transactionId, $this);
           }
 
           if (!$transaction->isPaid()) {
