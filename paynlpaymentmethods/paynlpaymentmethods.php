@@ -687,6 +687,11 @@ class PaynlPaymentMethods extends PaymentModule
                 return $transaction;
             }
 
+            if ($transaction->isPartiallyRefunded()) {
+                $message = 'Partial refund recieved | OrderReference: ' . $order->reference;
+                return $transaction;
+            }
+
             if ($order->hasBeenPaid() && !$transaction->isRefunded(false)) {
                 $message = 'Order is already paid | OrderReference: ' . $order->reference;
                 return $transaction;
