@@ -40,9 +40,8 @@ class PaynlPaymentMethodsStartPaymentModuleFrontController extends ModuleFrontCo
             Tools::redirect('index.php?controller=order&step=1');
         }
 
-
         $authorized = false;
-        $paymentOptionId = $_REQUEST['payment_option_id'];
+        $paymentOptionId = Tools::getValue('payment_option_id');
         foreach (Module::getPaymentModules() as $module) {
             if ($module['name'] == 'paynlpaymentmethods') {
                 $authorized = $this->module->isPaymentMethodAvailable($cart, $paymentOptionId);
@@ -55,17 +54,16 @@ class PaynlPaymentMethodsStartPaymentModuleFrontController extends ModuleFrontCo
         }
 
         $extra_data = array();
-        if(isset($_REQUEST['bank'])){
-            $extra_data['bank'] = $_REQUEST['bank'];
+        $bank = Tools::getValue('bank');
+        if (!empty($bank)) {
+            $extra_data['bank'] = $bank;
         }
-        try{
+        try {
             $redirectUrl = $this->module->startPayment($cart, $paymentOptionId, $extra_data);
             Tools::redirect($redirectUrl);
-        } catch (Exception $e){
-          $this->module->payLog('postProcess', 'Error startPayment: ' . $e->getMessage(), $cart->id);
-          die('Error: ' . $e->getMessage());
+        } catch (Exception $e) {
+            $this->module->payLog('postProcess', 'Error startPayment: ' . $e->getMessage(), $cart->id);
+            die('Error: ' . $e->getMessage());
         }
-
-
     }
 }
