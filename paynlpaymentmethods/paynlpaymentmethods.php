@@ -679,11 +679,13 @@ class PaynlPaymentMethods extends PaymentModule
             $amountPaid = in_array(round($cart->getOrderTotal(), 2), $arrPayAmounts) ? $cart->getOrderTotal() : null;
         }
 
+        $this->payLog('processPayment (order)', 'getOrderTotal: ' . $cart->getOrderTotal() . '. cartTotalPrice: ' . $cartTotalPrice . ' - ' . print_r($arrPayAmounts, true), $cartId, $transactionId);
+
         if ($orderId) {
 
           $order = new Order($orderId);
 
-            $this->payLog('processPayment', 'orderStateName:' . $orderStateName . '. iOrderState: ' . $iOrderState . '. ' .
+            $this->payLog('processPayment (order)', 'orderStateName:' . $orderStateName . '. iOrderState: ' . $iOrderState . '. ' .
                 'orderRef:' . $order->reference . '. orderModule:' . $order->module, $cartId, $transactionId);
 
             # Check if the order is processed by PAY.
@@ -816,9 +818,10 @@ class PaynlPaymentMethods extends PaymentModule
      * @param Cart $cart
      * @param $payment_option_id
      * @param array $extra_data
-     *
      * @return string
+     * @throws PrestaShopDatabaseException
      * @throws PrestaShopException
+     * @throws Exception
      */
     public function startPayment(Cart $cart, $payment_option_id, $extra_data = array())
     {
@@ -835,9 +838,12 @@ class PaynlPaymentMethods extends PaymentModule
         $iPaymentFee = $this->getPaymentFee($objPaymentMethod, $cartTotal);
         $iPaymentFee = empty($iPaymentFee) ? 0 : $iPaymentFee;
         $cartId = $cart->id;
-        $this->payLog('startPayment', 'Starting new payment with cart-total: ' . $cartTotal . '. Fee: ' . $iPaymentFee . ' Currency (cart): ' . $currency->iso_code, $cartId);
 
-        $this->addPaymentFee($cart, $iPaymentFee);
+        try {
+            $this->addPaymentFee($cart, $iPaymentFee);
+        } catch (Exception $e) {
+            $this->payLog('startPayment', 'Could not add payment fee: ' . $e->getMessage(), $cartId);
+        }
 
         $products = $this->_getProductData($cart);
 
@@ -848,7 +854,7 @@ class PaynlPaymentMethods extends PaymentModule
         }
 
         $startData = array(
-            'amount' => $cart->getOrderTotal(true, Cart::BOTH, null, null, false),
+            'amount' => $cartTotal,
             'currency' => $currency->iso_code,
             'returnUrl' => $this->context->link->getModuleLink($this->name, 'finish', array(), true),
             'exchangeUrl' => $this->context->link->getModuleLink($this->name, 'exchange', array(), true),
@@ -871,42 +877,47 @@ class PaynlPaymentMethods extends PaymentModule
         # Retrieve language
         $startData['language'] = $this->getLanguageForOrder($cart);
 
-        $payTransaction = \Paynl\Transaction::start($startData);
+        try {
+            $payTransaction = \Paynl\Transaction::start($startData);
+        } catch (Exception $e) {
+            $this->payLog('startPayment', 'Starting new payment failed: ' . $cartTotal . '. Fee: ' . $iPaymentFee . ' Currency (cart): ' . $currency->iso_code .' e:'.$e->getMessage(), $cartId);
+            throw new Exception($e->getMessage(), $e->getCode());
+        }
+
         $payTransactionData = $payTransaction->getData();
         $payTransactionId = !empty($payTransactionData['transaction']['transactionId']) ? $payTransactionData['transaction']['transactionId'] : '';
 
-      
+        $this->payLog('startPayment', 'Starting new payment with cart-total: ' . $cartTotal . '. Fee: ' . $iPaymentFee . ' Currency (cart): ' . $currency->iso_code, $cartId, $payTransactionId);
+
         Transaction::addTransaction($payTransactionId, $cart->id, $cart->id_customer, $payment_option_id, $cart->getOrderTotal());
-      
 
-      if ($this->shouldValidateOnStart($payment_option_id)) {
+        if ($this->shouldValidateOnStart($payment_option_id)) {
 
-        $this->payLog('startPayment', 'Pre-Creating order for pp : ' . $payment_option_id, $cartId, $payTransactionId);
+            $this->payLog('startPayment', 'Pre-Creating order for pp : ' . $payment_option_id, $cartId, $payTransactionId);
 
-        # Flush the package list, so the fee is added to it.
-        $this->context->cart->getPackageList(true);
+            # Flush the package list, so the fee is added to it.
+            $this->context->cart->getPackageList(true);
 
-        $paymentMethodSettings = PaymentMethod::getPaymentMethodSettings($payment_option_id);
-        $paymentMethodName = empty($paymentMethodSettings->name) ? 'PAY. Overboeking' : $paymentMethodSettings->name;
+            $paymentMethodSettings = PaymentMethod::getPaymentMethodSettings($payment_option_id);
+            $paymentMethodName = empty($paymentMethodSettings->name) ? 'PAY. Overboeking' : $paymentMethodSettings->name;
 
-        $this->validateOrder($cart->id, $this->statusPending, 0, $paymentMethodName, null, array(), null, false, $cart->secure_key);
+            $this->validateOrder($cart->id, $this->statusPending, 0, $paymentMethodName, null, array(), null, false, $cart->secure_key);
 
-        $orderId = Order::getIdByCartId($cartId);
-        $order = new Order($orderId);
+            $orderId = Order::getIdByCartId($cartId);
+            $order = new Order($orderId);
 
-        $orderPayment = new OrderPayment();
-        $orderPayment->order_reference = $order->reference;
-        $orderPayment->payment_method = $paymentMethodName;
-        $orderPayment->amount = $startData['amount'];
-        $orderPayment->transaction_id = $payTransactionData['transaction']['transactionId'];
-        $orderPayment->id_currency = $cart->id_currency;
-        $orderPayment->save();
-      } else
-      {
-        $this->payLog('startPayment', 'Not pre-creating the order, waiting for payment.', $cartId, $payTransactionId);
-      }
+            $orderPayment = new OrderPayment();
+            $orderPayment->order_reference = $order->reference;
+            $orderPayment->payment_method = $paymentMethodName;
+            $orderPayment->amount = $startData['amount'];
+            $orderPayment->transaction_id = $payTransactionData['transaction']['transactionId'];
+            $orderPayment->id_currency = $cart->id_currency;
+            $orderPayment->save();
+        } else {
+            $this->payLog('startPayment', 'Not pre-creating the order, waiting for payment.', $cartId, $payTransactionId);
+        }
 
-      if ($payment_option_id == PaymentMethod::METHOD_INSTORE) {
+        if ($payment_option_id == PaymentMethod::METHOD_INSTORE) {
             $this->payLog('startPayment', 'Starting Instore Payment', $cartId, $payTransactionId);
             $terminalId = null;
             if (isset($extra_data['bank'])) {
@@ -962,6 +973,8 @@ class PaynlPaymentMethods extends PaymentModule
     /**
      * @param Cart $cart
      * @param $iFee_wt
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
      */
     private function addPaymentFee(Cart $cart, $iFee_wt)
     {
