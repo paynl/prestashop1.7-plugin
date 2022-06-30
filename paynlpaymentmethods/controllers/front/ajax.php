@@ -36,15 +36,6 @@ class PaynlPaymentMethodsAjaxModuleFrontController extends ModuleFrontController
         $prestaorderid = Tools::getValue('prestaorderid');
         $amount = Tools::getValue('amount');
 
-        if ($calltype == 'refund') {
-            $this->refundType($prestaorderid, $amount);
-        } else if ($calltype == 'capture') {
-            $this->captureType($prestaorderid, $amount);
-        }
-    }
-
-    public function refundType($prestaorderid, $amount)
-    {
         /**
          * @var $module PaynlPaymentMethods
          */
@@ -53,7 +44,15 @@ class PaynlPaymentMethodsAjaxModuleFrontController extends ModuleFrontController
         try {
             $order = new Order($prestaorderid);
         } catch (Exception $e) {
-            $module->payLog('Refund', 'Failed trying to refund ' . $amount . ' on ps-orderid ' . $prestaorderid . ' Order not found. Errormessage: ' . $e->getMessage());
+            if ($calltype == 'refund') {
+                $module->payLog('Refund', 'Failed trying to refund ' . $amount . ' on ps-orderid ' . $prestaorderid . ' Order not found. Errormessage: ' . $e->getMessage());
+            } else if ($calltype == 'capture'){
+                if (empty($amount)) {
+                    $module->payLog('Capture', 'Failed trying to do the remaining capture on ps-orderid ' . $prestaorderid . ' Order not found. Errormessage: ' . $e->getMessage());
+                } else {
+                    $module->payLog('Capture', 'Failed trying to capture ' . $amount . ' on ps-orderid ' . $prestaorderid . ' Order not found. Errormessage: ' . $e->getMessage());
+                }
+            }
             $this->returnResponse(false, 0, 'Could not find order');
         }
 
@@ -67,6 +66,15 @@ class PaynlPaymentMethodsAjaxModuleFrontController extends ModuleFrontController
 
         $cartId = !empty($order->id_cart) ? $order->id_cart : null;
 
+        if ($calltype == 'refund') {
+            $this->refundType($prestaorderid, $amount, $cartId, $transactionId, $strCurrency, $module);
+        } else if ($calltype == 'capture') {
+            $this->captureType($prestaorderid, $amount, $cartId, $transactionId, $strCurrency, $module);
+        }
+    }
+
+    public function refundType($prestaorderid, $amount, $cartId, $transactionId, $strCurrency, $module)
+    {
         $module->payLog('Refund', 'Trying to refund ' . $amount . ' ' . $strCurrency . ' on prestashop-orderid ' . $prestaorderid, $cartId, $transactionId);
 
         $arrRefundResult = $module->doRefund($transactionId, $amount, $strCurrency);
@@ -87,34 +95,8 @@ class PaynlPaymentMethodsAjaxModuleFrontController extends ModuleFrontController
 
     }
 
-    public function captureType($prestaorderid, $amount)
+    public function captureType($prestaorderid, $amount, $cartId, $transactionId, $strCurrency, $module)
     {
-        /**
-         * @var $module PaynlPaymentMethods
-         */
-        $module = $this->module;
-
-        try {
-            $order = new Order($prestaorderid);
-        } catch (Exception $e) {
-            if (empty($amount)) {
-                $module->payLog('Capture', 'Failed trying to do the remaining capture on ps-orderid ' . $prestaorderid . ' Order not found. Errormessage: ' . $e->getMessage());
-            } else {
-                $module->payLog('Capture', 'Failed trying to capture ' . $amount . ' on ps-orderid ' . $prestaorderid . ' Order not found. Errormessage: ' . $e->getMessage());
-            }
-            $this->returnResponse(false, 0, 'Could not find order');
-        }
-
-        $paymenyArr = $order->getOrderPayments();
-        $orderPayment = reset($paymenyArr);
-        $transactionId = $orderPayment->transaction_id;
-
-        $currencyId = $orderPayment->id_currency;
-        $currency = new Currency($currencyId);
-        $strCurrency = $currency->iso_code;
-
-        $cartId = !empty($order->id_cart) ? $order->id_cart : null;
-
         if (empty($amount)) {
             $module->payLog('Capture', 'Trying to do the remaining capture on prestashop-orderid ' . $prestaorderid, $cartId, $transactionId);
         } else {
