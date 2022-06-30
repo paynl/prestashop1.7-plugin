@@ -191,7 +191,6 @@ class PaynlPaymentMethods extends PaymentModule
       'status' => $status,
       'method' => $methodName,
       'ajaxURL' => $this->context->link->getModuleLink($this->name, 'ajax', array(), true),
-      'captureURL' => $this->context->link->getModuleLink($this->name, 'capture', array(), true),
       'showRefundButton' => $showRefundButton,
       'showCaptureButton' => $showCaptureButton,
       'showCaptureRemainingButton' => $showCaptureRemainingButton,

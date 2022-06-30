@@ -40,7 +40,7 @@ jQuery(document).ready(function () {
             jQuery.extend(data, {amount: amount});
             jQuery.extend(data, {orderid: transactionid});
             jQuery.extend(data, {prestaorderid: PrestaOrderId});
-
+            jQuery.extend(data, {calltype: 'refund'});
 
             var actionButton = jQuery(this);
             var payOption = jQuery(this).parent();
@@ -69,7 +69,7 @@ jQuery(document).ready(function () {
         }
         var transactionid = jQuery('#pay-transactionid').val();
         var PrestaOrderId = jQuery('#pay-prestaorderid').val();
-        var ajaxurl = jQuery('#pay-captureurl').val();
+        var ajaxurl = jQuery('#pay-ajaxurl').val();
         var presentationAmount = amount.toFixed(2);
         var currency = jQuery('#pay-currency').val();
         var lang_areyoursurecapture = jQuery('#pay-lang-areyoursurecapture').val();
@@ -88,6 +88,7 @@ jQuery(document).ready(function () {
             jQuery.extend(data, {amount: amount});
             jQuery.extend(data, {orderid: transactionid});
             jQuery.extend(data, {prestaorderid: PrestaOrderId});
+            jQuery.extend(data, {calltype: 'capture'});
 
             var actionButton = jQuery(this);
             var payOption = jQuery(this).parent();
@@ -103,7 +104,7 @@ jQuery(document).ready(function () {
 
         var transactionid = jQuery('#pay-transactionid').val();
         var PrestaOrderId = jQuery('#pay-prestaorderid').val();
-        var ajaxurl = jQuery('#pay-captureurl').val();
+        var ajaxurl = jQuery('#pay-ajaxurl').val();
         var lang_areyoursurecapture = jQuery('#pay-lang-areyoursurecaptureremaining').val();
         var lang_capturing = jQuery('#pay-lang-capturing').val();
         var lang_succes = jQuery("#pay-lang-succesfullycapturedremaining").val();
@@ -117,6 +118,7 @@ jQuery(document).ready(function () {
             jQuery.extend(data, {amount: amount});
             jQuery.extend(data, {orderid: transactionid});
             jQuery.extend(data, {prestaorderid: PrestaOrderId});
+            jQuery.extend(data, {calltype: 'capture'});
 
             var actionButton = jQuery(this);
             var payOption = jQuery(this).parent();
