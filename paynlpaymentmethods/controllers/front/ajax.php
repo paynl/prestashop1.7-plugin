@@ -44,15 +44,8 @@ class PaynlPaymentMethodsAjaxModuleFrontController extends ModuleFrontController
         try {
             $order = new Order($prestaorderid);
         } catch (Exception $e) {
-            if ($calltype == 'refund') {
-                $module->payLog('Refund', 'Failed trying to refund ' . $amount . ' on ps-orderid ' . $prestaorderid . ' Order not found. Errormessage: ' . $e->getMessage());
-            } else if ($calltype == 'capture'){
-                if (empty($amount)) {
-                    $module->payLog('Capture', 'Failed trying to do the remaining capture on ps-orderid ' . $prestaorderid . ' Order not found. Errormessage: ' . $e->getMessage());
-                } else {
-                    $module->payLog('Capture', 'Failed trying to capture ' . $amount . ' on ps-orderid ' . $prestaorderid . ' Order not found. Errormessage: ' . $e->getMessage());
-                }
-            }
+            $amount = empty($amount) ? '' : $amount;
+            $module->payLog('Capture', 'Failed trying to ' . $calltype . ' ' . $amount . ' on ps-orderid ' . $prestaorderid . ' Order not found. Errormessage: ' . $e->getMessage());
             $this->returnResponse(false, 0, 'Could not find order');
         }
 
@@ -67,13 +60,13 @@ class PaynlPaymentMethodsAjaxModuleFrontController extends ModuleFrontController
         $cartId = !empty($order->id_cart) ? $order->id_cart : null;
 
         if ($calltype == 'refund') {
-            $this->refundType($prestaorderid, $amount, $cartId, $transactionId, $strCurrency, $module);
+            $this->processRefund($prestaorderid, $amount, $cartId, $transactionId, $strCurrency, $module);
         } else if ($calltype == 'capture') {
-            $this->captureType($prestaorderid, $amount, $cartId, $transactionId, $strCurrency, $module);
+            $this->processCapture($prestaorderid, $amount, $cartId, $transactionId, $strCurrency, $module);
         }
     }
 
-    public function refundType($prestaorderid, $amount, $cartId, $transactionId, $strCurrency, $module)
+    public function processRefund($prestaorderid, $amount, $cartId, $transactionId, $strCurrency, $module)
     {
         $module->payLog('Refund', 'Trying to refund ' . $amount . ' ' . $strCurrency . ' on prestashop-orderid ' . $prestaorderid, $cartId, $transactionId);
 
@@ -95,13 +88,10 @@ class PaynlPaymentMethodsAjaxModuleFrontController extends ModuleFrontController
 
     }
 
-    public function captureType($prestaorderid, $amount, $cartId, $transactionId, $strCurrency, $module)
+    public function processCapture($prestaorderid, $amount, $cartId, $transactionId, $strCurrency, $module)
     {
-        if (empty($amount)) {
-            $module->payLog('Capture', 'Trying to do the remaining capture on prestashop-orderid ' . $prestaorderid, $cartId, $transactionId);
-        } else {
-            $module->payLog('Capture', 'Trying to capture ' . $amount . ' ' . $strCurrency . ' on prestashop-orderid ' . $prestaorderid, $cartId, $transactionId);
-        }
+        $amount = empty($amount) ? '' : $amount;
+        $module->payLog('Capture', 'Trying to capture ' . $amount . ' ' . $strCurrency . ' on prestashop-orderid ' . $prestaorderid, $cartId, $transactionId);
 
         $arrCaptureResult = $module->doCapture($transactionId, $amount);
         $captureResult = $arrCaptureResult['data'];
@@ -109,11 +99,8 @@ class PaynlPaymentMethodsAjaxModuleFrontController extends ModuleFrontController
         if ($arrCaptureResult['result']) {
             $module->payLog('Capture', 'Capture success, result message: ' . $cartId, $transactionId);
 
-            if (empty($amount)) {
-                $this->returnResponse(true, "", 'succesfully_captured_remaining');
-            } else {
-                $this->returnResponse(true, $amount, 'succesfully_captured ' . $strCurrency . ' ' . $amount);
-            }
+            $amount = empty($amount) ? '' : $amount;
+            $this->returnResponse(true, $amount, 'succesfully_captured ' . $strCurrency . ' ' . $amount);
         } else {
             $module->payLog('Capture', 'Capture failed: ' . $captureResult, $cartId, $transactionId);
             $this->returnResponse(false, 0, 'could_not_process_capture');
