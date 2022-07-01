@@ -725,7 +725,7 @@ class PaynlPaymentMethods extends PaymentModule
                 if (empty($orderPayment->transaction_id)) {
                     $orderPayment->transaction_id = $transactionId;
                 }
-                if (empty($orderPayment->transaction_id)) {
+                if (empty($orderPayment->id_currency)) {
                     $orderPayment->id_currency = $order->id_currency;
                 }
 
