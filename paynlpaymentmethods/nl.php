@@ -33,6 +33,8 @@ $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_44a50f07b4bdc5774
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_c53d0786f9ff13068245fd1f0ba2c64e'] = 'De order zal gecaptured worden via PAY. en de klant zal een factuur ontvangen van de betaalmethode die ze gebruik van hebben gemaakt.';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_157806b805c6e8bf6c3f9fca552faa66'] = 'Deze order is al gedeeltelijk gecaptured, hierdoor kan je alleen nog het overgebleven bedrag capturen. De order zal gecaptured worden via PAY. en de klant zal een factuur ontvangen van de betaalmethode die ze gebruik van hebben gemaakt.';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_020c2091aec3019d02193cef080bcf97'] = 'Betaalmethode toeslag';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_3ee7960dc804545cf3cc91a1fbc155ca'] = 'Selecteer uw bank a.u.b.';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_cf633a48ceceb64b509b34070ff248e7'] = 'Selecteer een pin-terminal a.u.b';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_9f06b28a40790c4c4df5739bce3c1eb0'] = 'Verzendkosten';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_68bf367e228f45ba83cb8831a5ee6447'] = 'Nederlands';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_78463a384a5aa4fad5fa73e2f506ecfc'] = 'Engels';
@@ -47,12 +49,15 @@ $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_d262bca42a884db06
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_eca1973b20e3b246847fd7f1648c2599'] = 'ServiceId is verplicht';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_c888438d14855d7d96a2724ee9c306bd'] = 'Instellingen opgeslagen';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_8cfa0f8895de4a51e4055e0a4476e274'] = 'PAY. Account instellingen. Plugin-versie %s';
-$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_0a0d3d18ca5a07d08e62a1c962f91946'] = 'APItoken';
-$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_04542edeb8b2c5b3922716ca8ddd0032'] = 'Je kunt je APItoken vinden onderaan op https://admin.pay.nl/my_merchant';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_0a0d3d18ca5a07d08e62a1c962f91946'] = 'API-token';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_97563fbcbe6814385fdc665775155742'] = 'Je kunt je API-token ';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_6c92285fa6d3e827b198d120ea3ac674'] = 'hier';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_d709ffb39a9deff0cd368dabe33d44f4'] = ' vinden, nog niet geregistreerd bij PAY? Klik dan ';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_b1b404a85c213977a7cabb82b730639c'] = 'ServiceId';
-$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_7a78c463c901a677dc7c205fb2542f9d'] = 'De SL-code van je dienst op https://admin.pay.nl/programs/programs';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_e8e81817f5892a440e72854b1b5eeb1f'] = 'Je kunt je SL-code ';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_adc1e83ea8057c3b182f292b223612da'] = 'Transactieomschrijving voorvoegsel';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_2ab45b27dbaf728ece860448598238ae'] = 'Een tekst die voor de transactieomschrijving wordt gezet';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_99a8c83c65d822871e36ab3c9f989110'] = 'Failover gateway';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_063515f416b7d05ff5d1c8103e3786d5'] = 'Laat dit leeg tenzij we bij PAY. u adviseren om dit in te vullen met een gateway die wij u geven';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_b989ff7da93d9c8344a4c4e765cab502'] = 'Validatievertraging';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_71268b7a2a120a7b132e7e3833567700'] = 'Wanneer de betaling is voltooid, wacht tot PAY. de betaling valideert voordat u doorverwezen wordt naar de succespagina';
