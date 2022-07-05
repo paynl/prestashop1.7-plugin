@@ -182,7 +182,7 @@ class PaynlPaymentMethods extends PaymentModule
         $payOrderAmount = $transaction->getPaidAmount();
         $status = $arrTransactionDetails['paymentDetails']['stateName'];
         $profileId = $transaction->getPaymentProfileId();
-        $settings = $this->getPaymentMethodSettings($profileId);
+        $settings = PaymentMethod::getPaymentMethodSettings($profileId);
 
         # Get the custom method name
         if ($profileId == 613) {
