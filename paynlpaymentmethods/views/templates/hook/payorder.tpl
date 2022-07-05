@@ -53,12 +53,12 @@
         {/if}
         {if $showCaptureButton eq true}
             <div class="payOption" id="refund-div" style="display: inline-block">
-                <div class="label">{$lang.amount_to_capture} ({$currency}) :
-                    <input type="text" placeholder="0,00" value="{$amountFormatted}" id="pay-capture-amount"
+                <div class="label">{$lang.amount_to_capture} ({$currency}) : {$amountFormatted}
+                    <input type="hidden" placeholder="0,00" value="{$amountFormatted}" id="pay-capture-amount"
                            class="fixed-width-sm" style="display: inline;margin-right:10px"/>
                 </div>
                 <button type="button" id="pay-capture-button" class="btn btn-danger"
-                        style="display: inline">{$lang.capture_button}</button>
+                        style="display: inline; margin-left: 10px">{$lang.capture_button}</button>
                 <div class="tooltipPAY">
                     ? <span class="tooltipPAYtext"> {$lang.info_capture_text} </span>
                 </div>
