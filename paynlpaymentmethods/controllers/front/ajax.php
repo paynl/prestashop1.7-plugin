@@ -32,13 +32,8 @@ class PaynlPaymentMethodsAjaxModuleFrontController extends ModuleFrontController
     public function initContent()
     {
         $calltype = Tools::getValue('calltype');
-
         $prestaorderid = Tools::getValue('prestaorderid');
         $amount = Tools::getValue('amount');
-
-        /**
-         * @var $module PaynlPaymentMethods
-         */
         $module = $this->module;
 
         try {
@@ -66,6 +61,14 @@ class PaynlPaymentMethodsAjaxModuleFrontController extends ModuleFrontController
         }
     }
 
+    /**
+     * @param $prestaorderid
+     * @param $amount
+     * @param $cartId
+     * @param $transactionId
+     * @param $strCurrency
+     * @param $module
+     */
     public function processRefund($prestaorderid, $amount, $cartId, $transactionId, $strCurrency, $module)
     {
         $module->payLog('Refund', 'Trying to refund ' . $amount . ' ' . $strCurrency . ' on prestashop-orderid ' . $prestaorderid, $cartId, $transactionId);
@@ -85,9 +88,17 @@ class PaynlPaymentMethodsAjaxModuleFrontController extends ModuleFrontController
             $module->payLog('Refund', 'Refund failed: ' . $refundResult, $cartId, $transactionId);
             $this->returnResponse(false, 0, 'could_not_process_refund');
         }
-
     }
 
+
+    /**
+     * @param $prestaorderid
+     * @param $amount
+     * @param $cartId
+     * @param $transactionId
+     * @param $strCurrency
+     * @param $module
+     */
     public function processCapture($prestaorderid, $amount, $cartId, $transactionId, $strCurrency, $module)
     {
         $amount = empty($amount) ? '' : $amount;
@@ -97,17 +108,20 @@ class PaynlPaymentMethodsAjaxModuleFrontController extends ModuleFrontController
         $captureResult = $arrCaptureResult['data'];
 
         if ($arrCaptureResult['result']) {
-            $module->payLog('Capture', 'Capture success, result message: ' . $cartId, $transactionId);
-
+            $module->payLog('Capture', 'Capture success', $cartId, $transactionId);
             $amount = empty($amount) ? '' : $amount;
             $this->returnResponse(true, $amount, 'succesfully_captured ' . $strCurrency . ' ' . $amount);
         } else {
             $module->payLog('Capture', 'Capture failed: ' . $captureResult, $cartId, $transactionId);
             $this->returnResponse(false, 0, 'could_not_process_capture');
         }
-
     }
 
+    /**
+     * @param $result
+     * @param string $amountRefunded
+     * @param string $message
+     */
     private function returnResponse($result, $amountRefunded = '', $message = '')
     {
         header('Content-Type: application/json;charset=UTF-8');
