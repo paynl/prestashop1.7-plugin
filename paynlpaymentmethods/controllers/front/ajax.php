@@ -34,13 +34,8 @@ class PaynlPaymentMethodsAjaxModuleFrontController extends ModuleFrontController
     public function initContent()
     {
         $calltype = Tools::getValue('calltype');
-
         $prestaorderid = Tools::getValue('prestaorderid');
         $amount = Tools::getValue('amount');
-
-        /**
-         * @var $module PaynlPaymentMethods
-         */
         $module = $this->module;
 
         try {
@@ -64,14 +59,19 @@ class PaynlPaymentMethodsAjaxModuleFrontController extends ModuleFrontController
         $transaction = new Transaction;
 
         if ($calltype == 'refund') {
-            $result = $transaction->processRefund($prestaorderid, $amount, $cartId, $transactionId, $strCurrency, $module);
+            $return = $transaction->processRefund($prestaorderid, $amount, $cartId, $transactionId, $strCurrency, $module);
         } else if ($calltype == 'capture') {
-            $result = $transaction->processCapture($prestaorderid, $amount, $cartId, $transactionId, $strCurrency, $module);
+            $return = $transaction->processCapture($prestaorderid, $amount, $cartId, $transactionId, $strCurrency, $module);
         }
 
-        $this->returnResponse($result["result"], $result["amountRefunded"], $result["message"]);
+        $this->returnResponse($return["result"], $return["amountRefunded"], $return["message"]);
     }
 
+    /**
+     * @param $result
+     * @param string $amountRefunded
+     * @param string $message
+     */
     private function returnResponse($result, $amountRefunded = '', $message = '')
     {
         header('Content-Type: application/json;charset=UTF-8');

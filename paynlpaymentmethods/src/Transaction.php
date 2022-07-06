@@ -61,6 +61,14 @@ class Transaction
         return is_array($result) ? $result : array();
     }
 
+    /**
+     * @param $prestaorderid
+     * @param $amount
+     * @param $cartId
+     * @param $transactionId
+     * @param $strCurrency
+     * @param $module
+     */
     public function processRefund($prestaorderid, $amount, $cartId, $transactionId, $strCurrency, $module)
     {
         $module->payLog('Refund', 'Trying to refund ' . $amount . ' ' . $strCurrency . ' on prestashop-orderid ' . $prestaorderid, $cartId, $transactionId);
@@ -91,6 +99,14 @@ class Transaction
             "message" => $message);
     }
 
+    /**
+     * @param $prestaorderid
+     * @param $amount
+     * @param $cartId
+     * @param $transactionId
+     * @param $strCurrency
+     * @param $module
+     */
     public function processCapture($prestaorderid, $amount, $cartId, $transactionId, $strCurrency, $module)
     {
         $amount = empty($amount) ? '' : $amount;
