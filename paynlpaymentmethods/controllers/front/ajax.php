@@ -24,6 +24,8 @@
 *  International Registered Trademark & Property of PrestaShop SA
 */
 
+use PaynlPaymentMethods\PrestaShop\Transaction;
+
 /**
  * @since 1.5.0
  */
@@ -59,53 +61,15 @@ class PaynlPaymentMethodsAjaxModuleFrontController extends ModuleFrontController
 
         $cartId = !empty($order->id_cart) ? $order->id_cart : null;
 
+        $transaction = new Transaction;
+
         if ($calltype == 'refund') {
-            $this->processRefund($prestaorderid, $amount, $cartId, $transactionId, $strCurrency, $module);
+            $result = $transaction->processRefund($prestaorderid, $amount, $cartId, $transactionId, $strCurrency, $module);
         } else if ($calltype == 'capture') {
-            $this->processCapture($prestaorderid, $amount, $cartId, $transactionId, $strCurrency, $module);
-        }
-    }
-
-    public function processRefund($prestaorderid, $amount, $cartId, $transactionId, $strCurrency, $module)
-    {
-        $module->payLog('Refund', 'Trying to refund ' . $amount . ' ' . $strCurrency . ' on prestashop-orderid ' . $prestaorderid, $cartId, $transactionId);
-
-        $arrRefundResult = $module->doRefund($transactionId, $amount, $strCurrency);
-        $refundResult = $arrRefundResult['data'];
-
-        if ($arrRefundResult['result']) {
-            $arrResult = $refundResult->getData();
-            $amountRefunded = !empty($arrResult['amountRefunded']) ? $arrResult['amountRefunded'] : '';
-
-            $desc = !empty($arrResult['description']) ? $arrResult['description'] : 'empty';
-            $module->payLog('Refund', 'Refund success, result message: ' . $desc, $cartId, $transactionId);
-
-            $this->returnResponse(true, $amountRefunded, 'succesfully_refunded ' . $strCurrency . ' ' . $amount);
-        } else {
-            $module->payLog('Refund', 'Refund failed: ' . $refundResult, $cartId, $transactionId);
-            $this->returnResponse(false, 0, 'could_not_process_refund');
+            $result = $transaction->processCapture($prestaorderid, $amount, $cartId, $transactionId, $strCurrency, $module);
         }
 
-    }
-
-    public function processCapture($prestaorderid, $amount, $cartId, $transactionId, $strCurrency, $module)
-    {
-        $amount = empty($amount) ? '' : $amount;
-        $module->payLog('Capture', 'Trying to capture ' . $amount . ' ' . $strCurrency . ' on prestashop-orderid ' . $prestaorderid, $cartId, $transactionId);
-
-        $arrCaptureResult = $module->doCapture($transactionId, $amount);
-        $captureResult = $arrCaptureResult['data'];
-
-        if ($arrCaptureResult['result']) {
-            $module->payLog('Capture', 'Capture success, result message: ' . $cartId, $transactionId);
-
-            $amount = empty($amount) ? '' : $amount;
-            $this->returnResponse(true, $amount, 'succesfully_captured ' . $strCurrency . ' ' . $amount);
-        } else {
-            $module->payLog('Capture', 'Capture failed: ' . $captureResult, $cartId, $transactionId);
-            $this->returnResponse(false, 0, 'could_not_process_capture');
-        }
-
+        $this->returnResponse($result["result"], $result["amountRefunded"], $result["message"]);
     }
 
     private function returnResponse($result, $amountRefunded = '', $message = '')

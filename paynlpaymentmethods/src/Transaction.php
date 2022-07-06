@@ -60,4 +60,64 @@ class Transaction
 
         return is_array($result) ? $result : array();
     }
+
+    public function processRefund($prestaorderid, $amount, $cartId, $transactionId, $strCurrency, $module)
+    {
+        $module->payLog('Refund', 'Trying to refund ' . $amount . ' ' . $strCurrency . ' on prestashop-orderid ' . $prestaorderid, $cartId, $transactionId);
+
+        $arrRefundResult = $module->doRefund($transactionId, $amount, $strCurrency);
+        $refundResult = $arrRefundResult['data'];
+
+        if ($arrRefundResult['result']) {
+            $arrResult = $refundResult->getData();
+            $amountRefunded = !empty($arrResult['amountRefunded']) ? $arrResult['amountRefunded'] : '';
+
+            $desc = !empty($arrResult['description']) ? $arrResult['description'] : 'empty';
+            $module->payLog('Refund', 'Refund success, result message: ' . $desc, $cartId, $transactionId);
+
+            $result = true;
+            $message = 'succesfully_refunded ' . $strCurrency . ' ' . $amount;
+        } else {
+            $module->payLog('Refund', 'Refund failed: ' . $refundResult, $cartId, $transactionId);
+
+            $result = false;
+            $amountRefunded = 0;
+            $message = 'could_not_process_refund';
+        }
+
+        return array(
+            "result" => $result,
+            "amountRefunded" => $amountRefunded,
+            "message" => $message);
+    }
+
+    public function processCapture($prestaorderid, $amount, $cartId, $transactionId, $strCurrency, $module)
+    {
+        $amount = empty($amount) ? '' : $amount;
+        $module->payLog('Capture', 'Trying to capture ' . $amount . ' ' . $strCurrency . ' on prestashop-orderid ' . $prestaorderid, $cartId, $transactionId);
+
+        $arrCaptureResult = $module->doCapture($transactionId, $amount);
+        $captureResult = $arrCaptureResult['data'];
+
+        if ($arrCaptureResult['result']) {
+            $module->payLog('Capture', 'Capture success, result message: ' . $cartId, $transactionId);
+
+            $amount = empty($amount) ? '' : $amount;
+
+            $result = true;
+            $amountRefunded = $amount;
+            $message = 'succesfully_captured ' . $strCurrency . ' ' . $amount;
+        } else {
+            $module->payLog('Capture', 'Capture failed: ' . $captureResult, $cartId, $transactionId);
+
+            $result = false;
+            $amountRefunded = 0;
+            $message = 'could_not_process_capture';
+        }
+
+        return array(
+            "result" => $result,
+            "amountRefunded" => $amountRefunded,
+            "message" => $message);
+    }
 }
