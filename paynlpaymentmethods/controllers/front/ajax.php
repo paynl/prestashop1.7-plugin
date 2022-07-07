@@ -24,6 +24,8 @@
 *  International Registered Trademark & Property of PrestaShop SA
 */
 
+use \PaynlPaymentMethods\PrestaShop\Transaction;
+
 /**
  * @since 1.5.0
  */
@@ -73,7 +75,7 @@ class PaynlPaymentMethodsAjaxModuleFrontController extends ModuleFrontController
     {
         $module->payLog('Refund', 'Trying to refund ' . $amount . ' ' . $strCurrency . ' on prestashop-orderid ' . $prestaorderid, $cartId, $transactionId);
 
-        $arrRefundResult = $module->doRefund($transactionId, $amount, $strCurrency);
+        $arrRefundResult = Transaction::doRefund($transactionId, $amount, $strCurrency);
         $refundResult = $arrRefundResult['data'];
 
         if ($arrRefundResult['result']) {
@@ -104,7 +106,7 @@ class PaynlPaymentMethodsAjaxModuleFrontController extends ModuleFrontController
         $amount = empty($amount) ? '' : $amount;
         $module->payLog('Capture', 'Trying to capture ' . $amount . ' ' . $strCurrency . ' on prestashop-orderid ' . $prestaorderid, $cartId, $transactionId);
 
-        $arrCaptureResult = $module->doCapture($transactionId, $amount);
+        $arrCaptureResult = Transaction::doCapture($transactionId, $amount);
         $captureResult = $arrCaptureResult['data'];
 
         if ($arrCaptureResult['result']) {

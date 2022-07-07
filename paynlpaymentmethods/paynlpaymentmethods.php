@@ -32,6 +32,7 @@ if (!class_exists('\Paynl\Paymentmethods')) {
 }
 
 use Paynl\Result\Transaction\Refund;
+use PaynlPaymentMethods\PrestaShop\PayHelper;
 use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
 use PaynlPaymentMethods\PrestaShop\Transaction;
 use PaynlPaymentMethods\PrestaShop\PaymentMethod;
@@ -257,40 +258,6 @@ class PaynlPaymentMethods extends PaymentModule
 
       return $lang;
   }
-
-    /**
-     * @param $transactionId
-     * @param null $amount
-     * @param null $strCurrency
-     * @return array
-     */
-  public function doRefund($transactionId, $amount = null, $strCurrency = null)
-  {
-    try {
-      $this->sdkLogin();
-      $result = true;
-      $refundResult = \Paynl\Transaction::refund($transactionId, $amount, null, null, null, $strCurrency);
-    } catch (Exception $objException) {
-      $refundResult = $objException->getMessage();
-      $result = false;
-    }
-
-    return array('result' => $result, 'data' => $refundResult);
-  }
-
-    public function doCapture($transactionId, $amount = null)
-    {
-        try {
-            $this->sdkLogin();
-            $result = true;
-            $captureResult = \Paynl\Transaction::capture($transactionId, $amount);
-        } catch (Exception $objException) {
-            $captureResult = $objException->getMessage();
-            $result = false;
-        }
-
-        return array('result' => $result, 'data' => $captureResult);
-    }
 
   /**
    * Update order status
@@ -611,13 +578,13 @@ class PaynlPaymentMethods extends PaymentModule
         $paymentOptionText = null;
 
         if ($payment_option_id == PaymentMethod::METHOD_IDEAL) {
-            $this->sdkLogin();
+            PayHelper::sdkLogin();
             $paymentOptions = \Paynl\Paymentmethods::getBanks($payment_option_id);
             $paymentOptionText = $this->l('Please select your bank');
         }
 
         if ($payment_option_id == PaymentMethod::METHOD_INSTORE) {
-            $this->sdkLogin();
+            PayHelper::sdkLogin();
             $terminals = \Paynl\Instore::getAllTerminals();
             $paymentOptions = $terminals->getList();
             $paymentOptionText = $this->l('Please select a pin-terminal');
@@ -652,19 +619,6 @@ class PaynlPaymentMethods extends PaymentModule
             $summary['total_price_without_tax'] :
             $summary['total_price'];
 
-    }
-
-    private function sdkLogin()
-    {
-        $apitoken = Tools::getValue('PAYNL_API_TOKEN', Configuration::get('PAYNL_API_TOKEN'));
-        $serviceId = Tools::getValue('PAYNL_SERVICE_ID', Configuration::get('PAYNL_SERVICE_ID'));
-        $gateway = Tools::getValue('PAYNL_FAILOVER_GATEWAY', Configuration::get('PAYNL_FAILOVER_GATEWAY'));
-
-        if(!empty(trim($gateway))) {
-            \Paynl\Config::setApiBase(trim($gateway));
-        }
-        \Paynl\Config::setApiToken($apitoken);
-        \Paynl\Config::setServiceId($serviceId);
     }
 
     /**
@@ -829,7 +783,7 @@ class PaynlPaymentMethods extends PaymentModule
      */
     public function getTransaction($transactionId)
     {
-        $this->sdkLogin();
+        PayHelper::sdkLogin();
         return \Paynl\Transaction::status($transactionId);
     }
 
@@ -865,7 +819,7 @@ class PaynlPaymentMethods extends PaymentModule
      */
     public function startPayment(Cart $cart, $payment_option_id, $extra_data = array())
     {
-        $this->sdkLogin();
+        PayHelper::sdkLogin();
 
         $currency = new Currency($cart->id_currency);
         /** @var CurrencyCore $currency */
@@ -1324,7 +1278,7 @@ class PaynlPaymentMethods extends PaymentModule
      */
     private function getPaymentMethodName($payment_option_id)
     {
-        $this->sdkLogin();
+        PayHelper::sdkLogin();
 
         $payment_methods = \Paynl\Paymentmethods::getList();
         if (isset($payment_methods[$payment_option_id])) {
@@ -1356,7 +1310,7 @@ class PaynlPaymentMethods extends PaymentModule
             return false;
         }
         try {
-            $this->sdkLogin();
+            PayHelper::sdkLogin();
             //call api to check if the credentials are correct
             \Paynl\Paymentmethods::getList();
             $loggedin = true;
@@ -1386,7 +1340,7 @@ class PaynlPaymentMethods extends PaymentModule
 
             if (empty($this->_postErrors)) {
                 // check if apitoken and serviceId are valid
-                $this->sdkLogin();
+                PayHelper::sdkLogin();
 
                 try {
                     Paynl\Paymentmethods::getList();
@@ -1609,7 +1563,7 @@ class PaynlPaymentMethods extends PaymentModule
         $resultArray = array();
         $savedPaymentMethods = json_decode(Configuration::get('PAYNL_PAYMENTMETHODS'));
         try {
-            $this->sdkLogin();
+            PayHelper::sdkLogin();
             $paymentmethods = \Paynl\Paymentmethods::getList();
             $paymentmethods = (array)$paymentmethods;
             $languages = Language::getLanguages(true);
