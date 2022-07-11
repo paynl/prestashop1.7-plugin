@@ -177,29 +177,23 @@ class PaynlPaymentMethods extends PaymentModule
     $payOrderAmount = 0;
     $methodName = 'PAY.';
 
-    try {
-        $transaction = $this->getTransaction($transactionId);
-        $arrTransactionDetails = $transaction->getData();
-        $payOrderAmount = $transaction->getPaidAmount();
-        $status = $arrTransactionDetails['paymentDetails']['stateName'];
-        $profileId = $transaction->getPaymentProfileId();
-        $settings = PaymentMethod::getPaymentMethodSettings($profileId);
+      try {
+          $transaction = $this->getTransaction($transactionId);
+          $arrTransactionDetails = $transaction->getData();
+          $payOrderAmount = $transaction->getPaidAmount();
+          $status = $arrTransactionDetails['paymentDetails']['stateName'];
+          $profileId = $transaction->getPaymentProfileId();
+          $settings = PaymentMethod::getPaymentMethodSettings($profileId);
+          $methodName = PaymentMethod::getName($transactionId, $profileId);
 
-        # Get the custom method name
-        if ($profileId == 613) {
-            $methodName = 'Sandbox';
-        } else {
-            $methodName = empty($settings->name) ? $profileId : $settings->name;
-        }
-
-        $showCaptureButton = $transaction->isAuthorized();
-        $showCaptureRemainingButton = $arrTransactionDetails['paymentDetails']['state'] == 97;
-        $showRefundButton = $transaction->isPaid() || $transaction->isPartiallyRefunded() && !$transaction->isAuthorized();
-    } catch (Exception $exception) {
-        $showRefundButton = false;
-        $showCaptureButton = false;
-        $showCaptureRemainingButton = false;
-    }
+          $showCaptureButton = $transaction->isAuthorized();
+          $showCaptureRemainingButton = $arrTransactionDetails['paymentDetails']['state'] == 97;
+          $showRefundButton = ($transaction->isPaid() || $transaction->isPartiallyRefunded()) && ($profileId != PaymentMethod::METHOD_INSTORE_PROFILE_ID && $profileId != PaymentMethod::METHOD_INSTORE);
+      } catch (Exception $exception) {
+          $showRefundButton = false;
+          $showCaptureButton = false;
+          $showCaptureRemainingButton = false;
+      }
 
     $amountFormatted = number_format($order->total_paid, 2, ',','.');
     $amountPayFormatted = number_format($payOrderAmount, 2, ',','.');
