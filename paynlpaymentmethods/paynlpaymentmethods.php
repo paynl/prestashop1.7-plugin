@@ -91,6 +91,10 @@ class PaynlPaymentMethods extends PaymentModule
         if (!$this->isRegisteredInHook('actionAdminControllerSetMedia')) {
             $this->registerHook('actionAdminControllerSetMedia');
         }
+
+        if (!$this->isRegisteredInHook('actionOrderStatusPostUpdate')) {
+            $this->registerHook('actionOrderStatusPostUpdate');
+        }
     }
 
     public function hookDisplayHeader(array $params)
@@ -109,6 +113,7 @@ class PaynlPaymentMethods extends PaymentModule
             || !$this->registerHook('displayAdminOrder')
             || !$this->registerHook('actionAdminControllerSetMedia')
             || !$this->registerHook('displayHeader')
+            || !$this->registerHook('actionOrderStatusPostUpdate')
         ) {
             return false;
         }
@@ -207,6 +212,46 @@ class PaynlPaymentMethods extends PaymentModule
     ));
 
     return $this->display(__FILE__, 'payorder.tpl');
+  }
+
+  /**
+  * @param $params 
+  */
+  public function hookActionOrderStatusPostUpdate($params)
+  {
+      try {
+          $orderId = (int)$params['id_order'];
+          $cartId = Cart::getCartIdByOrderId($orderId);
+          $order = new Order($orderId);
+      } catch (Exception $e) {
+          return;
+      }
+  
+      # Check if the order is processed by PAY.
+      if ($order->module !== 'paynlpaymentmethods') {
+          return;
+      }
+  
+      # Check if the order has been Shipped and Auto-capture is on
+      if ($params['newOrderStatus']->shipped == 1 && Configuration::get('PAYNL_AUTO_CAPTURE')) {
+          $orderPayments = $order->getOrderPayments();
+          $orderPayment = reset($orderPayments);
+  
+          $transactionId = $orderPayment->transaction_id;
+          $transaction = $this->getTransaction($transactionId);
+  
+          # Check if status is Authorized
+          if ($transaction->isAuthorized()) {
+              $this->payLog('Auto-capture', 'Starting auto-capture', $cartId, $transactionId);
+              try {
+                  $this->sdkLogin();
+                  \Paynl\Transaction::capture($transactionId);
+                  $this->payLog('Auto-capture', 'Capture success ', $transactionId);
+              } catch (Exception $e) {
+                  $this->payLog('Auto-capture', 'Capture failed (' . $e->getMessage() . ') ', $cartId, $transactionId);
+              }
+          }
+      }
   }
 
   private function getMultiLang()
@@ -1370,6 +1415,7 @@ class PaynlPaymentMethods extends PaymentModule
             Configuration::updateValue('PAYNL_PAYMENTMETHODS', Tools::getValue('PAYNL_PAYMENTMETHODS'));
             Configuration::updateValue('PAYNL_LANGUAGE', Tools::getValue('PAYNL_LANGUAGE'));
             Configuration::updateValue('PAYNL_SHOW_IMAGE', Tools::getValue('PAYNL_SHOW_IMAGE'));
+            Configuration::updateValue('PAYNL_AUTO_CAPTURE', Tools::getValue('PAYNL_AUTO_CAPTURE'));
 
         }
         $this->_html .= $this->displayConfirmation($this->l('Settings updated'));
@@ -1485,6 +1531,24 @@ class PaynlPaymentMethods extends PaymentModule
                         ),
                     ),
                     array(
+                        'type' => 'switch',
+                        'label' => $this->l('Auto-capture'),
+                        'name' => 'PAYNL_AUTO_CAPTURE',
+                        'desc' => $this->l('Capture authorized transactions automatically when order is shipped.'),
+                        'values' => array(
+                            array(
+                                'id' => 'active_on',
+                                'value' => 1,
+                                'label' => $this->l('Enabled')
+                            ),
+                            array(
+                                'id' => 'active_off',
+                                'value' => 0,
+                                'label' => $this->l('Disabled')
+                            )
+                        ),
+                    ),
+                    array(
                         'type' => 'select',
                         'label' => $this->l('Payment screen language'),
                         'name' => 'PAYNL_LANGUAGE',
@@ -1556,6 +1620,7 @@ class PaynlPaymentMethods extends PaymentModule
             'PAYNL_DESCRIPTION_PREFIX' => Tools::getValue('PAYNL_DESCRIPTION_PREFIX', Configuration::get('PAYNL_DESCRIPTION_PREFIX')),
             'PAYNL_LANGUAGE' => Tools::getValue('PAYNL_LANGUAGE', Configuration::get('PAYNL_LANGUAGE')),
             'PAYNL_SHOW_IMAGE' => $showImage,
+            'PAYNL_AUTO_CAPTURE' => Tools::getValue('PAYNL_AUTO_CAPTURE', Configuration::get('PAYNL_AUTO_CAPTURE')),
             'PAYNL_PAYMENTMETHODS' => $paymentMethods
         );
     }
