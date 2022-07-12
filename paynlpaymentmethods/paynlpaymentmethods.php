@@ -183,7 +183,6 @@ class PaynlPaymentMethods extends PaymentModule
           $payOrderAmount = $transaction->getPaidAmount();
           $status = $arrTransactionDetails['paymentDetails']['stateName'];
           $profileId = $transaction->getPaymentProfileId();
-          $settings = PaymentMethod::getPaymentMethodSettings($profileId);
           $methodName = PaymentMethod::getName($transactionId, $profileId);
 
           $showCaptureButton = $transaction->isAuthorized();
