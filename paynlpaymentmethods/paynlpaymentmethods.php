@@ -1031,7 +1031,7 @@ class PaynlPaymentMethods extends PaymentModule
         $arrResult = array();
         foreach ($cart->getProducts(true) as $product) {
             $arrResult[] = array(
-                'id' => $product['id_product'],
+                'id' => substr($product['id_product'], 0, 25),
                 'name' => $product['name'],
                 'price' => $product['price_wt'],
                 'vatPercentage' => $product['rate'],
@@ -1064,7 +1064,7 @@ class PaynlPaymentMethods extends PaymentModule
                 }
                 if ($discountValue > 0) {
                     $arrResult[] = array(
-                        'id' => $discount['code'],
+                        'id' => substr($discount['code'], 0, 25),
                         'name' => $discount['description'],
                         'price' => -$discountValue,
                         'tax' => $discountTax - $discountValue,
