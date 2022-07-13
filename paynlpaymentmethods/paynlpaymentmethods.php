@@ -252,7 +252,7 @@ class PaynlPaymentMethods extends PaymentModule
           if ($transaction->isAuthorized()) {
               $this->payLog('Auto-capture', 'Starting auto-capture', $cartId, $transactionId);
               try {
-                  $this->sdkLogin();
+                  PayHelper::sdkLogin();
                   \Paynl\Transaction::capture($transactionId);
                   $this->payLog('Auto-capture', 'Capture success ', $transactionId);
               } catch (Exception $e) {
