@@ -32,6 +32,7 @@ if (!class_exists('\Paynl\Paymentmethods')) {
 }
 
 use Paynl\Result\Transaction\Refund;
+use PaynlPaymentMethods\PrestaShop\PayHelper;
 use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
 use PaynlPaymentMethods\PrestaShop\Transaction;
 use PaynlPaymentMethods\PrestaShop\PaymentMethod;
@@ -181,17 +182,22 @@ class PaynlPaymentMethods extends PaymentModule
     $payOrderAmount = 0;
     $methodName = 'PAY.';
 
-    try {
-        $transaction = $this->getTransaction($transactionId);
-        $arrTransactionDetails = $transaction->getData();
-        $payOrderAmount = $transaction->getPaidAmount();
-        $status = $arrTransactionDetails['paymentDetails']['stateName'];
-        $profileId = $transaction->getPaymentProfileId();        
-        $methodName = PaymentMethod::getName($transactionId, $profileId);
-        $showRefundButton = ($transaction->isPaid() || $transaction->isPartiallyRefunded()) && ($profileId != PaymentMethod::METHOD_INSTORE_PROFILE_ID  && $profileId != PaymentMethod::METHOD_INSTORE);
-    } catch (Exception $exception) {
-      $showRefundButton = false;
-    }
+      try {
+          $transaction = $this->getTransaction($transactionId);
+          $arrTransactionDetails = $transaction->getData();
+          $payOrderAmount = $transaction->getPaidAmount();
+          $status = $arrTransactionDetails['paymentDetails']['stateName'];
+          $profileId = $transaction->getPaymentProfileId();
+          $methodName = PaymentMethod::getName($transactionId, $profileId);
+
+          $showCaptureButton = $transaction->isAuthorized();
+          $showCaptureRemainingButton = $arrTransactionDetails['paymentDetails']['state'] == 97;
+          $showRefundButton = ($transaction->isPaid() || $transaction->isPartiallyRefunded()) && ($profileId != PaymentMethod::METHOD_INSTORE_PROFILE_ID && $profileId != PaymentMethod::METHOD_INSTORE);
+      } catch (Exception $exception) {
+          $showRefundButton = false;
+          $showCaptureButton = false;
+          $showCaptureRemainingButton = false;
+      }
 
     $amountFormatted = number_format($order->total_paid, 2, ',','.');
     $amountPayFormatted = number_format($payOrderAmount, 2, ',','.');
@@ -209,6 +215,8 @@ class PaynlPaymentMethods extends PaymentModule
       'method' => $methodName,
       'ajaxURL' => $this->context->link->getModuleLink($this->name, 'ajax', array(), true),
       'showRefundButton' => $showRefundButton,
+      'showCaptureButton' => $showCaptureButton,
+      'showCaptureRemainingButton' => $showCaptureRemainingButton,
     ));
 
     return $this->display(__FILE__, 'payorder.tpl');
@@ -258,43 +266,35 @@ class PaynlPaymentMethods extends PaymentModule
   {
     $lang['title'] = $this->l('PAY.');
     $lang['are_you_sure'] = $this->l('Are you sure want to refund this amount');
+    $lang['are_you_sure_capture'] = $this->l('Are you sure you want to capture this transaction for this amount');
+    $lang['are_you_sure_capture_remaining'] = $this->l('Are you sure you want to capture the remaining amount of this transaction?');
     $lang['refund_button'] = $this->l('REFUND');
+    $lang['capture_button'] = $this->l('CAPTURE');
+    $lang['capture_remaining_button'] = $this->l('CAPTURE REMAINING');
     $lang['my_text'] = $this->l('Are you sure?');
     $lang['refund_not_possible'] = $this->l('Refund is not possible');
     $lang['amount_to_refund'] = $this->l('Amount to refund');
+    $lang['amount_to_capture'] = $this->l('Amount to capture');
     $lang['refunding'] = $this->l('Processing');
+    $lang['capturing'] = $this->l('Processing');
     $lang['currency'] = $this->l('Currency');
     $lang['amount'] = $this->l('Amount');
     $lang['invalidamount'] = $this->l('Invalid amount');
     $lang['succesfully_refunded'] = $this->l('Succesfully refunded');
+    $lang['succesfully_captured'] = $this->l('Succesfully captured');
+    $lang['succesfully_captured_remaining'] = $this->l('Succesfully captured the remaining amount.');
     $lang['paymentmethod'] = $this->l('Paymentmethod');
     $lang['could_not_process_refund'] = $this->l('Could not process refund. Refund might be too fast or amount is invalid');
+    $lang['could_not_process_capture'] = $this->l('Could not process this capture.');
     $lang['info_refund_title'] = $this->l('Refund');
     $lang['info_refund_text'] = $this->l('The orderstatus will only change to `Refunded` when the full amount is refunded. Stock wont be updated.');
     $lang['info_log_title'] = $this->l('Logs');
     $lang['info_log_text'] = $this->l('For log information see `Advanced settings` and then `Logs`. Then filter on `PAY.`.');
+    $lang['info_capture_title'] = $this->l('Capture');
+    $lang['info_capture_text'] = $this->l('The order will be captured via PAY. and the customer will receive the invoice of the order from the payment method they ordered with.');
+    $lang['info_capture_remaining_text'] = $this->l('This order has already been partially captured, therefore you can only capture the remaining amount. The order will be captured via PAY. and the customer will receive the invoice of the order from the payment method they ordered with.');
 
-    return $lang;
-  }
-
-    /**
-     * @param $transactionId
-     * @param null $amount
-     * @param null $strCurrency
-     * @return array
-     */
-  public function doRefund($transactionId, $amount = null, $strCurrency = null)
-  {
-    try {
-      $this->sdkLogin();
-      $result = true;
-      $refundResult = \Paynl\Transaction::refund($transactionId, $amount, null, null, null, $strCurrency);
-    } catch (Exception $objException) {
-      $refundResult = $objException->getMessage();
-      $result = false;
-    }
-
-    return array('result' => $result, 'data' => $refundResult);
+      return $lang;
   }
 
   /**
@@ -527,14 +527,14 @@ class PaynlPaymentMethods extends PaymentModule
         // check customer type
         $invoiceAddressId = $cart->id_address_invoice;
         $objInvoiceAddress = new Address($invoiceAddressId);
-        
-        if (isset($objInvoiceAddress->company) && isset($paymentMethod->customer_type)) {        
+
+        if (isset($objInvoiceAddress->company) && isset($paymentMethod->customer_type)) {
             if(!empty(trim($objInvoiceAddress->company)) && $paymentMethod->customer_type == 'private'){
                 return false;
-            }    
+            }
             if(empty(trim($objInvoiceAddress->company)) && $paymentMethod->customer_type == 'business'){
                 return false;
-            }                      
+            }
         }
 
         return true;
@@ -616,13 +616,13 @@ class PaynlPaymentMethods extends PaymentModule
         $paymentOptionText = null;
 
         if ($payment_option_id == PaymentMethod::METHOD_IDEAL) {
-            $this->sdkLogin();
+            PayHelper::sdkLogin();
             $paymentOptions = \Paynl\Paymentmethods::getBanks($payment_option_id);
             $paymentOptionText = $this->l('Please select your bank');
         }
 
         if ($payment_option_id == PaymentMethod::METHOD_INSTORE) {
-            $this->sdkLogin();
+            PayHelper::sdkLogin();
             $terminals = \Paynl\Instore::getAllTerminals();
             $paymentOptions = $terminals->getList();
             $paymentOptionText = $this->l('Please select a pin-terminal');
@@ -652,24 +652,11 @@ class PaynlPaymentMethods extends PaymentModule
         } else {
             $taxCalculationMethod = Group::getPriceDisplayMethod(Group::getCurrent()->id);
         }
-        
+
         return $taxCalculationMethod == PS_TAX_EXC ?
             $summary['total_price_without_tax'] :
             $summary['total_price'];
-        
-    }
 
-    private function sdkLogin()
-    {
-        $apitoken = Tools::getValue('PAYNL_API_TOKEN', Configuration::get('PAYNL_API_TOKEN'));
-        $serviceId = Tools::getValue('PAYNL_SERVICE_ID', Configuration::get('PAYNL_SERVICE_ID'));
-        $gateway = Tools::getValue('PAYNL_FAILOVER_GATEWAY', Configuration::get('PAYNL_FAILOVER_GATEWAY'));
-
-        if(!empty(trim($gateway))) {
-            \Paynl\Config::setApiBase(trim($gateway));
-        }
-        \Paynl\Config::setApiToken($apitoken);
-        \Paynl\Config::setServiceId($serviceId);
     }
 
     /**
@@ -712,7 +699,7 @@ class PaynlPaymentMethods extends PaymentModule
             $orderId = Order::getOrderByCartId($cartId);
         }
 
-        $profileId = $transaction->getPaymentProfileId();        
+        $profileId = $transaction->getPaymentProfileId();
         $paymentMethodName = PaymentMethod::getName($transactionId, $profileId);
 
         $cart = new Cart((int)$cartId);
@@ -834,7 +821,7 @@ class PaynlPaymentMethods extends PaymentModule
      */
     public function getTransaction($transactionId)
     {
-        $this->sdkLogin();
+        PayHelper::sdkLogin();
         return \Paynl\Transaction::status($transactionId);
     }
 
@@ -870,7 +857,7 @@ class PaynlPaymentMethods extends PaymentModule
      */
     public function startPayment(Cart $cart, $payment_option_id, $extra_data = array())
     {
-        $this->sdkLogin();
+        PayHelper::sdkLogin();
 
         $currency = new Currency($cart->id_currency);
         /** @var CurrencyCore $currency */
@@ -1098,7 +1085,7 @@ class PaynlPaymentMethods extends PaymentModule
         $free_shipping_coupon_applied = false;
         $cartDetails = $cart->GetSummaryDetails();
         $discounts = (isset($cartDetails['discounts'])) ? $cartDetails['discounts'] : array();
-    
+
         foreach ($discounts as $discount) {
             if ((!empty($discount['reduction_amount']) && $discount['reduction_amount'] > 0) || (!empty($discount['reduction_percent']) && $discount['reduction_percent'] > 0) || (!empty($discount['free_shipping']) && $discount['free_shipping'] === 1 && $free_shipping_coupon_applied === false)) {
                 $discountValue = !empty($discount['value_real']) ? $discount['value_real'] : 0;
@@ -1329,7 +1316,7 @@ class PaynlPaymentMethods extends PaymentModule
      */
     private function getPaymentMethodName($payment_option_id)
     {
-        $this->sdkLogin();
+        PayHelper::sdkLogin();
 
         $payment_methods = \Paynl\Paymentmethods::getList();
         if (isset($payment_methods[$payment_option_id])) {
@@ -1361,7 +1348,7 @@ class PaynlPaymentMethods extends PaymentModule
             return false;
         }
         try {
-            $this->sdkLogin();
+            PayHelper::sdkLogin();
             //call api to check if the credentials are correct
             \Paynl\Paymentmethods::getList();
             $loggedin = true;
@@ -1391,7 +1378,7 @@ class PaynlPaymentMethods extends PaymentModule
 
             if (empty($this->_postErrors)) {
                 // check if apitoken and serviceId are valid
-                $this->sdkLogin();
+                PayHelper::sdkLogin();
 
                 try {
                     Paynl\Paymentmethods::getList();
@@ -1634,7 +1621,7 @@ class PaynlPaymentMethods extends PaymentModule
         $resultArray = array();
         $savedPaymentMethods = json_decode(Configuration::get('PAYNL_PAYMENTMETHODS'));
         try {
-            $this->sdkLogin();
+            PayHelper::sdkLogin();
             $paymentmethods = \Paynl\Paymentmethods::getList();
             $paymentmethods = (array)$paymentmethods;
             $languages = Language::getLanguages(true);
@@ -1769,7 +1756,7 @@ class PaynlPaymentMethods extends PaymentModule
     {
 
         $this->context->controller->addJs($this->_path . 'views/js/jquery-ui/jquery-ui.js');
-       
+
         $this->context->controller->addCss($this->_path . 'css/admin.css');
 
         $this->smarty->assign(array(

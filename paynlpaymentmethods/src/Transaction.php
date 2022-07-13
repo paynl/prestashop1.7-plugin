@@ -60,4 +60,38 @@ class Transaction
 
         return is_array($result) ? $result : array();
     }
+
+    /**
+     * @param $transactionId
+     * @param null $amount
+     * @param null $strCurrency
+     * @return array
+     */
+    public function doRefund($transactionId, $amount = null, $strCurrency = null)
+    {
+        try {
+            PayHelper::sdkLogin();
+            $result = true;
+            $refundResult = \Paynl\Transaction::refund($transactionId, $amount, null, null, null, $strCurrency);
+        } catch (Exception $objException) {
+            $refundResult = $objException->getMessage();
+            $result = false;
+        }
+
+        return array('result' => $result, 'data' => $refundResult);
+    }
+
+    public function doCapture($transactionId, $amount = null)
+    {
+        try {
+            PayHelper::sdkLogin();
+            $result = true;
+            $captureResult = \Paynl\Transaction::capture($transactionId, $amount);
+        } catch (Exception $objException) {
+            $captureResult = $objException->getMessage();
+            $result = false;
+        }
+
+        return array('result' => $result, 'data' => $captureResult);
+    }
 }
