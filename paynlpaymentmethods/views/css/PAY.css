@@ -38,9 +38,10 @@
 }
 
 .PAY.panel .payLogo {
+    width: 75px;
     float: left;
     margin-left: -88px;
-    margin-top: -8px;
+    margin-top: -4px;
 }
 
 #content.bootstrap .PAY.panel .card-body {
