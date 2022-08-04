@@ -4,7 +4,7 @@
     </div>
     <div class="card-body">
     <a href="https://admin.pay.nl" target="_blank">
-        <img class="payLogo" src="https://static.pay.nl/generic/images/75x75/logo.png"/>
+        <img class="payLogo" src="/modules/paynlpaymentmethods/views/images/main_pay_logo.png"/>
     </a>
     <input type="hidden" id="pay-currency" value="{$currency}">
     <input type="hidden" id="pay-transactionid" value="{$pay_orderid}">
