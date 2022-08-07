@@ -886,7 +886,7 @@ class PaynlPaymentMethods extends PaymentModule
         }
 
         $startData = array(
-            'amount' => $cartTotal,
+            'amount' => $cart->getOrderTotal(),
             'currency' => $currency->iso_code,
             'returnUrl' => $this->context->link->getModuleLink($this->name, 'finish', array(), true),
             'exchangeUrl' => $this->context->link->getModuleLink($this->name, 'exchange', array(), true),
