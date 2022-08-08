@@ -56,7 +56,7 @@ class PaynlPaymentMethods extends PaymentModule
     {
         $this->name = 'paynlpaymentmethods';
         $this->tab = 'payments_gateways';
-        $this->version = '4.6.0';
+        $this->version = '4.6.1';
 
         $this->payLogEnabled = null;
         $this->ps_versions_compliancy = array('min' => '1.7', 'max' => _PS_VERSION_);
@@ -886,7 +886,7 @@ class PaynlPaymentMethods extends PaymentModule
         }
 
         $startData = array(
-            'amount' => $cartTotal,
+            'amount' => $cart->getOrderTotal(),
             'currency' => $currency->iso_code,
             'returnUrl' => $this->context->link->getModuleLink($this->name, 'finish', array(), true),
             'exchangeUrl' => $this->context->link->getModuleLink($this->name, 'exchange', array(), true),
