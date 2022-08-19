@@ -1597,6 +1597,12 @@ class PaynlPaymentMethods extends PaymentModule
         Configuration::updateValue('PAYNL_SHOW_IMAGE', $showImage);
       }
 
+        $logging = Configuration::get('PAYNL_PAYLOGGER');
+        if ($logging === false) {
+            $logging = 1;
+            Configuration::updateValue('PAYNL_PAYLOGGER', $logging);
+        }
+
         return array(
             'PAYNL_API_TOKEN' => Tools::getValue('PAYNL_API_TOKEN', Configuration::get('PAYNL_API_TOKEN')),
             'PAYNL_SERVICE_ID' => Tools::getValue('PAYNL_SERVICE_ID', Configuration::get('PAYNL_SERVICE_ID')),
