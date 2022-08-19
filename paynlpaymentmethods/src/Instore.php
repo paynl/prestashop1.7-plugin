@@ -38,7 +38,7 @@ class Instore extends PaymentMethod
             }
             return $status;
         } catch (Exception $objException) {
-            $object->errors[] = $object->module->l('The payment could not be completed due to an error. Error: ' . $objException->getMessage(), 'finish');
+            $object->errors[] = $object->module->l('The payment could not be completed due to an error. Error: ', 'finish') . $objException->getMessage();
             $object->redirectWithNotifications('index.php?controller=order&step=1');
         }
     }
