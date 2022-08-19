@@ -1609,7 +1609,7 @@ class PaynlPaymentMethods extends PaymentModule
             'PAYNL_TEST_MODE' => Tools::getValue('PAYNL_TEST_MODE', Configuration::get('PAYNL_TEST_MODE')),
             'PAYNL_FAILOVER_GATEWAY' => Tools::getValue('PAYNL_FAILOVER_GATEWAY', Configuration::get('PAYNL_FAILOVER_GATEWAY')),
             'PAYNL_VALIDATION_DELAY' => Tools::getValue('PAYNL_VALIDATION_DELAY', Configuration::get('PAYNL_VALIDATION_DELAY')),
-            'PAYNL_PAYLOGGER' => Tools::getValue('PAYNL_PAYLOGGER', Configuration::get('PAYNL_PAYLOGGER')),
+            'PAYNL_PAYLOGGER' => $logging,
             'PAYNL_DESCRIPTION_PREFIX' => Tools::getValue('PAYNL_DESCRIPTION_PREFIX', Configuration::get('PAYNL_DESCRIPTION_PREFIX')),
             'PAYNL_LANGUAGE' => Tools::getValue('PAYNL_LANGUAGE', Configuration::get('PAYNL_LANGUAGE')),
             'PAYNL_SHOW_IMAGE' => $showImage,
