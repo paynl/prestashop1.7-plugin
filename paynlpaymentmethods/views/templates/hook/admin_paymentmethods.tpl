@@ -162,7 +162,7 @@
                                 <div class="col-lg-9">
                                     <input style="width:150px;" type="number" value="{$paymentmethod->fee_value}" name="fee_value">  
                                     <p class="help-block">
-                                        {l s='Value of the fee' mod='paynlpaymentmethods'}
+                                        {l s='Value of the fee (including TAX). Tax will be applied according to the paymentfee-product tax-configuration.' mod='paynlpaymentmethods'}
                                     </p>
                                 </div>
                             </div>
