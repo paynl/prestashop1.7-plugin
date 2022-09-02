@@ -143,6 +143,14 @@ class PaynlPaymentMethods extends PaymentModule
                 INDEX (`transaction_id`)
 			) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8 ;');
 
+        Db::getInstance()->execute('CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'pay_processing` (
+                `id` int(11) NOT NULL AUTO_INCREMENT,
+				`payOrderId` varchar(255) DEFAULT NULL,               
+                `created_at` datetime NOT NULL DEFAULT current_timestamp(),     
+				PRIMARY KEY (`id`),
+                UNIQUE KEY `payOrderId` (`payOrderId`) USING BTREE
+			) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8 ;');
+
         return true;
     }
 

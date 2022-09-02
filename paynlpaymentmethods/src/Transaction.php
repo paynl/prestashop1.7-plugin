@@ -94,4 +94,21 @@ class Transaction
 
         return array('result' => $result, 'data' => $captureResult);
     }
+
+
+    public static function addProcessing($payOrderId)
+    {
+        Db::getInstance()->execute("INSERT INTO `" . _DB_PREFIX_ . "pay_processing` (`payOrderId`) VALUES ('" . Db::getInstance()->escape($payOrderId) . "') ON DUPLICATE KEY UPDATE `created_at` = now()");        
+    }
+
+    public static function getProcessing($payOrderId)
+    {
+        $result = Db::getInstance()->getRow("SELECT * FROM `" . _DB_PREFIX_ . "pay_processing` WHERE `payOrderId` = '" . Db::getInstance()->escape($payOrderId) . "' AND created_at > date_sub(now(), interval 1 minute);");
+        return is_array($result) ? $result : array();
+    }
+
+    public static function removeProcessing($payOrderId)
+    {
+        Db::getInstance()->delete('pay_processing', 'payOrderId = "' . $payOrderId . '"');
+    }
 }

@@ -41,8 +41,8 @@ class PaynlPaymentMethodsExchangeModuleFrontController extends ModuleFrontContro
         $cartid = Tools::getValue('extra1');
 
         /**
-        * @var $module PaynlPaymentMethods
-        */
+         * @var $module PaynlPaymentMethods
+         */
         $module = $this->module;
 
         $module->payLog('Exchange', 'Action: ' . $action, $cartid, $transactionId);
@@ -55,13 +55,26 @@ class PaynlPaymentMethodsExchangeModuleFrontController extends ModuleFrontContro
             die('TRUE| Processing partial payment');
         }
 
+        if ($action == 'new_ppt') {
+            $processing = Transaction::getProcessing($transactionId);
+            Transaction::addProcessing($transactionId);
+            if (!empty($processing)) {
+                die('FALSE| Already Processing payment');
+            }
+        }
+
         try {
             $message = '';
             $module->processPayment($transactionId, $message);
-
+            if ($action == 'new_ppt') {
+                Transaction::removeProcessing($transactionId);
+            }
             die('TRUE| ' . $message);
-        } catch(Exception $e){
-            die('FALSE| '. $e->getMessage());
+        } catch (Exception $e) {
+            if ($action == 'new_ppt') {
+                Transaction::removeProcessing($transactionId);
+            }
+            die('FALSE| ' . $e->getMessage());
         }
     }
 }
