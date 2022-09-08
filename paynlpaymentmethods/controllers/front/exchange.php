@@ -34,11 +34,21 @@ class PaynlPaymentMethodsExchangeModuleFrontController extends ModuleFrontContro
      */
     public function postProcess()
     {
+
         $transactionId = $_REQUEST['order_id'];
 
         # PAY. action
         $action = Tools::getValue('action');
         $cartid = Tools::getValue('extra1');
+
+        if (!$action) {
+            $jsonRequest = Tools::file_get_contents('php://input');
+            $exchange = json_decode($jsonRequest, true);
+
+            $transactionId = $exchange['order_id'];
+            $action = $exchange['action'];
+            $cartid = $exchange['extra1'];
+        }
 
         /**
         * @var $module PaynlPaymentMethods
