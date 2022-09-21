@@ -108,6 +108,7 @@ class PaynlPaymentMethodsFinishModuleFrontController extends ModuleFrontControll
           $this->context->cart->deleteProduct(Configuration::get('PAYNL_FEE_PRODUCT_ID'), 0);
 
           if ($this->orderStatusId == '-63') {
+              $this->createNewCart($this->context->cart);
               $this->errors[] = $this->module->l('The payment has been denied', 'finish');
               $this->redirectWithNotifications('index.php?controller=order&step=1');
           } elseif ($transaction->isCanceled()) {
@@ -139,4 +140,59 @@ class PaynlPaymentMethodsFinishModuleFrontController extends ModuleFrontControll
     $this->setTemplate('module:paynlpaymentmethods/views/templates/front/waiting.tpl');
   }
 
+  public function createNewCart($oldCart)
+  {
+    $this->context->cart = new Cart();
+    $this->context->cart->id_lang = $this->context->language->id;
+    $this->context->cart->id_currency = $this->context->currency->id;
+    $this->context->cart->add();
+    foreach ($oldCart->getProducts() as $product) {
+      $customization_id = null;
+      if (!empty($product['id_customization'])) {
+        $customization_id = $this->addCustomization($oldCart->id, $product['id_product'], $product['id_customization']);
+      }
+      $this->context->cart->updateQty((int) $product['quantity'], (int) $product['id_product'], (int) $product['id_product_attribute'], $customization_id);
+    }
+    $this->context->cart->id_customer = $oldCart->id_customer;
+    $this->context->cart->id_guest = $oldCart->id_guest;
+    $this->context->cart->secure_key = $oldCart->secure_key;
+    $this->context->cart->id_shop_group = $oldCart->id_shop_group;
+    $this->context->cart->id_address_delivery = $oldCart->id_address_delivery;
+    $this->context->cart->id_address_invoice = $oldCart->id_address_invoice;
+    $this->context->cart->delivery_option = $oldCart->delivery_option;
+    $this->context->cart->id_carrier = $oldCart->id_carrier;
+    $this->context->cart->gift = $oldCart->gift;
+    $this->context->cart->gift_message = $oldCart->gift_message;
+    $this->context->cart->id_address_invoice = $oldCart->id_address_invoice;
+    $this->context->cart->mobile_theme = $oldCart->mobile_theme;
+    $this->context->cart->checkedTos = $oldCart->checkedTos;
+    $this->context->cart->pictures = $oldCart->pictures;
+    $this->context->cart->textFields = $oldCart->textFields;
+    $this->context->cart->allow_seperated_package = $oldCart->allow_seperated_package;
+    $this->context->cart->recyclable = $oldCart->recyclable;
+
+    $this->context->cart->save();
+    if ($this->context->cart->id) {
+      $this->context->cookie->id_cart = $this->context->cart->id;
+      $this->context->cookie->write();
+
+      $sessionData = Db::getInstance()->getValue('SELECT checkout_session_data FROM ' . _DB_PREFIX_ . 'cart WHERE id_cart = ' . (int) $oldCart->id);
+      Db::getInstance()->execute('UPDATE ' . _DB_PREFIX_ . 'cart SET checkout_session_data = "' . pSQL($sessionData) . '" WHERE id_cart = ' . (int) $this->context->cart->id);
+    }
+  }
+
+  function addCustomization($oldCartId, $productId, $customizationId)
+  {
+    $exising_customization = Db::getInstance()->executeS(
+      'SELECT cu.`id_customization`, cd.`index`, cd.`value`, cd.`type` FROM `' . _DB_PREFIX_ . 'customization` cu
+      LEFT JOIN `' . _DB_PREFIX_ . 'customized_data` cd
+      ON cu.`id_customization` = cd.`id_customization`
+      WHERE cu.id_cart = ' . (int) $oldCartId . '
+      AND cu.id_product = ' . (int) $productId . '
+      AND cu.id_customization = ' . (int) $customizationId
+    );
+    $this->context->cart->addTextFieldToProduct((int)($productId), $exising_customization[0]['index'], Product::CUSTOMIZE_TEXTFIELD, $exising_customization[0]['value'], true);
+    $customization = Db::getInstance()->executeS('SELECT id_customization FROM ' . _DB_PREFIX_ . 'customized_data ORDER BY id_customization DESC LIMIT 0,1');
+    return (!empty($customization[0]['id_customization'])) ? $customization[0]['id_customization'] : null;
+  }
 }
