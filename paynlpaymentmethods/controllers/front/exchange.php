@@ -56,8 +56,7 @@ class PaynlPaymentMethodsExchangeModuleFrontController extends ModuleFrontContro
         }
 
         if ($action == 'new_ppt') {
-            $processing = Transaction::getProcessing($transactionId);
-            Transaction::addProcessing($transactionId);
+            $processing = Transaction::checkProcessing($transactionId);         
             if (!empty($processing)) {
                 die('FALSE| Already Processing payment');
             }

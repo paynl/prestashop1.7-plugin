@@ -95,15 +95,16 @@ class Transaction
         return array('result' => $result, 'data' => $captureResult);
     }
 
-
-    public static function addProcessing($payOrderId)
+    public static function checkProcessing($payOrderId)
     {
-        Db::getInstance()->execute("INSERT INTO `" . _DB_PREFIX_ . "pay_processing` (`payOrderId`) VALUES ('" . Db::getInstance()->escape($payOrderId) . "') ON DUPLICATE KEY UPDATE `created_at` = now()");        
-    }
-
-    public static function getProcessing($payOrderId)
-    {
-        $result = Db::getInstance()->getRow("SELECT * FROM `" . _DB_PREFIX_ . "pay_processing` WHERE `payOrderId` = '" . Db::getInstance()->escape($payOrderId) . "' AND created_at > date_sub(now(), interval 1 minute);");
+        $db = Db::getInstance();
+        $payOrderId = $db->escape($payOrderId);
+        $sql = new DbQuery();
+        $sql->select('*');
+        $sql->from('pay_processing');
+        $sql->where("payOrderId = '" . $payOrderId . "' AND created_at > date_sub(now(), interval 1 minute)");
+        $result = $db->executeS($sql);
+        $db->insert('pay_processing', ['payOrderId' =>  $payOrderId, 'created_at' =>  date('Y-m-d H:i:s')], false, false, Db::ON_DUPLICATE_KEY, true);
         return is_array($result) ? $result : array();
     }
 
