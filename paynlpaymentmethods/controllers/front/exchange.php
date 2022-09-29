@@ -27,6 +27,9 @@
 /**
  * @since 1.5.0
  */
+
+use PaynlPaymentMethods\PrestaShop\Transaction;
+
 class PaynlPaymentMethodsExchangeModuleFrontController extends ModuleFrontController
 {
     /**
