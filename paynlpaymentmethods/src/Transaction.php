@@ -4,6 +4,7 @@
 namespace PaynlPaymentMethods\PrestaShop;
 
 use Db;
+use DbQuery;
 
 class Transaction
 {
