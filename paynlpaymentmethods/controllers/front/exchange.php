@@ -34,7 +34,7 @@ class PaynlPaymentMethodsExchangeModuleFrontController extends ModuleFrontContro
      */
     public function postProcess()
     {
-        $transactionId = $_REQUEST['order_id'];
+        $transactionId = empty($_REQUEST['order_id']) ? null : $_REQUEST['order_id'];
 
         # PAY. action
         $action = Tools::getValue('action');
@@ -45,7 +45,6 @@ class PaynlPaymentMethodsExchangeModuleFrontController extends ModuleFrontContro
 
             if (!empty($jsonRequest)) {
                 $exchange = json_decode($jsonRequest, true);
-
                 $transactionId = empty($exchange['order_id']) ? null : $exchange['order_id'];
                 $action = empty($exchange['action']) ? null : $exchange['action'];
                 $cartid = empty($exchange['extra1']) ? null : $exchange['extra1'];
@@ -53,10 +52,11 @@ class PaynlPaymentMethodsExchangeModuleFrontController extends ModuleFrontContro
                 if (empty($action)) {
                     die('TRUE| Empty action value in JSON call');
                 }
-
                 if (empty($cartid)) {
                     die('TRUE| Empty cart id in JSON call');
                 }
+            } else {
+                die('TRUE| Missing action');
             }
         }
 
@@ -70,11 +70,9 @@ class PaynlPaymentMethodsExchangeModuleFrontController extends ModuleFrontContro
         if ($action == 'pending') {
             die('TRUE| Ignoring pending');
         }
-
         if ($action == 'partial_payment') {
             die('TRUE| Processing partial payment');
         }
-
         if (empty($transactionId)) {
             die('TRUE| Empty transactionId in call');
         }
