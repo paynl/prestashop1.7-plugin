@@ -103,9 +103,12 @@ class Transaction
         $sql = new DbQuery();
         $sql->select('*');
         $sql->from('pay_processing');
-        $sql->where("payOrderId = '" . $payOrderId . "' AND created_at > date_sub(now(), interval 1 minute)");
+        $sql->where("payOrderId = '" . $payOrderId . "'");
+        $sql->where("created_at > date_sub('" . date('Y-m-d H:i:s') . "', interval 1 minute)");
         $result = $db->executeS($sql);
-        $db->insert('pay_processing', ['payOrderId' =>  $payOrderId, 'created_at' =>  date('Y-m-d H:i:s')], false, false, Db::ON_DUPLICATE_KEY, true);
+        if (empty($result)) {
+            $db->insert('pay_processing', ['payOrderId' =>  $payOrderId, 'created_at' =>  date('Y-m-d H:i:s')], false, false, Db::ON_DUPLICATE_KEY, true);
+        }
         return is_array($result) ? $result : array();
     }
 
