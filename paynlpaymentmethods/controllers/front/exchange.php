@@ -59,7 +59,7 @@ class PaynlPaymentMethodsExchangeModuleFrontController extends ModuleFrontContro
         }
 
         if ($action == 'new_ppt') {
-            $processing = Transaction::checkProcessing($transactionId);         
+            $processing = Transaction::checkProcessing($transactionId);
             if (!empty($processing)) {
                 die('FALSE| Already Processing payment');
             }
@@ -68,15 +68,15 @@ class PaynlPaymentMethodsExchangeModuleFrontController extends ModuleFrontContro
         try {
             $message = '';
             $module->processPayment($transactionId, $message);
-            if ($action == 'new_ppt') {
-                Transaction::removeProcessing($transactionId);
-            }
-            die('TRUE| ' . $message);
+            $response = 'TRUE| ' . $message;
         } catch (Exception $e) {
-            if ($action == 'new_ppt') {
-                Transaction::removeProcessing($transactionId);
-            }
-            die('FALSE| ' . $e->getMessage());
+            $response = 'FALSE| ' . $e->getMessage();
         }
+
+        if ($action == 'new_ppt') {
+            Transaction::removeProcessing($transactionId);
+        }
+
+        exit($response);
     }
 }
