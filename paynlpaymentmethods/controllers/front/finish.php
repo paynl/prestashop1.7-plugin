@@ -142,16 +142,15 @@ class PaynlPaymentMethodsFinishModuleFrontController extends ModuleFrontControll
 
   public function createNewCart($oldCart)
   {  
-    $newCart = $oldCart->duplicate();  
-    $newCartId = $newCart["cart"]->id;   
-    if ($newCartId) {
-      $this->context->cookie->id_cart = $newCartId;
+    $newCart = $oldCart->duplicate();     
+    if (!empty($newCart["cart"]->id)) {
+      $this->context->cookie->id_cart = $newCart["cart"]->id;
       $this->context->cookie->write();
       $db = Db::getInstance();
       $sql = new DbQuery();
       $sql->select('checkout_session_data')->from('cart')->where("id_cart = " . $db->escape($oldCart->id))->limit(1); 
       $sessionData = $db->executeS($sql)[0]["checkout_session_data"];
-      $db->update('cart', ['checkout_session_data' => pSQL($sessionData)], 'id_cart = ' . $db->escape($newCartId)); 
+      $db->update('cart', ['checkout_session_data' => pSQL($sessionData)], 'id_cart = ' . $db->escape($newCart["cart"]->id)); 
       $oldCart->delete; 
     }       
   }
