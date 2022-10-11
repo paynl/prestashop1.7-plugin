@@ -108,6 +108,7 @@ class PaynlPaymentMethodsFinishModuleFrontController extends ModuleFrontControll
           $this->context->cart->deleteProduct(Configuration::get('PAYNL_FEE_PRODUCT_ID'), 0);
 
           if ($this->orderStatusId == '-63') {
+              $this->createNewCart($this->context->cart);
               $this->errors[] = $this->module->l('The payment has been denied', 'finish');
               $this->redirectWithNotifications('index.php?controller=order&step=1');
           } elseif ($transaction->isCanceled()) {
@@ -139,4 +140,18 @@ class PaynlPaymentMethodsFinishModuleFrontController extends ModuleFrontControll
     $this->setTemplate('module:paynlpaymentmethods/views/templates/front/waiting.tpl');
   }
 
+  public function createNewCart($oldCart)
+  {  
+    $newCart = $oldCart->duplicate();     
+    if (!empty($newCart["cart"]->id)) {
+      $this->context->cookie->id_cart = $newCart["cart"]->id;
+      $this->context->cookie->write();
+      $db = Db::getInstance();
+      $sql = new DbQuery();
+      $sql->select('checkout_session_data')->from('cart')->where("id_cart = " . $db->escape($oldCart->id))->limit(1); 
+      $sessionData = $db->executeS($sql)[0]["checkout_session_data"];
+      $db->update('cart', ['checkout_session_data' => pSQL($sessionData)], 'id_cart = ' . $db->escape($newCart["cart"]->id)); 
+      $oldCart->delete; 
+    }       
+  }
 }

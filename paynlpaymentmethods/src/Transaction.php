@@ -68,7 +68,7 @@ class Transaction
      * @param null $strCurrency
      * @return array
      */
-    public function doRefund($transactionId, $amount = null, $strCurrency = null)
+    public static function doRefund($transactionId, $amount = null, $strCurrency = null)
     {
         try {
             PayHelper::sdkLogin();
@@ -82,7 +82,7 @@ class Transaction
         return array('result' => $result, 'data' => $refundResult);
     }
 
-    public function doCapture($transactionId, $amount = null)
+    public static function doCapture($transactionId, $amount = null)
     {
         try {
             PayHelper::sdkLogin();
