@@ -56,7 +56,7 @@ class PaynlPaymentMethods extends PaymentModule
     {
         $this->name = 'paynlpaymentmethods';
         $this->tab = 'payments_gateways';
-        $this->version = '4.7.0';
+        $this->version = '4.8.0';
 
         $this->payLogEnabled = null;
         $this->ps_versions_compliancy = array('min' => '1.7', 'max' => _PS_VERSION_);
@@ -142,6 +142,14 @@ class PaynlPaymentMethods extends PaymentModule
 				PRIMARY KEY (`id`),
                 INDEX (`transaction_id`)
 			) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8 ;');
+
+        Db::getInstance()->execute('CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'pay_processing` (
+            `id` int(11) NOT NULL AUTO_INCREMENT,
+            `payOrderId` varchar(255) DEFAULT NULL,
+            `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `payOrderId` (`payOrderId`) USING BTREE
+        ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8 ;');
 
         return true;
     }

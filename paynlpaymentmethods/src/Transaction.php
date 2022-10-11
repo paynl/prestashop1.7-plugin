@@ -4,6 +4,7 @@
 namespace PaynlPaymentMethods\PrestaShop;
 
 use Db;
+use DbQuery;
 
 class Transaction
 {
@@ -93,5 +94,38 @@ class Transaction
         }
 
         return array('result' => $result, 'data' => $captureResult);
+    }
+
+    /**
+     * @param $payOrderId
+     * @return array
+     */
+    public static function checkProcessing($payOrderId)
+    {
+        try {
+            $db = Db::getInstance();
+            $payOrderId = $db->escape($payOrderId);
+            $sql = new DbQuery();
+            $sql->select('*');
+            $sql->from('pay_processing');
+            $sql->where("payOrderId = '" . $payOrderId . "'");
+            $sql->where("created_at > date_sub('" . date('Y-m-d H:i:s') . "', interval 1 minute)");
+            $result = $db->executeS($sql);
+            if (empty($result)) {
+                $db->insert('pay_processing', ['payOrderId' => $payOrderId, 'created_at' => date('Y-m-d H:i:s')], false, false, Db::ON_DUPLICATE_KEY, true);
+            }
+        } catch (\Exception $e) {
+            $result = array();
+        }
+
+       return is_array($result) ? $result : array();
+    }
+
+    /**
+     * @param $payOrderId
+     */
+    public static function removeProcessing($payOrderId)
+    {
+        Db::getInstance()->delete('pay_processing', 'payOrderId = "' . $payOrderId . '"');
     }
 }

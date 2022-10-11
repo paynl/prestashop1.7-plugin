@@ -27,6 +27,9 @@
 /**
  * @since 1.5.0
  */
+
+use PaynlPaymentMethods\PrestaShop\Transaction;
+
 class PaynlPaymentMethodsExchangeModuleFrontController extends ModuleFrontController
 {
     /**
@@ -59,8 +62,8 @@ class PaynlPaymentMethodsExchangeModuleFrontController extends ModuleFrontContro
         }
 
         /**
-        * @var $module PaynlPaymentMethods
-        */
+         * @var $module PaynlPaymentMethods
+         */
         $module = $this->module;
 
         $module->payLog('Exchange', 'Action: ' . $action, $cartid, $transactionId);
@@ -75,13 +78,25 @@ class PaynlPaymentMethodsExchangeModuleFrontController extends ModuleFrontContro
             die('TRUE| Empty transactionId in call');
         }
 
+        if ($action == 'new_ppt') {
+            $processing = Transaction::checkProcessing($transactionId);
+            if (!empty($processing)) {
+                die('FALSE| Already Processing payment');
+            }
+        }
+
         try {
             $message = '';
             $module->processPayment($transactionId, $message);
-
-            die('TRUE| ' . $message);
-        } catch(Exception $e){
-            die('FALSE| '. $e->getMessage());
+            $response = 'TRUE| ' . $message;
+        } catch (Exception $e) {
+            $response = 'FALSE| ' . $e->getMessage();
         }
+
+        if ($action == 'new_ppt') {
+            Transaction::removeProcessing($transactionId);
+        }
+
+        exit($response);
     }
 }
