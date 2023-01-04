@@ -179,7 +179,8 @@
                                     </p>
                                 </div>
                             </div>
-                            {if $paymentmethod->id == 1657}
+
+                            {if in_array($paymentmethod->id,$showExternalLogoList)}
                                 <div class="form-group">
                                     <label class="control-label col-lg-3 align-right">{l s='External logo' mod='paynlpaymentmethods'}</label>
                                     <div class="col-lg-9">

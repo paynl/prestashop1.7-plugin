@@ -13,6 +13,7 @@ class PaymentMethod
     const METHOD_SOFORT = 556;
     const METHOD_INSTORE = 1729;
     const METHOD_INSTORE_PROFILE_ID = 1633;
+    const METHOD_GIVACARD = 1657;
 
     /**
      * @param null $transactionId

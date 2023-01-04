@@ -451,7 +451,7 @@ class PaynlPaymentMethods extends PaymentModule
             if ($bShowLogo) {
                 $objPaymentMethod->setLogo($this->_path . 'views/images/' . $paymentMethod->brand_id . '.png');
 
-                if ($paymentMethod->id == 1657 && !empty($paymentMethod->external_logo)) {
+                if (!empty($paymentMethod->external_logo)) {
                     $objPaymentMethod->setLogo($paymentMethod->external_logo);
                 }
             }
@@ -1788,7 +1788,8 @@ class PaynlPaymentMethods extends PaymentModule
             'available_carriers' => $this->getCarriers(),
             'image_url' => $this->_path . 'views/images/',
             'languages' => Language::getLanguages(true),
-            'paymentmethods' => (array) $this->getPaymentMethodsCombined()
+            'paymentmethods' => (array) $this->getPaymentMethodsCombined(),
+            'showExternalLogoList' => [PaymentMethod::METHOD_GIVACARD, PaymentMethod::METHOD_OVERBOEKING]
         ));
 
         return $this->display(__FILE__, 'admin_paymentmethods.tpl');
