@@ -716,10 +716,14 @@ class PaynlPaymentMethods extends PaymentModule
         $amountPaid = in_array(round($cartTotalPrice, 2), $arrPayAmounts) ? $cartTotalPrice : null;
 
         if (is_null($amountPaid)) {
-            $amountPaid = in_array(round($cart->getOrderTotal(), 2), $arrPayAmounts) ? $cart->getOrderTotal() : null;
+            if (in_array(round($cart->getOrderTotal(), 2), $arrPayAmounts)) {
+                $amountPaid = $cart->getOrderTotal();
+            } elseif (in_array(round($cart->getOrderTotal(false), 2), $arrPayAmounts)) {
+                $amountPaid = $cart->getOrderTotal(false);
+            }
         }
 
-        $this->payLog('processPayment (order)', 'getOrderTotal: ' . $cart->getOrderTotal() . '. cartTotalPrice: ' . $cartTotalPrice . ' - ' . print_r($arrPayAmounts, true), $cartId, $transactionId);
+        $this->payLog('processPayment (order)', 'getOrderTotal: ' . $cart->getOrderTotal() . ' getOrderTotal(false): ' . $cart->getOrderTotal(false) . '. cartTotalPrice: ' . $cartTotalPrice . ' - ' . print_r($arrPayAmounts, true), $cartId, $transactionId);
 
         if ($orderId) {
 
