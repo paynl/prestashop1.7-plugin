@@ -449,7 +449,11 @@ class PaynlPaymentMethods extends PaymentModule
                 ]);
 
             if ($bShowLogo) {
-              $objPaymentMethod->setLogo($this->_path . 'views/images/' . $paymentMethod->brand_id . '.png');
+                $objPaymentMethod->setLogo($this->_path . 'views/images/' . $paymentMethod->brand_id . '.png');
+
+                if (!empty($paymentMethod->external_logo)) {
+                    $objPaymentMethod->setLogo($paymentMethod->external_logo);
+                }
             }
 
             $strDescription = empty($paymentMethod->description) ? null : $paymentMethod->description;
@@ -1711,6 +1715,11 @@ class PaynlPaymentMethods extends PaymentModule
                     $changed = true;
                 }
 
+                if (!isset($paymentmethod->external_logo)) {
+                    $paymentmethod->external_logo = '';
+                    $changed = true;
+                }
+
                 foreach ($languages as $language) {
                     $key_name = 'name_' . $language['iso_code'];
                     if (!isset($paymentmethod->$key_name)) {
@@ -1745,7 +1754,8 @@ class PaynlPaymentMethods extends PaymentModule
                     'allowed_carriers' => [],
                     'fee_percentage' => false,
                     'fee_value' => '',
-                    'customer_type' => 'both'
+                    'customer_type' => 'both',
+                    'external_logo' => ''
                 ];
 
                 foreach ($languages as $language) {
@@ -1782,7 +1792,8 @@ class PaynlPaymentMethods extends PaymentModule
             'available_carriers' => $this->getCarriers(),
             'image_url' => $this->_path . 'views/images/',
             'languages' => Language::getLanguages(true),
-            'paymentmethods' => (array) $this->getPaymentMethodsCombined()
+            'paymentmethods' => (array) $this->getPaymentMethodsCombined(),
+            'showExternalLogoList' => [PaymentMethod::METHOD_GIVACARD]
         ));
 
         return $this->display(__FILE__, 'admin_paymentmethods.tpl');

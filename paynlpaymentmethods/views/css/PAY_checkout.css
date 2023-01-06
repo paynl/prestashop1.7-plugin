@@ -1,11 +1,13 @@
-.PAYNL.payment-option img {
+.payment-option img {
     margin-top: 0px;
     float: left;
     margin-right: 10px;
-    width: 50px;
     cursor: pointer;
     position: relative;
     top: -15px;
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
 }
 
 .payment-options form.paynl {
