@@ -1789,7 +1789,7 @@ class PaynlPaymentMethods extends PaymentModule
             'image_url' => $this->_path . 'views/images/',
             'languages' => Language::getLanguages(true),
             'paymentmethods' => (array) $this->getPaymentMethodsCombined(),
-            'showExternalLogoList' => [PaymentMethod::METHOD_GIVACARD, PaymentMethod::METHOD_OVERBOEKING]
+            'showExternalLogoList' => [PaymentMethod::METHOD_GIVACARD]
         ));
 
         return $this->display(__FILE__, 'admin_paymentmethods.tpl');
