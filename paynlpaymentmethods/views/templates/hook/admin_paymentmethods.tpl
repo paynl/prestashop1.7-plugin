@@ -179,6 +179,18 @@
                                     </p>
                                 </div>
                             </div>
+
+                            {if in_array($paymentmethod->id,$showExternalLogoList)}
+                                <div class="form-group">
+                                    <label class="control-label col-lg-3 align-right">{l s='External logo' mod='paynlpaymentmethods'}</label>
+                                    <div class="col-lg-9">
+                                        <input type="text" value="{$paymentmethod->external_logo}" name="external_logo">
+                                        <p class="help-block">
+                                            {l s='URL to a different logo to be used in the checkout' mod='paynlpaymentmethods'}
+                                        </p>
+                                    </div>
+                                </div>
+                            {/if}
                         </div>
                     </div>
                 </form>
