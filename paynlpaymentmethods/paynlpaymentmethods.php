@@ -939,7 +939,7 @@ class PaynlPaymentMethods extends PaymentModule
 
         Transaction::addTransaction($payTransactionId, $cart->id, $cart->id_customer, $payment_option_id, $cart->getOrderTotal());
 
-        if ($this->shouldValidateOnStart($payment_option_id)) {
+        if ($this->shouldValidateOnStart($payment_option_id, $objPaymentMethod)) {
 
             $this->payLog('startPayment', 'Pre-Creating order for pp : ' . $payment_option_id, $cartId, $payTransactionId);
 
@@ -1312,16 +1312,16 @@ class PaynlPaymentMethods extends PaymentModule
     }
 
     /**
-     * @param $payment_option_id
+     * @param int $payment_option_id
+     * @param object $objPaymentMethod
      *
-     * @return bool
+     * @return boolean
      */
-    public function shouldValidateOnStart($payment_option_id)
+    public function shouldValidateOnStart($payment_option_id, $objPaymentMethod)
     {
-        if ($payment_option_id == 136) {
+        if (($payment_option_id == PaymentMethod::METHOD_OVERBOEKING) || (isset($objPaymentMethod->create_order_on) && $objPaymentMethod->create_order_on == 'start')) {
             return true;
         }
-
         return false;
     }
 
@@ -1720,6 +1720,11 @@ class PaynlPaymentMethods extends PaymentModule
                     $changed = true;
                 }
 
+                if (!isset($paymentmethod->create_order_on)) {
+                    $paymentmethod->create_order_on = 'succes';
+                    $changed = true;
+                }
+
                 foreach ($languages as $language) {
                     $key_name = 'name_' . $language['iso_code'];
                     if (!isset($paymentmethod->$key_name)) {
@@ -1755,7 +1760,8 @@ class PaynlPaymentMethods extends PaymentModule
                     'fee_percentage' => false,
                     'fee_value' => '',
                     'customer_type' => 'both',
-                    'external_logo' => ''
+                    'external_logo' => '',
+                    'create_order_on' => 'succes'
                 ];
 
                 foreach ($languages as $language) {
@@ -1793,7 +1799,8 @@ class PaynlPaymentMethods extends PaymentModule
             'image_url' => $this->_path . 'views/images/',
             'languages' => Language::getLanguages(true),
             'paymentmethods' => (array) $this->getPaymentMethodsCombined(),
-            'showExternalLogoList' => [PaymentMethod::METHOD_GIVACARD]
+            'showExternalLogoList' => [PaymentMethod::METHOD_GIVACARD],
+            'showCreateOrderOnList' => [PaymentMethod::METHOD_PAYPAL]
         ));
 
         return $this->display(__FILE__, 'admin_paymentmethods.tpl');
