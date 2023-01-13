@@ -197,7 +197,7 @@
                                     <label class="control-label col-lg-3 align-right">{l s='Order Create' mod='paynlpaymentmethods'}</label>
                                     <div class="col-lg-9">                                    
                                         <select name="create_order_on">
-                                            <option value="succes" {if $paymentmethod->create_order_on == 'succes'}selected{/if}>Create order on succes (default)</option>
+                                            <option value="success" {if $paymentmethod->create_order_on == 'success'}selected{/if}>Create order on succes (default)</option>
                                             <option value="start" {if $paymentmethod->create_order_on == 'start'}selected{/if}>Create order on payment start</option>                                 
                                         </select>                                    
                                         <p class="help-block">

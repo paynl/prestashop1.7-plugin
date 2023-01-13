@@ -1721,7 +1721,7 @@ class PaynlPaymentMethods extends PaymentModule
                 }
 
                 if (!isset($paymentmethod->create_order_on)) {
-                    $paymentmethod->create_order_on = 'succes';
+                    $paymentmethod->create_order_on = 'success';
                     $changed = true;
                 }
 
@@ -1761,7 +1761,7 @@ class PaynlPaymentMethods extends PaymentModule
                     'fee_value' => '',
                     'customer_type' => 'both',
                     'external_logo' => '',
-                    'create_order_on' => 'succes'
+                    'create_order_on' => 'success'
                 ];
 
                 foreach ($languages as $language) {
