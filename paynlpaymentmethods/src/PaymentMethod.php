@@ -14,6 +14,7 @@ class PaymentMethod
     const METHOD_INSTORE = 1729;
     const METHOD_INSTORE_PROFILE_ID = 1633;
     const METHOD_GIVACARD = 1657;
+    const METHOD_PAYPAL = 138;
 
     /**
      * @param null $transactionId
