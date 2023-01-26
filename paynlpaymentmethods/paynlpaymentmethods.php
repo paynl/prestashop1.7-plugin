@@ -51,7 +51,6 @@ class PaynlPaymentMethods extends PaymentModule
     private $statusCanceled;
     private $paymentMethods;
     private $payLogEnabled;
-    private $test;
 
     public function __construct()
     {
