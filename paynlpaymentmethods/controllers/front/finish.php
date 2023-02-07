@@ -84,10 +84,9 @@ class PaynlPaymentMethodsFinishModuleFrontController extends ModuleFrontControll
             Instore::handlePin($dbTransaction['hash'], $transactionId, $this);
           }
 
+          $slow = '&slowvalidation=1';
+          $iTotalAttempts = in_array($ppid, array(PaymentMethod::METHOD_OVERBOEKING, PaymentMethod::METHOD_SOFORT)) ? 1 : 20;
           if (!$transaction->isPaid()) {
-              $slow = '&slowvalidation=1';
-              $iTotalAttempts = in_array($ppid, array(PaymentMethod::METHOD_OVERBOEKING, PaymentMethod::METHOD_SOFORT)) ? 1 : 20;
-
               if ($bValidationDelay == 1 && $iAttempt < $iTotalAttempts) {
                   return;
               }
@@ -99,7 +98,13 @@ class PaynlPaymentMethodsFinishModuleFrontController extends ModuleFrontControll
           $cartId = $transaction->getOrderNumber();
           $orderId = Order::getIdByCartId($cartId);
 
-          $this->order = $orderId;
+          if (empty($orderId)) {
+            if ($iAttempt < $iTotalAttempts) {
+                return;
+            }
+          }
+
+          $this->order = $orderId;          
 
           Tools::redirect('index.php?controller=order-confirmation' . $slow . '&id_cart=' . $cartId . '&id_module=' . $this->module->id . '&id_order=' . $orderId . '&key=' . $customer->secure_key);
 
