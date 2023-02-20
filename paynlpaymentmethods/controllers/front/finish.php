@@ -76,20 +76,18 @@ class PaynlPaymentMethodsFinishModuleFrontController extends ModuleFrontControll
       if ($transaction->isPaid() || $transaction->isPending() || $transaction->isBeingVerified() || $transaction->isAuthorized()) {
 
           $cart = $this->context->cart;
-          $customer = new Customer($cart->id_customer);
-          $slow = '';
+          $customer = new Customer($cart->id_customer);    
 
           $dbTransaction = Transaction::get($transactionId);
           if (!empty($dbTransaction['hash']) && !empty($dbTransaction['payment_option_id']) && $dbTransaction['payment_option_id'] == PaymentMethod::METHOD_INSTORE) {
             Instore::handlePin($dbTransaction['hash'], $transactionId, $this);
           }
 
-          $slow = '&slowvalidation=1';
-          $iTotalAttempts = in_array($ppid, array(PaymentMethod::METHOD_OVERBOEKING, PaymentMethod::METHOD_SOFORT)) ? 1 : 20;
           if (!$transaction->isPaid()) {
-              if ($bValidationDelay == 1 && $iAttempt < $iTotalAttempts) {
-                  return;
-              }
+            $iTotalAttempts = in_array($ppid, array(PaymentMethod::METHOD_OVERBOEKING, PaymentMethod::METHOD_SOFORT)) ? 1 : 20;
+            if ($bValidationDelay == 1 && $iAttempt < $iTotalAttempts) {
+                return;
+            }
           }
 
           unset($this->context->cart);
@@ -98,15 +96,13 @@ class PaynlPaymentMethodsFinishModuleFrontController extends ModuleFrontControll
           $cartId = $transaction->getOrderNumber();
           $orderId = Order::getIdByCartId($cartId);
 
-          if (empty($orderId)) {
-            if ($iAttempt < $iTotalAttempts) {
-                return;
-            }
+          if (empty($orderId) && $iAttempt < 1) {
+            return;
           }
 
           $this->order = $orderId;          
 
-          Tools::redirect('index.php?controller=order-confirmation' . $slow . '&id_cart=' . $cartId . '&id_module=' . $this->module->id . '&id_order=' . $orderId . '&key=' . $customer->secure_key);
+          Tools::redirect('index.php?controller=order-confirmation&id_cart=' . $cartId . '&id_module=' . $this->module->id . '&id_order=' . $orderId . '&key=' . $customer->secure_key);
 
       } else {
           # Delete old payment fee
