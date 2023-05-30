@@ -90,7 +90,7 @@ class PaynlPaymentMethodsFinishModuleFrontController extends ModuleFrontControll
 
             unset($this->context->cart);
             unset($this->context->cookie->id_cart);
-            
+
             if (empty($orderId) && $iAttempt < 1) {
                 return;
             }
