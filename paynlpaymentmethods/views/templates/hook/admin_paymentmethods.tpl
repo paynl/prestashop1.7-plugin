@@ -191,8 +191,7 @@
                                     </div>
                                 </div>
                             {/if}
-
-                            {if in_array($paymentmethod->id,$showCreateOrderOnList)}
+                            {if !in_array($paymentmethod->id,$showCreateOrderOnList)}
                                 <div class="form-group">
                                     <label class="control-label col-lg-3 align-right">{l s='Order Create' mod='paynlpaymentmethods'}</label>
                                     <div class="col-lg-9">                                    

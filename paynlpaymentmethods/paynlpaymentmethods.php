@@ -895,7 +895,24 @@ class PaynlPaymentMethods extends PaymentModule
 
         $products = $this->_getProductData($cart);
 
-        $description = $cartId;
+        $orderId = null;
+        if ($this->shouldValidateOnStart($payment_option_id, $objPaymentMethod)) {
+            $this->payLog('startPayment', 'Pre-Creating order for pp : ' . $payment_option_id, $cartId);
+
+            # Flush the package list, so the fee is added to it.
+            $this->context->cart->getPackageList(true);
+
+            $paymentMethodSettings = PaymentMethod::getPaymentMethodSettings($payment_option_id);
+            $paymentMethodName = empty($paymentMethodSettings->name) ? 'PAY. Overboeking' : $paymentMethodSettings->name;
+
+            $this->validateOrder($cart->id, $this->statusPending, 0, $paymentMethodName, null, array(), null, false, $cart->secure_key);
+
+            $orderId = Order::getIdByCartId($cartId);
+        } else {
+            $this->payLog('startPayment', 'Not pre-creating the order, waiting for payment.', $cartId);
+        }
+
+        $description = !empty($orderId) ? $orderId : $cartId;
 
         if (Configuration::get('PAYNL_DESCRIPTION_PREFIX')) {
             $description = Configuration::get('PAYNL_DESCRIPTION_PREFIX') . $description;
@@ -911,6 +928,7 @@ class PaynlPaymentMethods extends PaymentModule
             'testmode' => Configuration::get('PAYNL_TEST_MODE'),
             'orderNumber' => $cart->id,
             'extra1' => $cart->id,
+            'extra2' => !empty($orderId) ? $orderId : null,
             'products' => $products,
             'object' => $this->getObjectInfo()
         );
@@ -940,20 +958,7 @@ class PaynlPaymentMethods extends PaymentModule
         Transaction::addTransaction($payTransactionId, $cart->id, $cart->id_customer, $payment_option_id, $cart->getOrderTotal());
 
         if ($this->shouldValidateOnStart($payment_option_id, $objPaymentMethod)) {
-
-            $this->payLog('startPayment', 'Pre-Creating order for pp : ' . $payment_option_id, $cartId, $payTransactionId);
-
-            # Flush the package list, so the fee is added to it.
-            $this->context->cart->getPackageList(true);
-
-            $paymentMethodSettings = PaymentMethod::getPaymentMethodSettings($payment_option_id);
-            $paymentMethodName = empty($paymentMethodSettings->name) ? 'PAY. Overboeking' : $paymentMethodSettings->name;
-
-            $this->validateOrder($cart->id, $this->statusPending, 0, $paymentMethodName, null, array(), null, false, $cart->secure_key);
-
-            $orderId = Order::getIdByCartId($cartId);
             $order = new Order($orderId);
-
             $orderPayment = new OrderPayment();
             $orderPayment->order_reference = $order->reference;
             $orderPayment->payment_method = $paymentMethodName;
@@ -961,9 +966,7 @@ class PaynlPaymentMethods extends PaymentModule
             $orderPayment->transaction_id = $payTransactionData['transaction']['transactionId'];
             $orderPayment->id_currency = $cart->id_currency;
             $orderPayment->save();
-        } else {
-            $this->payLog('startPayment', 'Not pre-creating the order, waiting for payment.', $cartId, $payTransactionId);
-        }
+        } 
 
         if ($payment_option_id == PaymentMethod::METHOD_INSTORE) {
             $this->payLog('startPayment', 'Starting Instore Payment', $cartId, $payTransactionId);
@@ -1800,7 +1803,7 @@ class PaynlPaymentMethods extends PaymentModule
             'languages' => Language::getLanguages(true),
             'paymentmethods' => (array) $this->getPaymentMethodsCombined(),
             'showExternalLogoList' => [PaymentMethod::METHOD_GIVACARD],
-            'showCreateOrderOnList' => [PaymentMethod::METHOD_PAYPAL]
+            'showCreateOrderOnList' => [PaymentMethod::METHOD_OVERBOEKING]
         ));
 
         return $this->display(__FILE__, 'admin_paymentmethods.tpl');
