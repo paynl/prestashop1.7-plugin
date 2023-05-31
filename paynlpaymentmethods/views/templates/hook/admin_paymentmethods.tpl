@@ -200,7 +200,9 @@
                                             <option value="start" {if $paymentmethod->create_order_on == 'start'}selected{/if}>Create order on payment start</option>                                 
                                         </select>                                    
                                         <p class="help-block">
-                                            {l s='Sets when the order is created.' mod='paynlpaymentmethods'}
+                                            {l s='Default setting uses cart-ID. Create order on payment start, gives you the Prestashop order number. For more information, see our' mod='paynlpaymentmethods'}
+                                            <a href="https://docs.pay.nl/plugins#prestashop-oneseven-download" target="_BLANK">{l s=' documentation' mod='paynlpaymentmethods'}</a>
+                                            .
                                         </p>
                                     </div>
                                 </div>
