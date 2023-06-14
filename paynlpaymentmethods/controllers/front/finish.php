@@ -69,6 +69,9 @@ class PaynlPaymentMethodsFinishModuleFrontController extends ModuleFrontControll
             return;
         }
 
+        $cartId = $transaction->getOrderNumber();
+        $orderId = Order::getIdByCartId($cartId);
+
         $module->payLog('finishPostProcess', 'Returning to webshop. Method: ' . $transaction->getPaymentMethodName() . '. Status: ' . $stateName, $transaction->getOrderNumber(), $transactionId);
         if ($transaction->isPaid() || $transaction->isPending() || $transaction->isBeingVerified() || $transaction->isAuthorized()) {
             $cart = $this->context->cart;
@@ -87,8 +90,7 @@ class PaynlPaymentMethodsFinishModuleFrontController extends ModuleFrontControll
 
             unset($this->context->cart);
             unset($this->context->cookie->id_cart);
-            $cartId = $transaction->getOrderNumber();
-            $orderId = Order::getIdByCartId($cartId);
+
             if (empty($orderId) && $iAttempt < 1) {
                 return;
             }
@@ -96,17 +98,20 @@ class PaynlPaymentMethodsFinishModuleFrontController extends ModuleFrontControll
             $this->order = $orderId;
             Tools::redirect('index.php?controller=order-confirmation&id_cart=' . $cartId . '&id_module=' . $this->module->id . '&id_order=' . $orderId . '&key=' . $customer->secure_key);
         } else {
-        # Delete old payment fee
+            # Delete old payment fee
             $this->context->cart->deleteProduct(Configuration::get('PAYNL_FEE_PRODUCT_ID'), 0);
             if ($this->orderStatusId == '-63') {
                 $this->createNewCart($this->context->cart);
                 $this->errors[] = $this->module->l('The payment has been denied', 'finish');
                 $this->redirectWithNotifications('index.php?controller=order&step=1');
             } elseif ($transaction->isCanceled()) {
+                if (!empty($orderId)) {
+                    $this->createNewCart($cartId);
+                }
                 $this->errors[] = $this->module->l('The payment has been canceled', 'finish');
                 $this->redirectWithNotifications('index.php?controller=order&step=1');
             } else {
-    # To checkout
+                # To checkout
                 Tools::redirect('index.php?controller=order&step=1');
             }
         }
@@ -131,12 +136,13 @@ class PaynlPaymentMethodsFinishModuleFrontController extends ModuleFrontControll
     }
 
     /**
-     * @param object $oldCart
+     * @param string $cartId
      * @phpcs:disable Squiz.Commenting.FunctionComment.TypeHintMissing
      * @return void
      */
-    public function createNewCart($oldCart)
+    public function createNewCart($cartId)
     {
+        $oldCart = new Cart($cartId);
         $newCart = $oldCart->duplicate();
         if (!empty($newCart["cart"]->id)) {
             $this->context->cookie->id_cart = $newCart["cart"]->id;

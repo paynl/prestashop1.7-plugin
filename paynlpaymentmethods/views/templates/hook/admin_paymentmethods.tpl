@@ -191,17 +191,18 @@
                                     </div>
                                 </div>
                             {/if}
-
-                            {if in_array($paymentmethod->id,$showCreateOrderOnList)}
+                            {if !in_array($paymentmethod->id,$showCreateOrderOnList)}
                                 <div class="form-group">
                                     <label class="control-label col-lg-3 align-right">{l s='Order Create' mod='paynlpaymentmethods'}</label>
                                     <div class="col-lg-9">                                    
                                         <select name="create_order_on">
-                                            <option value="success" {if $paymentmethod->create_order_on == 'success'}selected{/if}>Create order on succes (default)</option>
+                                            <option value="success" {if $paymentmethod->create_order_on == 'success'}selected{/if}>Create order on success (default)</option>
                                             <option value="start" {if $paymentmethod->create_order_on == 'start'}selected{/if}>Create order on payment start</option>                                 
                                         </select>                                    
                                         <p class="help-block">
-                                            {l s='Sets when the order is created.' mod='paynlpaymentmethods'}
+                                            {l s='Default setting uses cart-ID. Create order on payment start, gives you the Prestashop order number. For more information, see our' mod='paynlpaymentmethods'}
+                                            <a href="https://docs.pay.nl/plugins#prestashop-oneseven-download" target="_BLANK">{l s=' documentation' mod='paynlpaymentmethods'}</a>
+                                            .
                                         </p>
                                     </div>
                                 </div>
