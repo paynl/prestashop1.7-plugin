@@ -873,6 +873,12 @@ class PaynlPaymentMethods extends PaymentModule
         $currency = new Currency($cart->id_currency);
 /** @var CurrencyCore $currency */
 
+        $exchangeUrl = $this->context->link->getModuleLink($this->name, 'exchange', array(), true);
+        $alternativeExchangeUrl = $this->getAlternativeExchangeUrl();
+        if (!empty(trim($alternativeExchangeUrl))) {
+            $exchangeUrl = $alternativeExchangeUrl;
+        }
+
         $objPaymentMethod = $this->getPaymentMethod($payment_option_id);
 # Make sure no fee is in the cart
         $cart->deleteProduct(Configuration::get('PAYNL_FEE_PRODUCT_ID'), 0);
@@ -909,7 +915,7 @@ class PaynlPaymentMethods extends PaymentModule
             'amount' => $cart->getOrderTotal(),
             'currency' => $currency->iso_code,
             'returnUrl' => $this->context->link->getModuleLink($this->name, 'finish', array(), true),
-            'exchangeUrl' => $this->context->link->getModuleLink($this->name, 'exchange', array(), true),
+            'exchangeUrl' => $exchangeUrl,
             'paymentMethod' => $payment_option_id,
             'description' => $description,
             'testmode' => Configuration::get('PAYNL_TEST_MODE'),
@@ -1402,6 +1408,7 @@ class PaynlPaymentMethods extends PaymentModule
             Configuration::updateValue('PAYNL_SERVICE_ID', Tools::getValue('PAYNL_SERVICE_ID'));
             Configuration::updateValue('PAYNL_TEST_MODE', Tools::getValue('PAYNL_TEST_MODE'));
             Configuration::updateValue('PAYNL_FAILOVER_GATEWAY', Tools::getValue('PAYNL_FAILOVER_GATEWAY'));
+            Configuration::updateValue('PAYNL_EXCHANGE_URL', Tools::getValue('PAYNL_EXCHANGE_URL'));
             Configuration::updateValue('PAYNL_VALIDATION_DELAY', Tools::getValue('PAYNL_VALIDATION_DELAY'));
             Configuration::updateValue('PAYNL_PAYLOGGER', Tools::getValue('PAYNL_PAYLOGGER'));
             Configuration::updateValue('PAYNL_DESCRIPTION_PREFIX', Tools::getValue('PAYNL_DESCRIPTION_PREFIX'));
@@ -1451,6 +1458,14 @@ class PaynlPaymentMethods extends PaymentModule
                         'label' => $this->l('Failover gateway'),
                         'name' => 'PAYNL_FAILOVER_GATEWAY',
                         'desc' => $this->l('Leave this empty unless we at PAY. advice you to fill this in with a gateway we give to you'),
+                        'required' => false
+                    ),
+                    array(
+                        'type' => 'text',
+                        'label' => $this->l('Alternatieve Exchange URL'),
+                        'name' => 'PAYNL_EXCHANGE_URL',
+                        'placeholder' => 'https//www.yourdomain.nl/exchange_handler',
+                        'desc' => $this->l('Use your own exchange-handler. Requests will be send as GET.') . '<br/>' . $this->l('Example: https://www.yourdomain.nl/exchange_handler?action=#action#&order_id=#order_id#') . '<br>' . $this->l('For more info see: ') . '<a href="https://docs.pay.nl/developers#exchange-parameters">' . $this->l('docs.pay.nl') . '</a>',
                         'required' => false
                     ),
                   array(
@@ -1615,6 +1630,7 @@ class PaynlPaymentMethods extends PaymentModule
             'PAYNL_SERVICE_ID' => Tools::getValue('PAYNL_SERVICE_ID', Configuration::get('PAYNL_SERVICE_ID')),
             'PAYNL_TEST_MODE' => Tools::getValue('PAYNL_TEST_MODE', Configuration::get('PAYNL_TEST_MODE')),
             'PAYNL_FAILOVER_GATEWAY' => Tools::getValue('PAYNL_FAILOVER_GATEWAY', Configuration::get('PAYNL_FAILOVER_GATEWAY')),
+            'PAYNL_EXCHANGE_URL' => Tools::getValue('PAYNL_EXCHANGE_URL', Configuration::get('PAYNL_EXCHANGE_URL')),
             'PAYNL_VALIDATION_DELAY' => Tools::getValue('PAYNL_VALIDATION_DELAY', Configuration::get('PAYNL_VALIDATION_DELAY')),
             'PAYNL_PAYLOGGER' => $logging,
             'PAYNL_DESCRIPTION_PREFIX' => Tools::getValue('PAYNL_DESCRIPTION_PREFIX', Configuration::get('PAYNL_DESCRIPTION_PREFIX')),
@@ -1805,5 +1821,16 @@ class PaynlPaymentMethods extends PaymentModule
     public function getCountries()
     {
         return Country::getCountries($this->context->language->id, true);
+    }
+
+    public function getAlternativeExchangeUrl()
+    {
+        $altUrl = Configuration::get('PAYNL_EXCHANGE_URL');
+
+        if (!empty($altUrl)) {
+            return $altUrl;
+        }
+
+        return $altUrl;
     }
 }
