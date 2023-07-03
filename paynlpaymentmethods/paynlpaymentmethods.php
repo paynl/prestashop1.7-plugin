@@ -1465,7 +1465,7 @@ class PaynlPaymentMethods extends PaymentModule
                         'label' => $this->l('Alternatieve Exchange URL'),
                         'name' => 'PAYNL_EXCHANGE_URL',
                         'placeholder' => 'https//www.yourdomain.nl/exchange_handler',
-                        'desc' => $this->l('Use your own exchange-handler. Requests will be send as GET.') . '<br/>' . $this->l('Example: https://www.yourdomain.nl/exchange_handler?action=#action#&order_id=#order_id#') . '<br>' . $this->l('For more info see: ') . '<a href="https://docs.pay.nl/developers#exchange-parameters">' . $this->l('docs.pay.nl') . '</a>',
+                        'desc' => $this->l('Use your own exchange-handler. Requests will be send as GET.') . '<br/>' . $this->l('Example: https://www.yourdomain.nl/exchange_handler?action=#action#&order_id=#order_id#') . '<br>' . $this->l('For more info see: ') . '<a href="https://docs.pay.nl/developers#exchange-parameters">' . $this->l('docs.pay.nl') . '</a>', // phpcs:ignore
                         'required' => false
                     ),
                   array(
@@ -1823,6 +1823,9 @@ class PaynlPaymentMethods extends PaymentModule
         return Country::getCountries($this->context->language->id, true);
     }
 
+    /**
+     * @return string
+     */
     public function getAlternativeExchangeUrl()
     {
         $altUrl = Configuration::get('PAYNL_EXCHANGE_URL');
@@ -1831,6 +1834,6 @@ class PaynlPaymentMethods extends PaymentModule
             return $altUrl;
         }
 
-        return $altUrl;
+        return '';
     }
 }
