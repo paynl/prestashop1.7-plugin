@@ -874,9 +874,9 @@ class PaynlPaymentMethods extends PaymentModule
 /** @var CurrencyCore $currency */
 
         $exchangeUrl = $this->context->link->getModuleLink($this->name, 'exchange', array(), true);
-        $alternativeExchangeUrl = $this->getAlternativeExchangeUrl();
-        if (!empty(trim($alternativeExchangeUrl))) {
-            $exchangeUrl = $alternativeExchangeUrl;
+        $alternativeExchangeUrl = Configuration::get('PAYNL_EXCHANGE_URL');
+        if (!empty($alternativeExchangeUrl)) {
+            $exchangeUrl = trim($alternativeExchangeUrl);
         }
 
         $objPaymentMethod = $this->getPaymentMethod($payment_option_id);
@@ -1821,19 +1821,5 @@ class PaynlPaymentMethods extends PaymentModule
     public function getCountries()
     {
         return Country::getCountries($this->context->language->id, true);
-    }
-
-    /**
-     * @return string
-     */
-    public function getAlternativeExchangeUrl()
-    {
-        $altUrl = Configuration::get('PAYNL_EXCHANGE_URL');
-
-        if (!empty($altUrl)) {
-            return $altUrl;
-        }
-
-        return '';
     }
 }
