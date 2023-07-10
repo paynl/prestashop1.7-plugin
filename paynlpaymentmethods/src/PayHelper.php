@@ -24,10 +24,10 @@ class PayHelper
     }
 
     /**
-     * @param $exchange
-     * @return mixed|string
+     * @param $exchange string
+     * @return string
      */
-    public static function getExchangeUrl($exchange)
+    public static function getExchangeUrl(string $exchange)
     {
         $alternativeExchangeUrl = trim(Configuration::get('PAYNL_EXCHANGE_URL'));
 
