@@ -24,7 +24,7 @@ class PayHelper
     }
 
     /**
-     * @param $exchange string
+     * @param $exchange
      * @return string
      */
     public static function getExchangeUrl(string $exchange)
