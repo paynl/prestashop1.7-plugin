@@ -19,4 +19,15 @@ class PayHelper
         \Paynl\Config::setApiToken($apitoken);
         \Paynl\Config::setServiceId($serviceId);
     }
+
+    public static function getExchangeUrl($exchange)
+    {
+        $alternativeExchangeUrl = trim(Configuration::get('PAYNL_EXCHANGE_URL'));
+
+        if (!empty($alternativeExchangeUrl)) {
+            return $alternativeExchangeUrl;
+        }
+
+        return $exchange;
+    }
 }

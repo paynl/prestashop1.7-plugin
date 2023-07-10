@@ -873,11 +873,7 @@ class PaynlPaymentMethods extends PaymentModule
         $currency = new Currency($cart->id_currency);
 /** @var CurrencyCore $currency */
 
-        $exchangeUrl = $this->context->link->getModuleLink($this->name, 'exchange', array(), true);
-        $alternativeExchangeUrl = Configuration::get('PAYNL_EXCHANGE_URL');
-        if (!empty($alternativeExchangeUrl)) {
-            $exchangeUrl = trim($alternativeExchangeUrl);
-        }
+        $exchangeUrl = PayHelper::getExchangeUrl($this->context->link->getModuleLink($this->name, 'exchange', array(), true));
 
         $objPaymentMethod = $this->getPaymentMethod($payment_option_id);
 # Make sure no fee is in the cart
