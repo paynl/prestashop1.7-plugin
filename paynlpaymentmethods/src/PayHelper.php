@@ -7,6 +7,9 @@ use Configuration;
 
 class PayHelper
 {
+    /**
+     * @return void
+     */
     public static function sdkLogin()
     {
         $apitoken = Tools::getValue('PAYNL_API_TOKEN', Configuration::get('PAYNL_API_TOKEN'));
@@ -20,6 +23,10 @@ class PayHelper
         \Paynl\Config::setServiceId($serviceId);
     }
 
+    /**
+     * @param $exchange
+     * @return mixed|string
+     */
     public static function getExchangeUrl($exchange)
     {
         $alternativeExchangeUrl = trim(Configuration::get('PAYNL_EXCHANGE_URL'));
