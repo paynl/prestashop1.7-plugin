@@ -64,7 +64,7 @@ class PaynlPaymentMethods extends PaymentModule
     {
         $this->name = 'paynlpaymentmethods';
         $this->tab = 'payments_gateways';
-        $this->version = '4.10.1';
+        $this->version = '4.12.0';
         $this->payLogEnabled = null;
         $this->ps_versions_compliancy = array('min' => '1.7', 'max' => _PS_VERSION_);
         $this->author = 'PAY.';
@@ -1461,7 +1461,7 @@ class PaynlPaymentMethods extends PaymentModule
                         'label' => $this->l('Alternatieve Exchange URL'),
                         'name' => 'PAYNL_EXCHANGE_URL',
                         'placeholder' => 'https//www.yourdomain.nl/exchange_handler',
-                        'desc' => $this->l('Use your own exchange-handler. Requests will be send as GET.') . '<br/>' . $this->l('Example: https://www.yourdomain.nl/exchange_handler?action=#action#&order_id=#order_id#') . '<br>' . $this->l('For more info see: ') . '<a href="https://docs.pay.nl/developers#exchange-parameters">' . $this->l('docs.pay.nl') . '</a>', // phpcs:ignore
+                        'desc' => $this->l('Use your own exchange-handler.') . '<br/>' . $this->l('Example: https://www.yourdomain.nl/exchange_handler?action=#action#&order_id=#order_id#') . '<br>' . $this->l('For more info see: ') . '<a href="https://docs.pay.nl/developers#exchange-parameters">' . $this->l('docs.pay.nl') . '</a>', // phpcs:ignore
                         'required' => false
                     ),
                   array(
