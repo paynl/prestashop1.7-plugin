@@ -101,12 +101,12 @@ class PaynlPaymentMethods extends PaymentModule
         }
 
         if ($this->isRegisteredInHook('paymentReturn')) {
-            $this->unregisterHook('paymentReturn');          
+            $this->unregisterHook('paymentReturn');
         }
 
         if (!$this->isRegisteredInHook('displayPaymentReturn')) {
             $this->registerHook('displayPaymentReturn');
-        } 
+        }
     }
 
     /**
