@@ -99,6 +99,14 @@ class PaynlPaymentMethods extends PaymentModule
         if (!$this->isRegisteredInHook('actionOrderStatusPostUpdate')) {
             $this->registerHook('actionOrderStatusPostUpdate');
         }
+
+        if ($this->isRegisteredInHook('paymentReturn')) {
+            $this->unregisterHook('paymentReturn');          
+        }
+
+        if (!$this->isRegisteredInHook('displayPaymentReturn')) {
+            $this->registerHook('displayPaymentReturn');
+        } 
     }
 
     /**
@@ -120,7 +128,7 @@ class PaynlPaymentMethods extends PaymentModule
         if (
             !parent::install()
             || !$this->registerHook('paymentOptions')
-            || !$this->registerHook('paymentReturn')
+            || !$this->registerHook('displayPaymentReturn')
             || !$this->registerHook('displayAdminOrder')
             || !$this->registerHook('actionAdminControllerSetMedia')
             || !$this->registerHook('displayHeader')
