@@ -1100,7 +1100,7 @@ class PaynlPaymentMethods extends PaymentModule
                 }
                 if ($discountValue > 0) {
                     $arrResult[] = array(
-                    'id' => substr($discount['code'], 0, 25),
+                    'id' => (empty(substr($discount['code'], 0, 25))) ? 'discount' : substr($discount['code'], 0, 25),
                     'name' => $discount['description'],
                     'price' => -$discountValue,
                     'tax' => $discountTax - $discountValue,
