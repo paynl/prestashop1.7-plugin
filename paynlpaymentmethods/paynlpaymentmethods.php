@@ -118,7 +118,7 @@ class PaynlPaymentMethods extends PaymentModule
         $this->context->controller->addJs($this->_path . 'views/js/PAY_checkout.js');
         if (Configuration::get('PAYNL_STANDARD_STYLE') !== '0') {
             $this->context->controller->addCSS($this->_path . 'views/css/PAY_checkout.css');
-        }  
+        }
     }
 
     /**
@@ -1774,10 +1774,10 @@ class PaynlPaymentMethods extends PaymentModule
 
                     if (!isset($paymentmethod->bank_selection)) {
                         $paymentmethod->bank_selection = '';
-                        if($paymentmethod->id == PaymentMethod::METHOD_INSTORE){
+                        if ($paymentmethod->id == PaymentMethod::METHOD_INSTORE) {
                             $paymentmethod->bank_selection = 'dropdown';
                         }
-                        if($paymentmethod->id == PaymentMethod::METHOD_IDEAL){
+                        if ($paymentmethod->id == PaymentMethod::METHOD_IDEAL) {
                             $paymentmethod->bank_selection = 'radio';
                         }
                         $changed = true;
