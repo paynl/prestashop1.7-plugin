@@ -655,6 +655,7 @@ class PaynlPaymentMethods extends PaymentModule
             $paymentOptionText = $this->l('Please select your bank');
             $paymentDropdownText = $this->l('Pay safely via your bank');
 
+            $type = 'radio';
             $objPaymentMethod = $this->getPaymentMethod($payment_option_id);
             if (!empty($objPaymentMethod->bank_selection)) {
                 $type = $objPaymentMethod->bank_selection;
@@ -666,6 +667,7 @@ class PaynlPaymentMethods extends PaymentModule
             $paymentOptions = $terminals->getList();
             $paymentOptionText = $this->l('Please select a pin-terminal');
             $paymentDropdownText = $this->l('Pay safely via pin');
+            $type = 'dropdown';
         }
         $this->context->smarty->assign([
             'action' => $this->context->link->getModuleLink($this->name, 'startPayment', array(), true),

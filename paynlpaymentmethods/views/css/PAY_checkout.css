@@ -5,6 +5,7 @@
     width: 30px;
     height: 30px;
     object-fit: contain;
+    margin-top: -5px;
 }
 .payment-options form.paynl {
     padding-left: 35px;
