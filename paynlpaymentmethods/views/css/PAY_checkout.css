@@ -42,21 +42,22 @@
     width: auto;
 }
 .payment-options form.paynl .row fieldset select {
-    border: none !important;
+    border: none;
     font-size: 16px;
     position: absolute;
     top: -10px;
     background: transparent;
     left: 0;
     border-radius: 10px;
-    padding: 11px 10px 11px 15px !important;
+    padding: 11px 10px 11px 15px;
     width: 100%;
     box-sizing: border-box;
     line-height: 1.618;
     text-rendering: optimizeLegibility;
     font-weight: 400;
     height: auto;
-    background-color: transparent !important;
+    background-color: transparent;
+    outline: none !important;
 }
 .payment-options form.paynl .row li {
     margin-top: 0rem;

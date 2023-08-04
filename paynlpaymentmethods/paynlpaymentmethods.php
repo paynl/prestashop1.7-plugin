@@ -679,7 +679,7 @@ class PaynlPaymentMethods extends PaymentModule
             'logoClass' => $logo ? '' : 'noLogo',
             'type' => $type,
         ]);
-        return $this->context->smarty->fetch('module:paynlpaymentmethods/views/templates/front/payment_form.tpl');
+        return $this->context->smarty->fetch('module:paynlpaymentmethods/views/templates/front/Pay_payment_form.tpl');
     }
 
     /**
