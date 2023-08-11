@@ -653,7 +653,7 @@ class PaynlPaymentMethods extends PaymentModule
             PayHelper::sdkLogin();
             $paymentOptions = \Paynl\Paymentmethods::getBanks($payment_option_id);
             $paymentOptionText = $this->l('Please select your bank');
-            $paymentDropdownText = $this->l('Pay safely via your bank');
+            $paymentDropdownText = $this->l('Choose your bank');
 
             $type = 'radio';
             $objPaymentMethod = $this->getPaymentMethod($payment_option_id);
@@ -665,8 +665,8 @@ class PaynlPaymentMethods extends PaymentModule
             PayHelper::sdkLogin();
             $terminals = \Paynl\Instore::getAllTerminals();
             $paymentOptions = $terminals->getList();
-            $paymentOptionText = $this->l('Please select a pin-terminal');
-            $paymentDropdownText = $this->l('Pay safely via pin');
+            $paymentOptionText = $this->l('Select card terminal');
+            $paymentDropdownText = $this->l('Select card terminal');
             $type = 'dropdown';
         }
         $this->context->smarty->assign([
@@ -1480,7 +1480,7 @@ class PaynlPaymentMethods extends PaymentModule
                     ),
                     array(
                         'type' => 'text',
-                        'label' => $this->l('Alternatieve Exchange URL'),
+                        'label' => $this->l('Custom exchange URL'),
                         'name' => 'PAYNL_EXCHANGE_URL',
                         'placeholder' => 'https//www.yourdomain.nl/exchange_handler',
                         'desc' => $this->l('Use your own exchange-handler.') . '<br/>' . $this->l('Example: https://www.yourdomain.nl/exchange_handler?action=#action#&order_id=#order_id#') . '<br>' . $this->l('For more info see: ') . '<a href="https://docs.pay.nl/developers#exchange-parameters">' . $this->l('docs.pay.nl') . '</a>', // phpcs:ignore
@@ -1560,9 +1560,9 @@ class PaynlPaymentMethods extends PaymentModule
                     ),
                     array(
                         'type' => 'switch',
-                        'label' => $this->l('Standard Pay. Style'),
+                        'label' => $this->l('Pay. Styling'),
                         'name' => 'PAYNL_STANDARD_STYLE',
-                        'desc' => $this->l('Enable this if you want to use the standard Pay. style in the checkout'),
+                        'desc' => $this->l('Enable this if you want to use the Pay. styling in your checkout'),
                         'values' => array(
                             array(
                                 'id' => 'active_on',

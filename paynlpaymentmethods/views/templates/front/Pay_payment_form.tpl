@@ -6,7 +6,6 @@
                 <fieldset>
                     <legend>{$payment_dropdown_text}</legend>
                     <select class="form-control form-control-select" id="bank" name="bank">
-                        <option value="">{$payment_option_text}</option>
                         {foreach from=$banks item=bank}
                             <option value="{$bank['id']}">{$bank['name']}</option>
                         {/foreach}

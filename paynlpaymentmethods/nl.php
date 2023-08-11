@@ -34,7 +34,8 @@ $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_c53d0786f9ff13068
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_157806b805c6e8bf6c3f9fca552faa66'] = 'Deze order is al gedeeltelijk gecaptured, hierdoor kan je alleen nog het overgebleven bedrag capturen. De order zal gecaptured worden via PAY. en de klant zal een factuur ontvangen van de betaalmethode die ze gebruik van hebben gemaakt.';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_020c2091aec3019d02193cef080bcf97'] = 'Betaalmethode toeslag';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_3ee7960dc804545cf3cc91a1fbc155ca'] = 'Selecteer uw bank a.u.b.';
-$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_cf633a48ceceb64b509b34070ff248e7'] = 'Selecteer een pin-terminal a.u.b';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_48fa0f621f79f451e58f200957da5b52'] = 'Selecteer uw bank';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_41abbe3dc7a10802ddf71fbd4ac9bdc0'] = 'Selecteer een pin terminal';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_9f06b28a40790c4c4df5739bce3c1eb0'] = 'Verzendkosten';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_68bf367e228f45ba83cb8831a5ee6447'] = 'Nederlands';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_78463a384a5aa4fad5fa73e2f506ecfc'] = 'Engels';
@@ -59,6 +60,8 @@ $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_adc1e83ea8057c3b1
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_2ab45b27dbaf728ece860448598238ae'] = 'Een tekst die voor de transactieomschrijving wordt gezet';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_99a8c83c65d822871e36ab3c9f989110'] = 'Failover gateway';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_063515f416b7d05ff5d1c8103e3786d5'] = 'Laat dit leeg tenzij we bij PAY. u adviseren om dit in te vullen met een gateway die wij u geven';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_0c790ab144fa537c0c9fcf738e84ebf0'] = 'Gebruik je eigen exchange url ';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_1d677b37b6d75a7a64381b03650e4768'] = 'Voor meer informatie zie:';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_b989ff7da93d9c8344a4c4e765cab502'] = 'Validatievertraging';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_71268b7a2a120a7b132e7e3833567700'] = 'Wanneer de betaling is voltooid, wacht tot PAY. de betaling valideert voordat u doorverwezen wordt naar de succespagina';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_00d23a76e43b46dae9ec7aa9dcbebb32'] = 'Ingeschakeld';
@@ -69,6 +72,7 @@ $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_4245499695408b974
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_61142607f22ea506073bcb1c1c74133e'] = 'Start de transacties in sandbox modus om te testen';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_4861c3d5c88af6037e2bfb0d5c309ce1'] = 'Weergave afbeeldingen';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_f7d5170bde3cbe04f1e4c3cb3459dc08'] = 'Laat de afbeeldingen van de betaalmethoden zien in de checkout.';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_d937de6de8ec9846b8fcaaf208659d6c'] = 'Schakel dit in wanneer je pay-styling (css) wilt gebruiken in je checkout.';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_69fb3ae0a14e5747d5f2c229236e0d3f'] = 'Auto-capture';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_bd42c8dcf92a5f21986cdcc31751f8b6'] = 'Capture geautoriseerde betalingen automatisch bij verzending';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_3d8bf69f189462bae437c9b50d32f4e1'] = 'Betaalscherm taal';
