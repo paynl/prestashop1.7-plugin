@@ -1,25 +1,107 @@
 .payment-option img {
-    margin-top: 0px;
-    float: left;
-    margin-right: 10px;
+    float: right;
     cursor: pointer;
     position: relative;
-    top: -15px;
-    width: 50px;
-    height: 50px;
+    width: 30px;
+    height: 30px;
     object-fit: contain;
+    margin-top: -5px;
 }
-
 .payment-options form.paynl {
-    padding-left: 50px;
+    padding-left: 35px;
     font-size: 14px;
-    padding-top: 5px;
+    padding-top: 5px;    
 }
-
+.payment-options form.paynl .row {
+    margin-right: 0;
+    margin-left: 0;
+}
+.payment-options form.paynl .row fieldset {
+    border: 1px solid #c2c2c2;
+    line-height: 1.42857143;
+    vertical-align: baseline;
+    width: 100%;
+    box-sizing: border-box;
+    position: relative;
+    border-radius: 10px;
+    height: 60px;
+    padding: 10px;
+    margin-top: 10px;
+    background: transparent;
+}
+.payment-options form.paynl .row fieldset legend {
+    padding: 0px 5px;
+    margin: 0;
+    font-weight: normal;
+    font-size: 14px;
+    position: relative;
+    z-index: 2;
+    height: 20px;
+    background: transparent;
+    float: none;
+    width: auto;
+}
+.payment-options form.paynl .row fieldset select {
+    border: none;
+    font-size: 16px;
+    position: absolute;
+    top: -10px;
+    background: transparent;
+    left: 0;
+    border-radius: 10px;
+    padding: 11px 10px 11px 15px;
+    width: 100%;
+    box-sizing: border-box;
+    line-height: 1.618;
+    text-rendering: optimizeLegibility;
+    font-weight: 400;
+    height: auto;
+    background-color: transparent;
+    outline: none !important;
+}
+.payment-options form.paynl .row li {
+    margin-top: 0rem;
+    margin-bottom: 0.95rem;
+    cursor: pointer;
+}
+.payment-options form.paynl .row li label {
+    height: auto;
+    display: block !important;
+    width: 100%;
+    text-align: left;
+}
+.payment-options form.paynl .row li label input[type="radio"] {
+    margin: 2px 5px 0 0;
+    vertical-align: middle;
+    display: inline-block;
+}
+.payment-options form.paynl .row li label img {
+    display: inline-block;
+    width: 50px;
+    height: 35px;
+    vertical-align: middle;
+    max-width: 50px;
+    max-height: 35px;
+    object-fit: scale-down;
+}
 .payment-options .paynl_payment_description {
     margin-bottom: 40px;
 }
-
 .PAYNL.firstMethod {
     margin-top: 20px;
+}
+body#checkout section.checkout-step .payment-options .PAYNL label,
+.PAYNL label {
+    width: 100%;
+    display: block;
+    text-align: left;
+    height: 30px;
+    cursor: pointer;
+}
+.PAYNL label span {
+    padding-top: 1px;
+    display: inline-block;
+}
+.payment-option label span {
+    padding-left: 10px;
 }

@@ -116,7 +116,9 @@ class PaynlPaymentMethods extends PaymentModule
     public function hookDisplayHeader(array $params)
     {
         $this->context->controller->addJs($this->_path . 'views/js/PAY_checkout.js');
-        $this->context->controller->addCSS($this->_path . 'views/css/PAY_checkout.css');
+        if (Configuration::get('PAYNL_STANDARD_STYLE') !== '0') {
+            $this->context->controller->addCSS($this->_path . 'views/css/PAY_checkout.css');
+        }
     }
 
     /**
@@ -645,28 +647,39 @@ class PaynlPaymentMethods extends PaymentModule
     {
         $paymentOptions = array();
         $paymentOptionText = null;
+        $paymentDropdownText = null;
+        $type = 'dropdown';
         if ($payment_option_id == PaymentMethod::METHOD_IDEAL) {
             PayHelper::sdkLogin();
             $paymentOptions = \Paynl\Paymentmethods::getBanks($payment_option_id);
             $paymentOptionText = $this->l('Please select your bank');
-        }
+            $paymentDropdownText = $this->l('Choose your bank');
 
+            $type = 'radio';
+            $objPaymentMethod = $this->getPaymentMethod($payment_option_id);
+            if (!empty($objPaymentMethod->bank_selection)) {
+                $type = $objPaymentMethod->bank_selection;
+            }
+        }
         if ($payment_option_id == PaymentMethod::METHOD_INSTORE) {
             PayHelper::sdkLogin();
             $terminals = \Paynl\Instore::getAllTerminals();
             $paymentOptions = $terminals->getList();
-            $paymentOptionText = $this->l('Please select a pin-terminal');
+            $paymentOptionText = $this->l('Select card terminal');
+            $paymentDropdownText = $this->l('Select card terminal');
+            $type = 'dropdown';
         }
-
         $this->context->smarty->assign([
             'action' => $this->context->link->getModuleLink($this->name, 'startPayment', array(), true),
             'banks' => $paymentOptions,
             'payment_option_id' => $payment_option_id,
             'payment_option_text' => $paymentOptionText,
+            'payment_dropdown_text' => $paymentDropdownText,
             'description' => $description,
-            'logoClass' => $logo ? '' : 'noLogo'
+            'logoClass' => $logo ? '' : 'noLogo',
+            'type' => $type,
         ]);
-        return $this->context->smarty->fetch('module:paynlpaymentmethods/views/templates/front/payment_form.tpl');
+        return $this->context->smarty->fetch('module:paynlpaymentmethods/views/templates/front/Pay_payment_form.tpl');
     }
 
     /**
@@ -1419,6 +1432,7 @@ class PaynlPaymentMethods extends PaymentModule
             Configuration::updateValue('PAYNL_PAYMENTMETHODS', Tools::getValue('PAYNL_PAYMENTMETHODS'));
             Configuration::updateValue('PAYNL_LANGUAGE', Tools::getValue('PAYNL_LANGUAGE'));
             Configuration::updateValue('PAYNL_SHOW_IMAGE', Tools::getValue('PAYNL_SHOW_IMAGE'));
+            Configuration::updateValue('PAYNL_STANDARD_STYLE', Tools::getValue('PAYNL_STANDARD_STYLE'));
             Configuration::updateValue('PAYNL_AUTO_CAPTURE', Tools::getValue('PAYNL_AUTO_CAPTURE'));
         }
         $this->_html .= $this->displayConfirmation($this->l('Settings updated'));
@@ -1466,7 +1480,7 @@ class PaynlPaymentMethods extends PaymentModule
                     ),
                     array(
                         'type' => 'text',
-                        'label' => $this->l('Alternatieve Exchange URL'),
+                        'label' => $this->l('Custom exchange URL'),
                         'name' => 'PAYNL_EXCHANGE_URL',
                         'placeholder' => 'https//www.yourdomain.nl/exchange_handler',
                         'desc' => $this->l('Use your own exchange-handler.') . '<br/>' . $this->l('Example: https://www.yourdomain.nl/exchange_handler?action=#action#&order_id=#order_id#') . '<br>' . $this->l('For more info see: ') . '<a href="https://docs.pay.nl/developers#exchange-parameters">' . $this->l('docs.pay.nl') . '</a>', // phpcs:ignore
@@ -1531,6 +1545,24 @@ class PaynlPaymentMethods extends PaymentModule
                         'label' => $this->l('Show images'),
                         'name' => 'PAYNL_SHOW_IMAGE',
                         'desc' => $this->l('Show the images of the payment methods in checkout.'),
+                        'values' => array(
+                            array(
+                                'id' => 'active_on',
+                                'value' => 1,
+                                'label' => $this->l('Enabled')
+                            ),
+                            array(
+                                'id' => 'active_off',
+                                'value' => 0,
+                                'label' => $this->l('Disabled')
+                            )
+                        ),
+                    ),
+                    array(
+                        'type' => 'switch',
+                        'label' => $this->l('Pay. Styling'),
+                        'name' => 'PAYNL_STANDARD_STYLE',
+                        'desc' => $this->l('Enable this if you want to use the Pay. styling in your checkout'),
                         'values' => array(
                             array(
                                 'id' => 'active_on',
@@ -1623,6 +1655,12 @@ class PaynlPaymentMethods extends PaymentModule
             Configuration::updateValue('PAYNL_SHOW_IMAGE', $showImage);
         }
 
+        $standardStyle = Configuration::get('PAYNL_STANDARD_STYLE');
+        if ($standardStyle === false) {
+            $standardStyle = 1;
+            Configuration::updateValue('PAYNL_STANDARD_STYLE', $standardStyle);
+        }
+
         $logging = Configuration::get('PAYNL_PAYLOGGER');
         if ($logging === false) {
             $logging = 1;
@@ -1640,6 +1678,7 @@ class PaynlPaymentMethods extends PaymentModule
             'PAYNL_DESCRIPTION_PREFIX' => Tools::getValue('PAYNL_DESCRIPTION_PREFIX', Configuration::get('PAYNL_DESCRIPTION_PREFIX')),
             'PAYNL_LANGUAGE' => Tools::getValue('PAYNL_LANGUAGE', Configuration::get('PAYNL_LANGUAGE')),
             'PAYNL_SHOW_IMAGE' => $showImage,
+            'PAYNL_STANDARD_STYLE' => $standardStyle,
             'PAYNL_AUTO_CAPTURE' => Tools::getValue('PAYNL_AUTO_CAPTURE', Configuration::get('PAYNL_AUTO_CAPTURE')),
             'PAYNL_PAYMENTMETHODS' => $paymentMethods
         );
@@ -1735,6 +1774,17 @@ class PaynlPaymentMethods extends PaymentModule
                         $changed = true;
                     }
 
+                    if (!isset($paymentmethod->bank_selection)) {
+                        $paymentmethod->bank_selection = '';
+                        if ($paymentmethod->id == PaymentMethod::METHOD_INSTORE) {
+                            $paymentmethod->bank_selection = 'dropdown';
+                        }
+                        if ($paymentmethod->id == PaymentMethod::METHOD_IDEAL) {
+                            $paymentmethod->bank_selection = 'radio';
+                        }
+                        $changed = true;
+                    }
+
                     foreach ($languages as $language) {
                         $key_name = 'name_' . $language['iso_code'];
                         if (!isset($paymentmethod->$key_name)) {
@@ -1771,7 +1821,8 @@ class PaynlPaymentMethods extends PaymentModule
                     'fee_value' => '',
                     'customer_type' => 'both',
                     'external_logo' => '',
-                    'create_order_on' => 'success'
+                    'create_order_on' => 'success',
+                    'bank_selection' => ''
                 ];
                 foreach ($languages as $language) {
                     $defaultArray['name_' . $language['iso_code']] = '';

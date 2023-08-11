@@ -207,6 +207,20 @@
                                     </div>
                                 </div>
                             {/if}
+                            {if ($paymentmethod->id == 10)}
+                                <div class="form-group">
+                                    <label class="control-label col-lg-3 align-right">{l s='Bank Selection' mod='paynlpaymentmethods'}</label>
+                                    <div class="col-lg-9">                                    
+                                        <select name="bank_selection">
+                                            <option value="radio" {if $paymentmethod->bank_selection == 'radio'}selected{/if}>Radiobuttons</option>   
+                                            <option value="dropdown" {if $paymentmethod->bank_selection == 'dropdown'}selected{/if}>Selectbox</option>                                                                          
+                                        </select>                                    
+                                        <p class="help-block">
+                                            {l s='Choose the type of bank selection'}
+                                        </p>
+                                    </div>
+                                </div>
+                            {/if}
                         </div>
                     </div>
                 </form>
