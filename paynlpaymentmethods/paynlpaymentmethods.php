@@ -284,6 +284,25 @@ class PaynlPaymentMethods extends PaymentModule
                 }
             }
         }
+
+        # Check if the order has been Cancelled and Auto-void is on
+        if ($params['newOrderStatus']->template == "order_canceled" && Configuration::get('PAYNL_AUTO_VOID')) {
+            $orderPayments = $order->getOrderPayments();
+            $orderPayment = reset($orderPayments);
+            $transactionId = $orderPayment->transaction_id;
+            $transaction = $this->getTransaction($transactionId);
+            # Check if status is Authorized
+            if ($transaction->isAuthorized()) {
+                $this->payLog('Auto-void', 'Starting auto-void', $cartId, $transactionId);
+                try {
+                    PayHelper::sdkLogin();
+                    \Paynl\Transaction::void($transactionId);
+                    $this->payLog('Auto-void', 'Void success ', $transactionId);
+                } catch (Exception $e) {
+                    $this->payLog('Auto-void', 'Void failed (' . $e->getMessage() . ') ', $cartId, $transactionId);
+                }
+            }
+        }
     }
 
     /**
@@ -1434,6 +1453,7 @@ class PaynlPaymentMethods extends PaymentModule
             Configuration::updateValue('PAYNL_SHOW_IMAGE', Tools::getValue('PAYNL_SHOW_IMAGE'));
             Configuration::updateValue('PAYNL_STANDARD_STYLE', Tools::getValue('PAYNL_STANDARD_STYLE'));
             Configuration::updateValue('PAYNL_AUTO_CAPTURE', Tools::getValue('PAYNL_AUTO_CAPTURE'));
+            Configuration::updateValue('PAYNL_AUTO_VOID', Tools::getValue('PAYNL_AUTO_VOID'));
         }
         $this->_html .= $this->displayConfirmation($this->l('Settings updated'));
     }
@@ -1595,6 +1615,24 @@ class PaynlPaymentMethods extends PaymentModule
                         ),
                     ),
                     array(
+                        'type' => 'switch',
+                        'label' => $this->l('Auto-void'),
+                        'name' => 'PAYNL_AUTO_VOID',
+                        'desc' => $this->l('Void authorized transactions automatically when order is cancelled.'),
+                        'values' => array(
+                            array(
+                                'id' => 'active_on',
+                                'value' => 1,
+                                'label' => $this->l('Enabled')
+                            ),
+                            array(
+                                'id' => 'active_off',
+                                'value' => 0,
+                                'label' => $this->l('Disabled')
+                            )
+                        ),
+                    ),
+                    array(
                         'type' => 'select',
                         'label' => $this->l('Payment screen language'),
                         'name' => 'PAYNL_LANGUAGE',
@@ -1680,6 +1718,7 @@ class PaynlPaymentMethods extends PaymentModule
             'PAYNL_SHOW_IMAGE' => $showImage,
             'PAYNL_STANDARD_STYLE' => $standardStyle,
             'PAYNL_AUTO_CAPTURE' => Tools::getValue('PAYNL_AUTO_CAPTURE', Configuration::get('PAYNL_AUTO_CAPTURE')),
+            'PAYNL_AUTO_VOID' => Tools::getValue('PAYNL_AUTO_VOID', Configuration::get('PAYNL_AUTO_VOID')),
             'PAYNL_PAYMENTMETHODS' => $paymentMethods
         );
     }
