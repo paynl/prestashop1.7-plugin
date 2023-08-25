@@ -935,7 +935,7 @@ class PaynlPaymentMethods extends PaymentModule
             'exchangeUrl' => $exchangeUrl,
             'paymentMethod' => $payment_option_id,
             'description' => $description,
-            'testmode' => Configuration::get('PAYNL_TEST_MODE'),
+            'testmode' => PayHelper::isTestMode(),
             'orderNumber' => $cart->id,
             'extra1' => $cart->id,
             'extra2' => !empty($orderId) ? $orderId : null,
@@ -1434,6 +1434,7 @@ class PaynlPaymentMethods extends PaymentModule
             Configuration::updateValue('PAYNL_SHOW_IMAGE', Tools::getValue('PAYNL_SHOW_IMAGE'));
             Configuration::updateValue('PAYNL_STANDARD_STYLE', Tools::getValue('PAYNL_STANDARD_STYLE'));
             Configuration::updateValue('PAYNL_AUTO_CAPTURE', Tools::getValue('PAYNL_AUTO_CAPTURE'));
+            Configuration::updateValue('PAYNL_TEST_IPADDRESS', Tools::getValue('PAYNL_TEST_IPADDRESS'));
         }
         $this->_html .= $this->displayConfirmation($this->l('Settings updated'));
     }
@@ -1606,6 +1607,13 @@ class PaynlPaymentMethods extends PaymentModule
                         )
                     ),
                     array(
+                        'type' => 'text',
+                        'label' => $this->l('Test Ip address'),
+                        'name' => 'PAYNL_TEST_IPADDRESS',
+                        'desc' => $this->l('Forces testmode on these Ip addresses, separate Ip\'s by comma\'s for multiple Ip\'s. ') . '<br/>' . $this->l('Current user Ip address: ') . Tools::getRemoteAddr(), // phpcs:ignore
+                        'required' => false
+                    ),
+                    array(
                         'type' => 'hidden',
                         'name' => 'PAYNL_PAYMENTMETHODS',
                     )
@@ -1680,6 +1688,7 @@ class PaynlPaymentMethods extends PaymentModule
             'PAYNL_SHOW_IMAGE' => $showImage,
             'PAYNL_STANDARD_STYLE' => $standardStyle,
             'PAYNL_AUTO_CAPTURE' => Tools::getValue('PAYNL_AUTO_CAPTURE', Configuration::get('PAYNL_AUTO_CAPTURE')),
+            'PAYNL_TEST_IPADDRESS' => Tools::getValue('PAYNL_TEST_IPADDRESS', Configuration::get('PAYNL_TEST_IPADDRESS')),
             'PAYNL_PAYMENTMETHODS' => $paymentMethods
         );
     }
