@@ -292,7 +292,7 @@ class PaynlPaymentMethods extends PaymentModule
             $transactionId = $orderPayment->transaction_id;
             $transaction = $this->getTransaction($transactionId);
             # Check if status is Authorized
-            if ($transaction->isAuthorized()) {
+            if ($transaction->isAuthorized() || $transaction->isBeingVerified()) {
                 $this->payLog('Auto-void', 'Starting auto-void', $cartId, $transactionId);
                 try {
                     PayHelper::sdkLogin();
