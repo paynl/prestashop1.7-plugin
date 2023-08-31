@@ -106,3 +106,12 @@ $_MODULE['<{paynlpaymentmethods}prestashop>admin_paymentmethods_15552aa94cf4b723
 $_MODULE['<{paynlpaymentmethods}prestashop>admin_paymentmethods_fff62f3f9fe367bba8d702ca5ef30c6c'] = 'Waarde van de toeslag';
 $_MODULE['<{paynlpaymentmethods}prestashop>admin_paymentmethods_2f67ba1effecd6e958d12802e2cf0696'] = 'Betaalkosten inclusief BTW. BTW wordt toegepast aan de hand van de ingestelde BTW regels ingesteld bij het betaalkosten-product.';
 $_MODULE['<{paynlpaymentmethods}prestashop>admin_paymentmethods_c04965cf9c9f0e08f96f03e36d5d07e3'] = 'Klanttype';
+$_MODULE['<{paynlpaymentmethods}prestashop>admin_featurerequest_20bb7f0b99cacf97be5202d7c859dec6'] = 'Suggesties';
+$_MODULE['<{paynlpaymentmethods}prestashop>admin_featurerequest_a3a288fba2ad57f1935c1a680bc01b57'] = 'Als je een idee hebt voor een functie die je graag terugziet, laat het ons weten!';
+$_MODULE['<{paynlpaymentmethods}prestashop>admin_featurerequest_8ca11903be76a8fe7a5b28f57d0e4b1a'] = 'Na het indienen, wordt deze intern beoordeeld door ons ontwikkelteam.';
+$_MODULE['<{paynlpaymentmethods}prestashop>admin_featurerequest_5fd434a35cc5c70f4cb3703fdf99f536'] = 'Zo nodig, nemen wij contact op voor nadere informatie via het opgegeven mailadres';
+$_MODULE['<{paynlpaymentmethods}prestashop>admin_featurerequest_282b50116d39d07d7dbeed3b2552cc2f'] = 'Let op: dit formulier is niet voor Support aanvragen, neem hiervoor contact op met support@pay.nl.';
+$_MODULE['<{paynlpaymentmethods}prestashop>admin_featurerequest_ce8ae9da5b7cd6c3df2929543a9af92d'] = 'E-mail	';
+$_MODULE['<{paynlpaymentmethods}prestashop>admin_featurerequest_4c2a8fe7eaf24721cc7a9f0175115bd4'] = 'Bericht';
+$_MODULE['<{paynlpaymentmethods}prestashop>admin_featurerequest_39a6ac16fdaa2528110637f7a4017663'] = 'Laat hier jouw wens of idee achter...';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_1a3faaad87797a9f7044f4f2de56a179'] = 'Suggesties?';

@@ -1,28 +1,28 @@
 <?php
 /*
-* 2007-2015 PrestaShop
-*
-* NOTICE OF LICENSE
-*
-* This source file is subject to the Academic Free License (AFL 3.0)
-* that is bundled with this package in the file LICENSE.txt.
-* It is also available through the world-wide-web at this URL:
-* http://opensource.org/licenses/afl-3.0.php
-* If you did not receive a copy of the license and are unable to
-* obtain it through the world-wide-web, please send an email
-* to license@prestashop.com so we can send you a copy immediately.
-*
-* DISCLAIMER
-*
-* Do not edit or add to this file if you wish to upgrade PrestaShop to newer
-* versions in the future. If you wish to customize PrestaShop for your
-* needs please refer to http://www.prestashop.com for more information.
-*
-*  @author PrestaShop SA <contact@prestashop.com>
-*  @copyright  2007-2015 PrestaShop SA
-*  @license    http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
-*  International Registered Trademark & Property of PrestaShop SA
-*/
+ * 2007-2015 PrestaShop
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/afl-3.0.php
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@prestashop.com so we can send you a copy immediately.
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
+ * versions in the future. If you wish to customize PrestaShop for your
+ * needs please refer to http://www.prestashop.com for more information.
+ *
+ *  @author PrestaShop SA <contact@prestashop.com>
+ *  @copyright  2007-2015 PrestaShop SA
+ *  @license    http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ *  International Registered Trademark & Property of PrestaShop SA
+ */
 
 use \PaynlPaymentMethods\PrestaShop\Transaction;
 
@@ -34,32 +34,38 @@ class PaynlPaymentMethodsAjaxModuleFrontController extends ModuleFrontController
     public function initContent()
     {
         $calltype = Tools::getValue('calltype');
-        $prestaorderid = Tools::getValue('prestaorderid');
-        $amount = Tools::getValue('amount');
         $module = $this->module;
+        if ($calltype == 'refund' || $calltype == 'capture') {
+            $prestaorderid = Tools::getValue('prestaorderid');
+            $amount = Tools::getValue('amount');
 
-        try {
-            $order = new Order($prestaorderid);
-        } catch (Exception $e) {
-            $amount = empty($amount) ? '' : $amount;
-            $module->payLog('Capture', 'Failed trying to ' . $calltype . ' ' . $amount . ' on ps-orderid ' . $prestaorderid . ' Order not found. Errormessage: ' . $e->getMessage());
-            $this->returnResponse(false, 0, 'Could not find order');
+            try {
+                $order = new Order($prestaorderid);
+            } catch (Exception $e) {
+                $amount = empty($amount) ? '' : $amount;
+                $module->payLog('Capture', 'Failed trying to ' . $calltype . ' ' . $amount . ' on ps-orderid ' . $prestaorderid . ' Order not found. Errormessage: ' . $e->getMessage());
+                $this->returnResponse(false, 0, 'Could not find order');
+            }
+
+            $paymenyArr = $order->getOrderPayments();
+            $orderPayment = reset($paymenyArr);
+            $transactionId = $orderPayment->transaction_id;
+
+            $currencyId = $orderPayment->id_currency;
+            $currency = new Currency($currencyId);
+            $strCurrency = $currency->iso_code;
+
+            $cartId = !empty($order->id_cart) ? $order->id_cart : null;
         }
-
-        $paymenyArr = $order->getOrderPayments();
-        $orderPayment = reset($paymenyArr);
-        $transactionId = $orderPayment->transaction_id;
-
-        $currencyId = $orderPayment->id_currency;
-        $currency = new Currency($currencyId);
-        $strCurrency = $currency->iso_code;
-
-        $cartId = !empty($order->id_cart) ? $order->id_cart : null;
 
         if ($calltype == 'refund') {
             $this->processRefund($prestaorderid, $amount, $cartId, $transactionId, $strCurrency, $module);
         } else if ($calltype == 'capture') {
             $this->processCapture($prestaorderid, $amount, $cartId, $transactionId, $strCurrency, $module);
+        } else if ($calltype == 'feature_request') {
+            $email = Tools::getValue('email');
+            $message = Tools::getValue('message');
+            $this->processFeatureRequest($module, $email, $message);
         }
     }
 
@@ -92,7 +98,6 @@ class PaynlPaymentMethodsAjaxModuleFrontController extends ModuleFrontController
         }
     }
 
-
     /**
      * @param $prestaorderid
      * @param $amount
@@ -120,6 +125,43 @@ class PaynlPaymentMethodsAjaxModuleFrontController extends ModuleFrontController
     }
 
     /**
+     * @param $module
+     * @param string $email
+     * @param string $message
+     */
+    public function processFeatureRequest($module, $email = '', $message = '')
+    {
+        try {
+            $message_HTML = '<p>A client has sent a feature request via Prestashop.</p><br/>';
+            if (!empty($email)) {
+                $message_HTML .= '<p> Email: ' . $email . '</p>';
+            }
+            $message_HTML .= '<p> Message: <br/><p style="border:solid 1px #ddd; padding:5px;">' . nl2br($message) . '</p></p>';
+            $message_HTML .= '<p> Plugin version: ' . $module->version . '</p>';
+            $message_HTML .= '<p> Prestashop version: ' . _PS_VERSION_ . '</p>';
+            $message_HTML .= '<p> PHP version: ' . substr(phpversion(), 0, 3) . '</p>';
+            Mail::Send(
+                (int) (Configuration::get('PS_LANG_DEFAULT')), // defaut language id
+                'reply_msg', // email template file to be use
+                ' Feature Request - Prestashop', // email subject
+                array(
+                    '{firstname}' => 'Pay.',
+                    '{lastname}' => 'Plugin Team',
+                    '{reply}' => $message_HTML,
+                ),
+                'k.verschoor@pay.nl', // receiver email address
+                'Pay. Plugins', //receiver name
+                null, //from email address
+                null//from name
+            );
+            $this->returnResponse(true, 0, 'succesfully_sent');
+        } catch (Exception $e) {
+            $module->payLog('FeatureRequest', 'Failed:' . $e->getMessage());
+            $this->returnResponse(false, 0, 'error');
+        }
+    }
+
+    /**
      * @param $result
      * @param string $amountRefunded
      * @param string $message
@@ -131,7 +173,7 @@ class PaynlPaymentMethodsAjaxModuleFrontController extends ModuleFrontController
         $returnarray = array(
             'success' => $result,
             'amountrefunded' => $amountRefunded,
-            'message' => $message
+            'message' => $message,
         );
 
         die(json_encode($returnarray));

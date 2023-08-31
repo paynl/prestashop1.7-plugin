@@ -1382,11 +1382,11 @@ class PaynlPaymentMethods extends PaymentModule
             $loggedin = true;
         } catch (\Exception  $e) {
         }
-
         $this->_html .= $this->renderAccountSettingsForm();
         if ($loggedin) {
             $this->_html .= $this->renderPaymentMethodsForm();
         }
+        $this->_html .= $this->renderFeatureRequest();
 
         return $this->_html;
     }
@@ -1608,6 +1608,13 @@ class PaynlPaymentMethods extends PaymentModule
                     array(
                         'type' => 'hidden',
                         'name' => 'PAYNL_PAYMENTMETHODS',
+                    )
+                ),
+                'buttons' => array(
+                    array(
+                        'href' => '#feature_request',
+                        'title' => $this->l('Suggestion?'),
+                        'icon' => 'process-icon-back'
                     )
                 ),
                 'submit' => array(
@@ -1860,6 +1867,19 @@ class PaynlPaymentMethods extends PaymentModule
             'showCreateOrderOnList' => [PaymentMethod::METHOD_OVERBOEKING]
         ));
         return $this->display(__FILE__, 'admin_paymentmethods.tpl');
+    }
+
+    /**
+     * @return string
+     */
+    public function renderFeatureRequest()
+    {
+        $this->context->controller->addJs($this->_path . 'views/js/jquery-ui/jquery-ui.js');
+        $this->context->controller->addCss($this->_path . 'css/admin.css');
+        $this->smarty->assign(array(
+            'ajaxURL' => $this->context->link->getModuleLink($this->name, 'ajax', array(), true),
+        ));
+        return $this->display(__FILE__, 'admin_featurerequest.tpl');
     }
 
     /**
