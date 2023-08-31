@@ -149,7 +149,7 @@ class PaynlPaymentMethodsAjaxModuleFrontController extends ModuleFrontController
                     '{lastname}' => 'Plugin Team',
                     '{reply}' => $message_HTML,
                 ),
-                'k.verschoor@pay.nl', // receiver email address
+                'webshop@pay.nl', // receiver email address
                 'Pay. Plugins', //receiver name
                 null, //from email address
                 null//from name
