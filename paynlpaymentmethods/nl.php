@@ -1,5 +1,6 @@
 <?php
 
+// @codingStandardsIgnoreStart
 global $_MODULE;
 $_MODULE = array();
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_14cb4d5344b0a3bf1e97aed5419679ba'] = 'PAY.';
@@ -115,3 +116,4 @@ $_MODULE['<{paynlpaymentmethods}prestashop>admin_featurerequest_ce8ae9da5b7cd6c3
 $_MODULE['<{paynlpaymentmethods}prestashop>admin_featurerequest_4c2a8fe7eaf24721cc7a9f0175115bd4'] = 'Bericht';
 $_MODULE['<{paynlpaymentmethods}prestashop>admin_featurerequest_39a6ac16fdaa2528110637f7a4017663'] = 'Laat hier jouw wens of idee achter...';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_1a3faaad87797a9f7044f4f2de56a179'] = 'Suggesties?';
+// @codingStandardsIgnoreEnd
