@@ -13,7 +13,8 @@
     <form>   
         <input type="hidden" id="pay-ajaxurl" value="{$ajaxURL}">      
         <div class="form-group">
-            <label class="control-label col-lg-1 align-right">{l s='Email' mod='paynlpaymentmethods'}</label>
+            <span id="email_error" style="padding: 15px;color: red;font-size: 12px; display:none;">Please fill in a valid email.</span>
+            <label class="control-label col-lg-1 align-right">{l s='Email (optional)' mod='paynlpaymentmethods'}</label>
             <div class="col-lg-11">
                 <input style="width:100%;" type="text" name="FR_Email" id="FR_Email">       
                 <p class="help-block"></p>      
@@ -41,13 +42,22 @@
 
 <script type="text/javascript">     
     function submitFeatureRequestForm() {
+        $('#email_error').hide();
         $('#message_error').hide();
         var email = $('#FR_Email').val();
         var message = $('#FR_Message').val();   
-        if($.trim(message) == ''){
-            $('#message_error').css('display', 'inline');
+        
+        var regex = /^[\w-\.]+@([\w-]+\.)+[\w-]/i;
+        if($.trim(message) == '' || ($.trim(email) != '' && !regex.test($('#FR_Email').val()))){        
+            if($.trim(email) != '' && !regex.test($('#FR_Email').val())){
+                $('#email_error').css('display', 'inline');
+            }
+            if($.trim(message) == ''){
+                $('#message_error').css('display', 'inline');
+            }
             return false;
         }
+        
         var ajaxurl = $('#pay-ajaxurl').val();        
         var data = {
             'email' : email,
@@ -64,13 +74,13 @@
                         if (data.success) {
                             $('#FR_Email').val("");
                             $('#FR_Message').val("");
-                            alert('Sent! Thank you for your contribution.');
+                            alert('{l s='Sent! Thank you for your contribution.' mod='paynlpaymentmethods'}');
                         } else {
-                            alert('Couldn\'t send email.');
+                            alert('{l s='Email could not be sent, please try again later.' mod='paynlpaymentmethods'}');
                         }
                     },
-                    error: function () {                        
-                        alert('Couldn\'t send email.');
+                    error: function () {  
+                        alert('{l s='Email could not be sent, please try again later.' mod='paynlpaymentmethods'}');                      
                     }
                 });
             }, 750);

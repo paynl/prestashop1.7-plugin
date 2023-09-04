@@ -112,8 +112,11 @@ $_MODULE['<{paynlpaymentmethods}prestashop>admin_featurerequest_a3a288fba2ad57f1
 $_MODULE['<{paynlpaymentmethods}prestashop>admin_featurerequest_8ca11903be76a8fe7a5b28f57d0e4b1a'] = 'Na het indienen, wordt deze intern beoordeeld door ons ontwikkelteam.';
 $_MODULE['<{paynlpaymentmethods}prestashop>admin_featurerequest_5fd434a35cc5c70f4cb3703fdf99f536'] = 'Zo nodig, nemen wij contact op voor nadere informatie via het opgegeven mailadres';
 $_MODULE['<{paynlpaymentmethods}prestashop>admin_featurerequest_282b50116d39d07d7dbeed3b2552cc2f'] = 'Let op: dit formulier is niet voor Support aanvragen, neem hiervoor contact op met support@pay.nl.';
-$_MODULE['<{paynlpaymentmethods}prestashop>admin_featurerequest_ce8ae9da5b7cd6c3df2929543a9af92d'] = 'E-mail	';
+$_MODULE['<{paynlpaymentmethods}prestashop>admin_featurerequest_ce8ae9da5b7cd6c3df2929543a9af92d'] = 'E-mail';
+$_MODULE['<{paynlpaymentmethods}prestashop>admin_featurerequest_ea5957193770106ccbb79106b47c06a6'] = 'E-mail (optioneel)';
 $_MODULE['<{paynlpaymentmethods}prestashop>admin_featurerequest_4c2a8fe7eaf24721cc7a9f0175115bd4'] = 'Bericht';
 $_MODULE['<{paynlpaymentmethods}prestashop>admin_featurerequest_39a6ac16fdaa2528110637f7a4017663'] = 'Laat hier jouw wens of idee achter...';
+$_MODULE['<{paynlpaymentmethods}prestashop>admin_featurerequest_11bd854505f9390219b142e5f7abacee'] = 'Verstuurd! Bedankt voor het delen van jouw input.';
+$_MODULE['<{paynlpaymentmethods}prestashop>admin_featurerequest_39ef6665bb3ee1df8b39cecdae2782c9'] = 'E-mail kon niet worden verzonden. Probeer het later opnieuw.';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_1a3faaad87797a9f7044f4f2de56a179'] = 'Suggesties?';
 // @codingStandardsIgnoreEnd
