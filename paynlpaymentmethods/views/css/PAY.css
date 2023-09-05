@@ -86,3 +86,37 @@
     border-radius: 4px;
     color: #272727;
 }
+
+#pay-version-check-test{
+    display: inline-block;
+    margin-left: 12px;
+}
+
+#pay-version-check-result{
+    display: none;
+    float: left;
+    margin-top: 2px;
+}
+
+#pay-version-check-current-version{
+    padding: 1px 6px;
+    border: 1px solid #c8c8c8;
+    float: left;
+    margin-right: 15px;
+}
+
+.versionUpToDate {
+    color: white;
+    background-color: #5aa70d;
+    font-weight: bold;
+    border-color: #5aa70d;
+}
+
+.version-check{
+    font-style: normal;
+    font-size: 14px;
+}
+
+#pay-version-check{
+    margin-top: -5px;
+}
