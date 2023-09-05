@@ -744,6 +744,7 @@ class PaynlPaymentMethods extends PaymentModule
         $profileId = $transaction->getPaymentProfileId();
         $paymentMethodName = PaymentMethod::getName($transactionId, $profileId);
         $cart = new Cart((int)$cartId);
+        $this->context->cart = $cart;
         $cartTotalPrice = (version_compare(_PS_VERSION_, '1.7.7.0', '>=')) ? $cart->getCartTotalPrice() : $this->getCartTotalPrice($cart);
         $arrPayAmounts = array($transaction->getCurrencyAmount(), $transaction->getPaidCurrencyAmount(), $transaction->getPaidAmount());
         $amountPaid = in_array(round($cartTotalPrice, 2), $arrPayAmounts) ? $cartTotalPrice : null;
