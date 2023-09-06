@@ -92,27 +92,34 @@
     margin-left: 12px;
 }
 
-#pay-version-check-result{
+#pay-version-check-result {
     display: none;
     float: left;
     margin-top: 2px;
+    color: #363a41;
 }
 
-#pay-version-check-current-version{
+#pay-version-check-current-version {
     padding: 1px 6px;
-    border: 1px solid #c8c8c8;
+    border: 0;
     float: left;
-    margin-right: 15px;
+    margin-right: 25px;
+    color: #363a41;
 }
 
 .versionUpToDate {
-    color: white;
+    color: white !important;
     background-color: #5aa70d;
     font-weight: bold;
-    border-color: #5aa70d;
+    border: 0;
+    padding: 5px 9px !important;
+    border-radius: 5px;
+    position: relative;
+    top: -3px;
+    margin-bottom: 10px;
 }
 
-.version-check{
+.version-check {
     font-style: normal;
     font-size: 14px;
 }
