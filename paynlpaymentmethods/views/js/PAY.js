@@ -129,6 +129,39 @@ jQuery(document).ready(function () {
         }
     });
 
+    jQuery("#pay-version-check").click(function () {
+        var current_version = jQuery('#pay-version-check').val();
+        getVersion(current_version);
+    });
+
+    function getVersion(current_version){
+        $.ajax({
+            url: 'https://api.github.com/repos/paynl/prestashop1.7-plugin/releases',
+            method: 'GET',
+            dataType: 'json',
+            asynchronous: true,
+            success: function (data) {
+                var newest_version = data[0].tag_name;
+                let result = '';
+
+                if (newest_version.startsWith('v')) {
+                    newest_version = newest_version.substring(1);
+                }
+
+                if (newest_version > current_version) {
+                    result = 'There is a new version available (' + newest_version + ')'
+                } else {
+                    result = 'You are up to date with the latest version'
+                    jQuery('#pay-version-check-current-version').addClass('versionUpToDate');
+                }
+
+                jQuery('#pay-version-check').hide();
+                jQuery('#pay-version-check-result').html(result);
+                jQuery('#pay-version-check-result').css('display', 'block');
+            }
+        })
+    }
+
     function exchangeCall(ajaxurl, data, payOption, lang_succes, actionButton, lang_button, lang_couldnotprocess, errorMessage){
         setTimeout(function () {
             jQuery.ajax({
