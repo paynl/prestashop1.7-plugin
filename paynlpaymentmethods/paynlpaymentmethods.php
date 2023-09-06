@@ -64,7 +64,7 @@ class PaynlPaymentMethods extends PaymentModule
     {
         $this->name = 'paynlpaymentmethods';
         $this->tab = 'payments_gateways';
-        $this->version = '4.13.0';
+        $this->version = '4.14.0';
         $this->payLogEnabled = null;
         $this->ps_versions_compliancy = array('min' => '1.7', 'max' => _PS_VERSION_);
         $this->author = 'PAY.';
@@ -763,6 +763,7 @@ class PaynlPaymentMethods extends PaymentModule
         $profileId = $transaction->getPaymentProfileId();
         $paymentMethodName = PaymentMethod::getName($transactionId, $profileId);
         $cart = new Cart((int)$cartId);
+        $this->context->cart = $cart;
         $cartTotalPrice = (version_compare(_PS_VERSION_, '1.7.7.0', '>=')) ? $cart->getCartTotalPrice() : $this->getCartTotalPrice($cart);
         $arrPayAmounts = array($transaction->getCurrencyAmount(), $transaction->getPaidCurrencyAmount(), $transaction->getPaidAmount());
         $amountPaid = in_array(round($cartTotalPrice, 2), $arrPayAmounts) ? $cartTotalPrice : null;
@@ -954,7 +955,7 @@ class PaynlPaymentMethods extends PaymentModule
             'exchangeUrl' => $exchangeUrl,
             'paymentMethod' => $payment_option_id,
             'description' => $description,
-            'testmode' => Configuration::get('PAYNL_TEST_MODE'),
+            'testmode' => PayHelper::isTestMode(),
             'orderNumber' => $cart->id,
             'extra1' => $cart->id,
             'extra2' => !empty($orderId) ? $orderId : null,
@@ -1453,6 +1454,7 @@ class PaynlPaymentMethods extends PaymentModule
             Configuration::updateValue('PAYNL_SHOW_IMAGE', Tools::getValue('PAYNL_SHOW_IMAGE'));
             Configuration::updateValue('PAYNL_STANDARD_STYLE', Tools::getValue('PAYNL_STANDARD_STYLE'));
             Configuration::updateValue('PAYNL_AUTO_CAPTURE', Tools::getValue('PAYNL_AUTO_CAPTURE'));
+            Configuration::updateValue('PAYNL_TEST_IPADDRESS', Tools::getValue('PAYNL_TEST_IPADDRESS'));
             Configuration::updateValue('PAYNL_AUTO_VOID', Tools::getValue('PAYNL_AUTO_VOID'));
         }
         $this->_html .= $this->displayConfirmation($this->l('Settings updated'));
@@ -1470,6 +1472,12 @@ class PaynlPaymentMethods extends PaymentModule
                     'icon' => 'icon-envelope'
                 ),
                 'input' => array(
+                    array(
+                        'type' => '',
+                        'label' => $this->l('Version'),
+                        'name' => 'PAYNL_VERSION',
+                        'desc' => '<span class="version-check"><span id="pay-version-check-current-version">' . $this->version . '</span><span id="pay-version-check-result"></span><button type="button" value="' . $this->version . '" id="pay-version-check" class="btn btn-info">' . $this->l('Check version') . '</button></span>',  // phpcs:ignore
+                    ),
                     array(
                         'type' => 'text',
                         'label' => $this->l('API-token'),
@@ -1644,6 +1652,13 @@ class PaynlPaymentMethods extends PaymentModule
                         )
                     ),
                     array(
+                        'type' => 'text',
+                        'label' => $this->l('Test IP address'),
+                        'name' => 'PAYNL_TEST_IPADDRESS',
+                        'desc' => $this->l('Forces testmode on these IP addresses. Separate IP\'s by comma\'s for multiple IP\'s. ') . '<br/>' . $this->l('Current user IP address: ') . Tools::getRemoteAddr(), // phpcs:ignore
+                        'required' => false
+                    ),
+                    array(
                         'type' => 'hidden',
                         'name' => 'PAYNL_PAYMENTMETHODS',
                     )
@@ -1719,6 +1734,7 @@ class PaynlPaymentMethods extends PaymentModule
             'PAYNL_STANDARD_STYLE' => $standardStyle,
             'PAYNL_AUTO_CAPTURE' => Tools::getValue('PAYNL_AUTO_CAPTURE', Configuration::get('PAYNL_AUTO_CAPTURE')),
             'PAYNL_AUTO_VOID' => Tools::getValue('PAYNL_AUTO_VOID', Configuration::get('PAYNL_AUTO_VOID')),
+            'PAYNL_TEST_IPADDRESS' => Tools::getValue('PAYNL_TEST_IPADDRESS', Configuration::get('PAYNL_TEST_IPADDRESS')),
             'PAYNL_PAYMENTMETHODS' => $paymentMethods
         );
     }
