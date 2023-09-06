@@ -1608,9 +1608,9 @@ class PaynlPaymentMethods extends PaymentModule
                     ),
                     array(
                         'type' => 'text',
-                        'label' => $this->l('Test Ip address'),
+                        'label' => $this->l('Test IP address'),
                         'name' => 'PAYNL_TEST_IPADDRESS',
-                        'desc' => $this->l('Forces testmode on these Ip addresses, separate Ip\'s by comma\'s for multiple Ip\'s. ') . '<br/>' . $this->l('Current user Ip address: ') . Tools::getRemoteAddr(), // phpcs:ignore
+                        'desc' => $this->l('Forces testmode on these IP addresses. Separate IP\'s by comma\'s for multiple IP\'s. ') . '<br/>' . $this->l('Current user IP address: ') . Tools::getRemoteAddr(), // phpcs:ignore
                         'required' => false
                     ),
                     array(
