@@ -1452,6 +1452,12 @@ class PaynlPaymentMethods extends PaymentModule
                 ),
                 'input' => array(
                     array(
+                        'type' => '',
+                        'label' => $this->l('Version'),
+                        'name' => 'PAYNL_VERSION',
+                        'desc' => '<span class="version-check"><span id="pay-version-check-current-version">' . $this->version . '</span><span id="pay-version-check-result"></span><button type="button" value="' . $this->version . '" id="pay-version-check" class="btn btn-info">' . $this->l('Check version') . '</button></span>',  // phpcs:ignore
+                    ),
+                    array(
                         'type' => 'text',
                         'label' => $this->l('API-token'),
                         'name' => 'PAYNL_API_TOKEN',
