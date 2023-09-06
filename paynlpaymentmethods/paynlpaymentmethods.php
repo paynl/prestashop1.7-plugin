@@ -1526,7 +1526,7 @@ class PaynlPaymentMethods extends PaymentModule
                   ),
                   array(
                     'type' => 'switch',
-                    'label' => $this->l('PAY Logging'),
+                    'label' => $this->l('Pay. logging'),
                     'name' => 'PAYNL_PAYLOGGER',
                     'desc' => $this->l('Log internal PAY. processing information.'),
                     'values' => array(
@@ -1580,7 +1580,7 @@ class PaynlPaymentMethods extends PaymentModule
                     ),
                     array(
                         'type' => 'switch',
-                        'label' => $this->l('Pay. Styling'),
+                        'label' => $this->l('Pay. styling'),
                         'name' => 'PAYNL_STANDARD_STYLE',
                         'desc' => $this->l('Enable this if you want to use the Pay. styling in your checkout'),
                         'values' => array(
