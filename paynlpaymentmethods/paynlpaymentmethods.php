@@ -284,6 +284,25 @@ class PaynlPaymentMethods extends PaymentModule
                 }
             }
         }
+
+        # Check if the order has been Cancelled and Auto-void is on
+        if ($params['newOrderStatus']->template == "order_canceled" && Configuration::get('PAYNL_AUTO_VOID')) {
+            $orderPayments = $order->getOrderPayments();
+            $orderPayment = reset($orderPayments);
+            $transactionId = $orderPayment->transaction_id;
+            $transaction = $this->getTransaction($transactionId);
+            # Check if status is Authorized
+            if ($transaction->isAuthorized()) {
+                $this->payLog('Auto-void', 'Starting auto-void', $cartId, $transactionId);
+                try {
+                    PayHelper::sdkLogin();
+                    \Paynl\Transaction::void($transactionId);
+                    $this->payLog('Auto-void', 'Void success ', $transactionId);
+                } catch (Exception $e) {
+                    $this->payLog('Auto-void', 'Void failed (' . $e->getMessage() . ') ', $cartId, $transactionId);
+                }
+            }
+        }
     }
 
     /**
@@ -1436,6 +1455,7 @@ class PaynlPaymentMethods extends PaymentModule
             Configuration::updateValue('PAYNL_STANDARD_STYLE', Tools::getValue('PAYNL_STANDARD_STYLE'));
             Configuration::updateValue('PAYNL_AUTO_CAPTURE', Tools::getValue('PAYNL_AUTO_CAPTURE'));
             Configuration::updateValue('PAYNL_TEST_IPADDRESS', Tools::getValue('PAYNL_TEST_IPADDRESS'));
+            Configuration::updateValue('PAYNL_AUTO_VOID', Tools::getValue('PAYNL_AUTO_VOID'));
         }
         $this->_html .= $this->displayConfirmation($this->l('Settings updated'));
     }
@@ -1514,7 +1534,7 @@ class PaynlPaymentMethods extends PaymentModule
                   ),
                   array(
                     'type' => 'switch',
-                    'label' => $this->l('PAY Logging'),
+                    'label' => $this->l('Pay. logging'),
                     'name' => 'PAYNL_PAYLOGGER',
                     'desc' => $this->l('Log internal PAY. processing information.'),
                     'values' => array(
@@ -1568,7 +1588,7 @@ class PaynlPaymentMethods extends PaymentModule
                     ),
                     array(
                         'type' => 'switch',
-                        'label' => $this->l('Pay. Styling'),
+                        'label' => $this->l('Pay. styling'),
                         'name' => 'PAYNL_STANDARD_STYLE',
                         'desc' => $this->l('Enable this if you want to use the Pay. styling in your checkout'),
                         'values' => array(
@@ -1589,6 +1609,24 @@ class PaynlPaymentMethods extends PaymentModule
                         'label' => $this->l('Auto-capture'),
                         'name' => 'PAYNL_AUTO_CAPTURE',
                         'desc' => $this->l('Capture authorized transactions automatically when order is shipped.'),
+                        'values' => array(
+                            array(
+                                'id' => 'active_on',
+                                'value' => 1,
+                                'label' => $this->l('Enabled')
+                            ),
+                            array(
+                                'id' => 'active_off',
+                                'value' => 0,
+                                'label' => $this->l('Disabled')
+                            )
+                        ),
+                    ),
+                    array(
+                        'type' => 'switch',
+                        'label' => $this->l('Auto-void'),
+                        'name' => 'PAYNL_AUTO_VOID',
+                        'desc' => $this->l('Void authorized transactions automatically when order is cancelled.'),
                         'values' => array(
                             array(
                                 'id' => 'active_on',
@@ -1695,6 +1733,7 @@ class PaynlPaymentMethods extends PaymentModule
             'PAYNL_SHOW_IMAGE' => $showImage,
             'PAYNL_STANDARD_STYLE' => $standardStyle,
             'PAYNL_AUTO_CAPTURE' => Tools::getValue('PAYNL_AUTO_CAPTURE', Configuration::get('PAYNL_AUTO_CAPTURE')),
+            'PAYNL_AUTO_VOID' => Tools::getValue('PAYNL_AUTO_VOID', Configuration::get('PAYNL_AUTO_VOID')),
             'PAYNL_TEST_IPADDRESS' => Tools::getValue('PAYNL_TEST_IPADDRESS', Configuration::get('PAYNL_TEST_IPADDRESS')),
             'PAYNL_PAYMENTMETHODS' => $paymentMethods
         );
