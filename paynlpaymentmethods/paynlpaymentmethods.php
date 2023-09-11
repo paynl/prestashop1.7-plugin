@@ -64,7 +64,7 @@ class PaynlPaymentMethods extends PaymentModule
     {
         $this->name = 'paynlpaymentmethods';
         $this->tab = 'payments_gateways';
-        $this->version = '4.13.0';
+        $this->version = '4.14.0';
         $this->payLogEnabled = null;
         $this->ps_versions_compliancy = array('min' => '1.7', 'max' => _PS_VERSION_);
         $this->author = 'PAY.';
@@ -281,6 +281,25 @@ class PaynlPaymentMethods extends PaymentModule
                     $this->payLog('Auto-capture', 'Capture success ', $transactionId);
                 } catch (Exception $e) {
                     $this->payLog('Auto-capture', 'Capture failed (' . $e->getMessage() . ') ', $cartId, $transactionId);
+                }
+            }
+        }
+
+        # Check if the order has been Cancelled and Auto-void is on
+        if ($params['newOrderStatus']->template == "order_canceled" && Configuration::get('PAYNL_AUTO_VOID')) {
+            $orderPayments = $order->getOrderPayments();
+            $orderPayment = reset($orderPayments);
+            $transactionId = $orderPayment->transaction_id;
+            $transaction = $this->getTransaction($transactionId);
+            # Check if status is Authorized
+            if ($transaction->isAuthorized()) {
+                $this->payLog('Auto-void', 'Starting auto-void', $cartId, $transactionId);
+                try {
+                    PayHelper::sdkLogin();
+                    \Paynl\Transaction::void($transactionId);
+                    $this->payLog('Auto-void', 'Void success ', $transactionId);
+                } catch (Exception $e) {
+                    $this->payLog('Auto-void', 'Void failed (' . $e->getMessage() . ') ', $cartId, $transactionId);
                 }
             }
         }
@@ -744,6 +763,7 @@ class PaynlPaymentMethods extends PaymentModule
         $profileId = $transaction->getPaymentProfileId();
         $paymentMethodName = PaymentMethod::getName($transactionId, $profileId);
         $cart = new Cart((int)$cartId);
+        $this->context->cart = $cart;
         $cartTotalPrice = (version_compare(_PS_VERSION_, '1.7.7.0', '>=')) ? $cart->getCartTotalPrice() : $this->getCartTotalPrice($cart);
         $arrPayAmounts = array($transaction->getCurrencyAmount(), $transaction->getPaidCurrencyAmount(), $transaction->getPaidAmount());
         $amountPaid = in_array(round($cartTotalPrice, 2), $arrPayAmounts) ? $cartTotalPrice : null;
@@ -935,7 +955,7 @@ class PaynlPaymentMethods extends PaymentModule
             'exchangeUrl' => $exchangeUrl,
             'paymentMethod' => $payment_option_id,
             'description' => $description,
-            'testmode' => Configuration::get('PAYNL_TEST_MODE'),
+            'testmode' => PayHelper::isTestMode(),
             'orderNumber' => $cart->id,
             'extra1' => $cart->id,
             'extra2' => !empty($orderId) ? $orderId : null,
@@ -1434,6 +1454,8 @@ class PaynlPaymentMethods extends PaymentModule
             Configuration::updateValue('PAYNL_SHOW_IMAGE', Tools::getValue('PAYNL_SHOW_IMAGE'));
             Configuration::updateValue('PAYNL_STANDARD_STYLE', Tools::getValue('PAYNL_STANDARD_STYLE'));
             Configuration::updateValue('PAYNL_AUTO_CAPTURE', Tools::getValue('PAYNL_AUTO_CAPTURE'));
+            Configuration::updateValue('PAYNL_TEST_IPADDRESS', Tools::getValue('PAYNL_TEST_IPADDRESS'));
+            Configuration::updateValue('PAYNL_AUTO_VOID', Tools::getValue('PAYNL_AUTO_VOID'));
         }
         $this->_html .= $this->displayConfirmation($this->l('Settings updated'));
     }
@@ -1450,6 +1472,12 @@ class PaynlPaymentMethods extends PaymentModule
                     'icon' => 'icon-envelope'
                 ),
                 'input' => array(
+                    array(
+                        'type' => '',
+                        'label' => $this->l('Version'),
+                        'name' => 'PAYNL_VERSION',
+                        'desc' => '<span class="version-check"><span id="pay-version-check-current-version">' . $this->version . '</span><span id="pay-version-check-result"></span><button type="button" value="' . $this->version . '" id="pay-version-check" class="btn btn-info">' . $this->l('Check version') . '</button></span>',  // phpcs:ignore
+                    ),
                     array(
                         'type' => 'text',
                         'label' => $this->l('API-token'),
@@ -1506,7 +1534,7 @@ class PaynlPaymentMethods extends PaymentModule
                   ),
                   array(
                     'type' => 'switch',
-                    'label' => $this->l('PAY Logging'),
+                    'label' => $this->l('Pay. logging'),
                     'name' => 'PAYNL_PAYLOGGER',
                     'desc' => $this->l('Log internal PAY. processing information.'),
                     'values' => array(
@@ -1560,7 +1588,7 @@ class PaynlPaymentMethods extends PaymentModule
                     ),
                     array(
                         'type' => 'switch',
-                        'label' => $this->l('Pay. Styling'),
+                        'label' => $this->l('Pay. styling'),
                         'name' => 'PAYNL_STANDARD_STYLE',
                         'desc' => $this->l('Enable this if you want to use the Pay. styling in your checkout'),
                         'values' => array(
@@ -1595,6 +1623,24 @@ class PaynlPaymentMethods extends PaymentModule
                         ),
                     ),
                     array(
+                        'type' => 'switch',
+                        'label' => $this->l('Auto-void'),
+                        'name' => 'PAYNL_AUTO_VOID',
+                        'desc' => $this->l('Void authorized transactions automatically when order is cancelled.'),
+                        'values' => array(
+                            array(
+                                'id' => 'active_on',
+                                'value' => 1,
+                                'label' => $this->l('Enabled')
+                            ),
+                            array(
+                                'id' => 'active_off',
+                                'value' => 0,
+                                'label' => $this->l('Disabled')
+                            )
+                        ),
+                    ),
+                    array(
                         'type' => 'select',
                         'label' => $this->l('Payment screen language'),
                         'name' => 'PAYNL_LANGUAGE',
@@ -1604,6 +1650,13 @@ class PaynlPaymentMethods extends PaymentModule
                             'id' => 'language_id',
                             'name' => 'label'
                         )
+                    ),
+                    array(
+                        'type' => 'text',
+                        'label' => $this->l('Test IP address'),
+                        'name' => 'PAYNL_TEST_IPADDRESS',
+                        'desc' => $this->l('Forces testmode on these IP addresses. Separate IP\'s by comma\'s for multiple IP\'s. ') . '<br/>' . $this->l('Current user IP address: ') . Tools::getRemoteAddr(), // phpcs:ignore
+                        'required' => false
                     ),
                     array(
                         'type' => 'hidden',
@@ -1687,6 +1740,8 @@ class PaynlPaymentMethods extends PaymentModule
             'PAYNL_SHOW_IMAGE' => $showImage,
             'PAYNL_STANDARD_STYLE' => $standardStyle,
             'PAYNL_AUTO_CAPTURE' => Tools::getValue('PAYNL_AUTO_CAPTURE', Configuration::get('PAYNL_AUTO_CAPTURE')),
+            'PAYNL_AUTO_VOID' => Tools::getValue('PAYNL_AUTO_VOID', Configuration::get('PAYNL_AUTO_VOID')),
+            'PAYNL_TEST_IPADDRESS' => Tools::getValue('PAYNL_TEST_IPADDRESS', Configuration::get('PAYNL_TEST_IPADDRESS')),
             'PAYNL_PAYMENTMETHODS' => $paymentMethods
         );
     }

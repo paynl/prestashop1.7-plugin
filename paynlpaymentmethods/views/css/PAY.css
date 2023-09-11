@@ -115,3 +115,44 @@
 #FR_Footer {
     margin-top: 20px;
 }
+
+#pay-version-check-test{
+    display: inline-block;
+    margin-left: 12px;
+}
+
+#pay-version-check-result {
+    display: none;
+    float: left;
+    margin-top: 2px;
+    color: #363a41;
+}
+
+#pay-version-check-current-version {
+    padding: 1px 6px;
+    border: 0;
+    float: left;
+    margin-right: 25px;
+    color: #363a41;
+}
+
+.versionUpToDate {
+    color: white !important;
+    background-color: #5aa70d;
+    font-weight: bold;
+    border: 0;
+    padding: 5px 9px !important;
+    border-radius: 5px;
+    position: relative;
+    top: -3px;
+    margin-bottom: 10px;
+}
+
+.version-check {
+    font-style: normal;
+    font-size: 14px;
+}
+
+#pay-version-check{
+    margin-top: -5px;
+}

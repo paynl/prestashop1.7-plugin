@@ -2,8 +2,8 @@
 
 namespace PaynlPaymentMethods\PrestaShop;
 
-use Tools;
 use Configuration;
+use Tools;
 
 class PayHelper
 {
@@ -36,5 +36,26 @@ class PayHelper
         }
 
         return $exchange;
+    }
+
+    /**
+     * @return boolean
+     */
+    public static function isTestMode()
+    {
+        $ip = Tools::getRemoteAddr();
+        $ipconfig = Configuration::get('PAYNL_TEST_IPADDRESS');
+        if (!empty($ipconfig)) {
+            $allowed_ips = explode(',', $ipconfig);
+            if (
+                in_array($ip, $allowed_ips) &&
+                filter_var($ip, FILTER_VALIDATE_IP) &&
+                strlen($ip) > 0 &&
+                count($allowed_ips) > 0
+            ) {
+                return true;
+            }
+        }
+        return Configuration::get('PAYNL_TEST_MODE');
     }
 }
