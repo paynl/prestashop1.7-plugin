@@ -86,3 +86,32 @@
     border-radius: 4px;
     color: #272727;
 }
+
+.FR_Error {
+    padding: 15px;
+    color: red;
+    font-size: 12px;
+    display: none;
+}
+
+.clearboth {
+    clear: both;
+}
+
+#FR_Success_Modal .modal-body,
+#FR_fail_Modal .modal-body {
+    font-size: 20px;
+    padding: 25px;
+}
+
+#FR_Email {
+    width: 100%;
+}
+
+#FR_Message {
+    height: 250px;
+}
+
+#FR_Footer {
+    margin-top: 20px;
+}
