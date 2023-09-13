@@ -185,4 +185,50 @@ jQuery(document).ready(function () {
             });
         }, 750);
     }
+
+    jQuery("#module_form_submit_btn_fr").click(function () {  
+        $('#email_error').hide();
+        $('#message_error').hide();
+        var email = $('#FR_Email').val();
+        var message = $('#FR_Message').val();   
+        
+        var regex = /^[\w-\.]+@([\w-]+\.)+[\w-]/i;
+        if($.trim(message) == '' || ($.trim(email) != '' && !regex.test($('#FR_Email').val()))){        
+            if($.trim(email) != '' && !regex.test($('#FR_Email').val())){
+                $('#email_error').css('display', 'inline');
+            }
+            if($.trim(message) == ''){
+                $('#message_error').css('display', 'inline');
+            }
+            return false;
+        }
+        
+        var ajaxurl = $('#pay-ajaxurl').val();        
+        var data = {
+            'email' : email,
+            'message' : message,
+            'calltype' : 'feature_request'
+        };     
+        setTimeout(function () {
+            $.ajax({
+                    url: ajaxurl,
+                    type: 'POST',
+                    data: data,
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data.success) {
+                            $('#FR_Email').val("");
+                            $('#FR_Message').val("");
+                            $('#FR_Success_Modal').modal('show');                            
+                        } else {
+                            $('#FR_fail_Modal').modal('show'); 
+                        }
+                    },
+                    error: function () {  
+                        $('#FR_fail_Modal').modal('show');                    
+                    }
+                });
+            }, 750);
+        
+    });
 });
