@@ -81,7 +81,7 @@ class PaynlPaymentMethodsFinishModuleFrontController extends ModuleFrontControll
                 Instore::handlePin($dbTransaction['hash'], $transactionId, $this);
             }
 
-            if (!$transaction->isPaid()) {
+            if ($transaction->isPending()) {
                 $iTotalAttempts = in_array($ppid, array(PaymentMethod::METHOD_OVERBOEKING, PaymentMethod::METHOD_SOFORT)) ? 1 : 20;
                 if ($bValidationDelay == 1 && $iAttempt < $iTotalAttempts) {
                     return;
@@ -128,7 +128,7 @@ class PaynlPaymentMethodsFinishModuleFrontController extends ModuleFrontControll
         }
 
         $iAttempt += 1;
-        $url =  'module/paynlpaymentmethods/finish?orderId=' . $this->payOrderId .
+        $url =  '/module/paynlpaymentmethods/finish?orderId=' . $this->payOrderId .
         '&orderStatusId=' . $this->orderStatusId .
         '&paymentSessionId=' . $this->paymentSessionId . '&utm_nooverride=1&attempt=' . $iAttempt;
         $this->context->smarty->assign(array('order' => $this->payOrderId, 'extendUrl' => $url));
