@@ -1666,7 +1666,7 @@ class PaynlPaymentMethods extends PaymentModule
                 'buttons' => array(
                     array(
                         'href' => '#feature_request',
-                        'title' => $this->l('Suggestion?'),
+                        'title' => $this->l('Suggestions?'),
                         'icon' => 'process-icon-back'
                     )
                 ),
