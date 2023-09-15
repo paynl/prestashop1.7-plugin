@@ -111,7 +111,7 @@ class PaynlPaymentMethods extends PaymentModule
 
         if (!$this->isRegisteredInHook('actionProductCancel')) {
             $this->registerHook('actionProductCancel');
-        }  
+        }
     }
 
     /**
