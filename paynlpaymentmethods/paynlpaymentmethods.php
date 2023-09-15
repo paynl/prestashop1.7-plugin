@@ -1417,7 +1417,7 @@ class PaynlPaymentMethods extends PaymentModule
     protected function _postValidation() // phpcs:ignore
     {
         if (Tools::isSubmit('btnSubmit')) {
-            if (!Tools::getValue('PAYNL_API_TOKEN')) {
+            if (!Tools::getValue('PAYNL_API_TOKEN') && empty(Configuration::get('PAYNL_API_TOKEN'))) {
                 $this->_postErrors[] = $this->l('APItoken is required');
             } elseif (!Tools::getValue('PAYNL_SERVICE_ID')) {
                 $this->_postErrors[] = $this->l('ServiceId is required');
@@ -1441,7 +1441,9 @@ class PaynlPaymentMethods extends PaymentModule
     protected function _postProcess() // phpcs:ignore
     {
         if (Tools::isSubmit('btnSubmit')) {
-            Configuration::updateValue('PAYNL_API_TOKEN', Tools::getValue('PAYNL_API_TOKEN'));
+            if (!empty(Tools::getValue('PAYNL_API_TOKEN'))) {
+                Configuration::updateValue('PAYNL_API_TOKEN', Tools::getValue('PAYNL_API_TOKEN'));
+            }
             Configuration::updateValue('PAYNL_SERVICE_ID', Tools::getValue('PAYNL_SERVICE_ID'));
             Configuration::updateValue('PAYNL_TEST_MODE', Tools::getValue('PAYNL_TEST_MODE'));
             Configuration::updateValue('PAYNL_FAILOVER_GATEWAY', Tools::getValue('PAYNL_FAILOVER_GATEWAY'));
