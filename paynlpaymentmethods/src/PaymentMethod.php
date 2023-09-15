@@ -61,7 +61,7 @@ class PaymentMethod
      *
      * @param string $error
      * @param string $object
-     * @return string
+     * @return void
      */
     public static function paymentError($error, $object)
     {
