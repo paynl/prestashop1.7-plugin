@@ -57,4 +57,14 @@ class PaymentMethod
         return false;
     }
 
+    /**
+     * Show errors
+     *
+     * @param $error
+     */
+    public static function paymentError($error, $object)
+    {
+        $object->errors[] = $error;
+        $object->redirectWithNotifications('index.php?controller=order&step=1');
+    }
 }

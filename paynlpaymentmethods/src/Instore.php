@@ -7,18 +7,7 @@ use PaynlPaymentMethods\PrestaShop\PaymentMethod;
 use db;
 
 class Instore extends PaymentMethod
-{
-    /**
-     * Show terminal errors
-     *
-     * @param $error
-     */
-    public static function terminalError($error, $object)
-    {
-        $object->errors[] = $object->module->l($error, 'finish');
-        $object->redirectWithNotifications('index.php?controller=order&step=1');
-    }
-
+{   
     /**
      * Check the status of the pin
      *

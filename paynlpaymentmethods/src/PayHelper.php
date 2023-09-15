@@ -58,4 +58,23 @@ class PayHelper
         }
         return Configuration::get('PAYNL_TEST_MODE');
     }
+
+    /**
+     * @param string $exceptionMessage
+     * @return string
+     */
+    public static function getFriendlyMessage($exceptionMessage, $object)
+    {
+        $exceptionMessage = strtolower(trim($exceptionMessage));
+
+        if (stripos($exceptionMessage, 'minimum amount') !== false) {
+            $strMessage = $object->l('Unfortunately the order amount does not fit the requirements for this payment method.');
+        } elseif (stripos($exceptionMessage, 'not enabled for this service') !== false) {
+            $strMessage = $object->l('The selected payment method is not enabled. Please select another payment method.');
+        } else {
+            $strMessage = $object->l('Unfortunately something went wrong.');
+        }
+
+        return $strMessage;
+    }
 }
