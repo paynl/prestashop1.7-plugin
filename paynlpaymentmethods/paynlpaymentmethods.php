@@ -340,7 +340,6 @@ class PaynlPaymentMethods extends PaymentModule
                 } else {
                     throw new Exception('Order has no Payments.');
                 }
-
             } catch (Exception $e) {
                 $this->payLog('Partial Refund', 'Partial Refund failed (' . $e->getMessage() . ') ');
                 throw new Exception($this->l('Pay. Could not process Partial Refund please try again later.'));
