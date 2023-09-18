@@ -318,25 +318,29 @@ class PaynlPaymentMethods extends PaymentModule
     {
         if ($params['action'] == CancellationActionType::PARTIAL_REFUND && $params['order']->module == 'paynlpaymentmethods') {
             try {
-                $cartId = $params['order']->id_cart;
-                $orderId = Order::getOrderByCartId($cartId);
+                $cartId = $params['order']->id_cart ?? null;
+                $orderId = Order::getIdByCartId($cartId);
                 $order = new Order($orderId);
 
                 $orderPayments = $order->getOrderPayments();
                 $orderPayment = reset($orderPayments);
 
-                $currencyId = $orderPayment->id_currency;
-                $currency = new Currency($currencyId);
-                $strCurrency = $currency->iso_code;
+                if (empty($orderPayment)) {
+                    $currencyId = $orderPayment->id_currency;
+                    $currency = new Currency($currencyId);
+                    $strCurrency = $currency->iso_code;
 
-                $transactionId = $orderPayment->transaction_id;
+                    $transactionId = $orderPayment->transaction_id ?? null;
+                    $refundAmount = $params['cancel_amount'] ?? null;
 
-                $refundAmount = $params['cancel_amount'];
+                    PayHelper::sdkLogin();
+                    \Paynl\Transaction::refund($transactionId, $refundAmount, null, null, null, $strCurrency);
 
-                PayHelper::sdkLogin();
-                \Paynl\Transaction::refund($transactionId, $refundAmount, null, null, null, $strCurrency);
+                    $this->payLog('Partial Refund', 'Partial Refund (' . $refundAmount . ') success ', $transactionId);
+                } else {
+                    throw new Exception('Order has no Payments.');
+                }
 
-                $this->payLog('Partial Refund', 'Partial Refund (' . $refundAmount . ') success ', $transactionId);
             } catch (Exception $e) {
                 $this->payLog('Partial Refund', 'Partial Refund failed (' . $e->getMessage() . ') ');
                 throw new Exception($this->l('Pay. Could not process Partial Refund please try again later.'));
