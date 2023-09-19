@@ -1481,7 +1481,7 @@ class PaynlPaymentMethods extends PaymentModule
                         'desc' => '<span class="version-check"><span id="pay-version-check-current-version">' . $this->version . '</span><span id="pay-version-check-result"></span><button type="button" value="' . $this->version . '" id="pay-version-check" class="btn btn-info">' . $this->l('Check version') . '</button></span>',  // phpcs:ignore
                     ),
                     array(
-                        'type' => 'text',
+                        'type' => 'password',
                         'label' => $this->l('API-token'),
                         'name' => 'PAYNL_API_TOKEN',
                         'desc' => $this->l('You can find your API-token ') . '<a href="https://admin.pay.nl/company/tokens">' . $this->l('here') . '</a>' . $this->l(', not registered at PAY? Sign up ') . '<a href="https://www.pay.nl/en?register">' . $this->l('here') . '</a>', // phpcs:ignore
