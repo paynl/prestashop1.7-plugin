@@ -13,6 +13,9 @@ class PayHelper
     public static function sdkLogin()
     {
         $apitoken = Tools::getValue('PAYNL_API_TOKEN', Configuration::get('PAYNL_API_TOKEN'));
+        if (empty($apitoken) && !empty(Configuration::get('PAYNL_API_TOKEN'))) {
+            $apitoken = Configuration::get('PAYNL_API_TOKEN');
+        }
         $serviceId = Tools::getValue('PAYNL_SERVICE_ID', Configuration::get('PAYNL_SERVICE_ID'));
         $gateway = Tools::getValue('PAYNL_FAILOVER_GATEWAY', Configuration::get('PAYNL_FAILOVER_GATEWAY'));
 

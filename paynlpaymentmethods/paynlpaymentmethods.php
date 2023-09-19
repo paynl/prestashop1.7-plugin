@@ -1460,7 +1460,7 @@ class PaynlPaymentMethods extends PaymentModule
     protected function _postValidation() // phpcs:ignore
     {
         if (Tools::isSubmit('btnSubmit')) {
-            if (!Tools::getValue('PAYNL_API_TOKEN')) {
+            if (!Tools::getValue('PAYNL_API_TOKEN') && empty(Configuration::get('PAYNL_API_TOKEN'))) {
                 $this->_postErrors[] = $this->l('APItoken is required');
             } elseif (!Tools::getValue('PAYNL_SERVICE_ID')) {
                 $this->_postErrors[] = $this->l('ServiceId is required');
@@ -1484,7 +1484,9 @@ class PaynlPaymentMethods extends PaymentModule
     protected function _postProcess() // phpcs:ignore
     {
         if (Tools::isSubmit('btnSubmit')) {
-            Configuration::updateValue('PAYNL_API_TOKEN', Tools::getValue('PAYNL_API_TOKEN'));
+            if (!empty(Tools::getValue('PAYNL_API_TOKEN'))) {
+                Configuration::updateValue('PAYNL_API_TOKEN', Tools::getValue('PAYNL_API_TOKEN'));
+            }
             Configuration::updateValue('PAYNL_SERVICE_ID', Tools::getValue('PAYNL_SERVICE_ID'));
             Configuration::updateValue('PAYNL_TEST_MODE', Tools::getValue('PAYNL_TEST_MODE'));
             Configuration::updateValue('PAYNL_FAILOVER_GATEWAY', Tools::getValue('PAYNL_FAILOVER_GATEWAY'));
@@ -1522,7 +1524,7 @@ class PaynlPaymentMethods extends PaymentModule
                         'desc' => '<span class="version-check"><span id="pay-version-check-current-version">' . $this->version . '</span><span id="pay-version-check-result"></span><button type="button" value="' . $this->version . '" id="pay-version-check" class="btn btn-info">' . $this->l('Check version') . '</button></span>',  // phpcs:ignore
                     ),
                     array(
-                        'type' => 'text',
+                        'type' => 'password',
                         'label' => $this->l('API-token'),
                         'name' => 'PAYNL_API_TOKEN',
                         'desc' => $this->l('You can find your API-token ') . '<a href="https://admin.pay.nl/company/tokens">' . $this->l('here') . '</a>' . $this->l(', not registered at PAY? Sign up ') . '<a href="https://www.pay.nl/en?register">' . $this->l('here') . '</a>', // phpcs:ignore
