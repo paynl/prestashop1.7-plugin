@@ -1,7 +1,7 @@
 <html>
 <head>
     <title>Pay.nl</title>
-    <meta http-equiv="refresh" content="5; URL={url}{$extendUrl}">
+    <meta http-equiv="refresh" content="5; URL={$extendUrl}">
     <style>
         * {
             font-family: Verdana;
