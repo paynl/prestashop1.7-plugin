@@ -1017,7 +1017,7 @@ class PaynlPaymentMethods extends PaymentModule
             $payTransaction = \Paynl\Transaction::start($startData);
         } catch (Exception $e) {
             $this->payLog('startPayment', 'Starting new payment failed: ' . $cartTotal . '. Fee: ' . $iPaymentFee . ' Currency (cart): ' . $currency->iso_code . ' e:' . $e->getMessage(), $cartId);
-            throw new Exception($e->getMessage(), $e->getCode());
+            return $this->context->link->getModuleLink($this->name, 'finish', array('paymentError' => true, 'error' => PayHelper::getFriendlyMessage($e->getMessage(), $this)), true);
         }
 
         $payTransactionData = $payTransaction->getData();
@@ -1051,7 +1051,7 @@ class PaynlPaymentMethods extends PaymentModule
                 return $instorePayment->getRedirectUrl();
             } catch (\Exception $e) {
                 $this->payLog('startPayment', 'Instore Payment error: ' . $e->getMessage(), $cartId, $payTransactionId);
-                return $this->context->link->getModuleLink($this->name, 'finish', array('terminalerror' => true, 'error' => $e->getMessage()), true);
+                return $this->context->link->getModuleLink($this->name, 'finish', array('paymentError' => true, 'error' => $this->l('Pin transaction could not be started.')), true);
             }
         }
 

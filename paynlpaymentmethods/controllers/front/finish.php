@@ -51,8 +51,8 @@ class PaynlPaymentMethodsFinishModuleFrontController extends ModuleFrontControll
         $this->payOrderId = $transactionId;
         $this->orderStatusId = Tools::getValue('orderStatusId');
         $this->paymentSessionId = Tools::getValue('paymentSessionId');
-        if (Tools::getValue('terminalerror') == 1) {
-            Instore::terminalError(Tools::getValue('error'), $this);
+        if (Tools::getValue('paymentError') == 1) {
+            PaymentMethod::paymentError(Tools::getValue('error'), $this);
         }
 
       /**
