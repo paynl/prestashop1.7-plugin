@@ -325,7 +325,7 @@ class PaynlPaymentMethods extends PaymentModule
                 $orderPayments = $order->getOrderPayments();
                 $orderPayment = reset($orderPayments);
 
-                if (empty($orderPayment)) {
+                if (!empty($orderPayment)) {
                     $currencyId = $orderPayment->id_currency;
                     $currency = new Currency($currencyId);
                     $strCurrency = $currency->iso_code;
