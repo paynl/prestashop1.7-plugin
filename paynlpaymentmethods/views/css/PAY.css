@@ -33,19 +33,12 @@
     visibility: visible;
 }
 
+.PAY.panel .card-header {
+    padding-bottom: 10px !important;
+}
+
 .PAY.panel .card-body {
-    padding-left: 100px;
-}
-
-.PAY.panel .payLogo {
-    width: 75px;
-    float: left;
-    margin-left: -88px;
-    margin-top: -4px;
-}
-
-#content.bootstrap .PAY.panel .card-body {
-    padding-left: 100px;
+    padding-top: 0.625rem !important;
 }
 
 .PAY.panel .payOption {
