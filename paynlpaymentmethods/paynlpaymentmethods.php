@@ -1464,17 +1464,7 @@ class PaynlPaymentMethods extends PaymentModule
                 $this->_postErrors[] = $this->l('APItoken is required');
             } elseif (!Tools::getValue('PAYNL_SERVICE_ID')) {
                 $this->_postErrors[] = $this->l('ServiceId is required');
-            }
-
-            if (empty($this->_postErrors)) {
-// check if apitoken and serviceId are valid
-                PayHelper::sdkLogin();
-                try {
-                    Paynl\Paymentmethods::getList();
-                } catch (\Paynl\Error\Error $e) {
-                    $this->_postErrors[] = $e->getMessage();
-                }
-            }
+            }            
         }
     }
 
@@ -1515,11 +1505,11 @@ class PaynlPaymentMethods extends PaymentModule
         if ($status['status'] == 1) {
             $statusHTML = '<span class="value pay_connect_success">' . $this->l('Pay. successfully connected') . '</span>';
         } elseif (!empty($status['error'])) {
-            if($status['error'] == 'Could not authorize'){
-                $statusHTML = '<span class="value pay_connect_failure">' . $this->l('We are experiencing technical issues. Please check ') . '<a href="https://status.pay.nl" target="_BLANK">status.pay.nl</a>' . $this->l(' for the latest updates.') .  '<br/>' . $this->l('You can set your failover gateway in the \'Failover gateway\' input field.') . '</span>';
+            if ($status['error'] == 'Could not authorize') {
+                $statusHTML = '<span class="value pay_connect_failure">' . $this->l('We are experiencing technical issues. Please check ') . '<a href="https://status.pay.nl" target="_BLANK">status.pay.nl</a>' . $this->l(' for the latest updates.') . '<br/>' . $this->l('You can set your failover gateway in the \'Failover gateway\' input field.') . '</span>'; // phpcs:ignore
             } else {
-                $statusHTML = '<span class="value pay_connect_failure">' . $this->l('Pay. connection failed') .  ' (' . $status['error'] . ')' . '</span>';
-            }            
+                $statusHTML = '<span class="value pay_connect_failure">' . $this->l('Pay. connection failed') . ' (' . $status['error'] . ')' . '</span>';
+            }
         } else {
             $statusHTML = '<span class="value pay_connect_empty">' . $this->l('Pay. not connected') . '</span>';
         }

@@ -100,7 +100,6 @@ class PayHelper
             try {
                 PayHelper::sdkLogin();
                 \Paynl\Paymentmethods::getList();
-
             } catch (\Exception $e) {
                 $error = $e->getMessage();
             }
