@@ -1464,7 +1464,7 @@ class PaynlPaymentMethods extends PaymentModule
                 $this->_postErrors[] = $this->l('APItoken is required');
             } elseif (!Tools::getValue('PAYNL_SERVICE_ID')) {
                 $this->_postErrors[] = $this->l('ServiceId is required');
-            }            
+            }
         }
     }
 
