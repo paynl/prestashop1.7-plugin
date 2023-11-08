@@ -1439,10 +1439,7 @@ class PaynlPaymentMethods extends PaymentModule
             return false;
         }
         try {
-            PayHelper::sdkLogin();
-//call api to check if the credentials are correct
-            \Paynl\Paymentmethods::getList();
-            $loggedin = true;
+            $loggedin = PayHelper::isLoggedIn()['status'];
         } catch (\Exception  $e) {
         }
         $this->_html .= $this->renderAccountSettingsForm();
@@ -1467,12 +1464,9 @@ class PaynlPaymentMethods extends PaymentModule
             }
 
             if (empty($this->_postErrors)) {
-// check if apitoken and serviceId are valid
-                PayHelper::sdkLogin();
-                try {
-                    Paynl\Paymentmethods::getList();
-                } catch (\Paynl\Error\Error $e) {
-                    $this->_postErrors[] = $e->getMessage();
+                $loggedIn = PayHelper::isLoggedIn();
+                if ($loggedIn['status'] == false) {
+                    $this->_postErrors[] = $loggedIn['error'];
                 }
             }
         }
@@ -1802,7 +1796,7 @@ class PaynlPaymentMethods extends PaymentModule
         try {
             if (!empty(Configuration::get('PAYNL_FAILOVER_GATEWAY'))) {
                 $resultArray = $savedPaymentMethods;
-            } else {
+            } else { 
                 PayHelper::sdkLogin();
                 $paymentmethods = \Paynl\Paymentmethods::getList();
                 $paymentmethods = (array)$paymentmethods;
