@@ -1796,7 +1796,7 @@ class PaynlPaymentMethods extends PaymentModule
         try {
             if (!empty(Configuration::get('PAYNL_FAILOVER_GATEWAY'))) {
                 $resultArray = $savedPaymentMethods;
-            } else { 
+            } else {
                 PayHelper::sdkLogin();
                 $paymentmethods = \Paynl\Paymentmethods::getList();
                 $paymentmethods = (array)$paymentmethods;
@@ -1940,7 +1940,7 @@ class PaynlPaymentMethods extends PaymentModule
                 if ($changed) {
                     Configuration::updateValue('PAYNL_PAYMENTMETHODS', json_encode($resultArray));
                 }
-            }            
+            }
         } catch (\Exception  $e) {
         }
 
