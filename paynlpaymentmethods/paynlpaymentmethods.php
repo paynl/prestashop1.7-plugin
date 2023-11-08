@@ -1800,149 +1800,153 @@ class PaynlPaymentMethods extends PaymentModule
         $resultArray = array();
         $savedPaymentMethods = json_decode(Configuration::get('PAYNL_PAYMENTMETHODS'));
         try {
-            PayHelper::sdkLogin();
-            $paymentmethods = \Paynl\Paymentmethods::getList();
-            $paymentmethods = (array)$paymentmethods;
-            $languages = Language::getLanguages(true);
-            foreach ($savedPaymentMethods as $paymentmethod) {
-                if (isset($paymentmethods[$paymentmethod->id])) {
-                    # The paymentmethod allready exists in the config. Check if fields are set..
-                              $extMethod = $paymentmethods[$paymentmethod->id];
-                    if (!isset($paymentmethod->min_amount)) {
-                        $paymentmethod->min_amount = isset($extMethod['min_amount']) ? intval($extMethod['min_amount'] / 100) : 0;
-                        $changed = true;
-                    }
-
-                    if (!isset($paymentmethod->max_amount)) {
-                        $paymentmethod->max_amount = isset($extMethod['max_amount']) ? intval($extMethod['max_amount'] / 100) : 0;
-                        $changed = true;
-                    }
-
-                    if (!isset($paymentmethod->description)) {
-                        $paymentmethod->description = isset($extMethod['brand']['public_description']) ? $extMethod['brand']['public_description'] : '';
-                        $changed = true;
-                    }
-
-                    if (!isset($paymentmethod->brand_id)) {
-                        $paymentmethod->brand_id = isset($extMethod['brand']['id']) ? $extMethod['brand']['id'] : '';
-                        $changed = true;
-                    }
-
-                    if (!isset($paymentmethod->limit_countries)) {
-                        $paymentmethod->limit_countries = false;
-                        $changed = true;
-                    }
-
-                    if (!isset($paymentmethod->allowed_countries)) {
-                        $paymentmethod->allowed_countries = [];
-                        $changed = true;
-                    }
-                    if (isset($paymentmethod->allowed_countries) && !is_array($paymentmethod->allowed_countries)) {
-                        $paymentmethod->allowed_countries = [];
-                        $changed = true;
-                    }
-
-                    if (!isset($paymentmethod->limit_carriers)) {
-                        $paymentmethod->limit_carriers = false;
-                        $changed = true;
-                    }
-
-                    if (!isset($paymentmethod->allowed_carriers)) {
-                        $paymentmethod->allowed_carriers = [];
-                        $changed = true;
-                    }
-                    if (isset($paymentmethod->allowed_carriers) && !is_array($paymentmethod->allowed_carriers)) {
-                        $paymentmethod->allowed_carriers = [];
-                        $changed = true;
-                    }
-
-                    if (!isset($paymentmethod->fee_percentage)) {
-                        $paymentmethod->fee_percentage = false;
-                        $changed = true;
-                    }
-
-                    if (!isset($paymentmethod->fee_value)) {
-                        $paymentmethod->fee_value = '';
-                        $changed = true;
-                    }
-
-                    if (!isset($paymentmethod->customer_type)) {
-                        $paymentmethod->customer_type = 'both';
-                        $changed = true;
-                    }
-
-                    if (!isset($paymentmethod->external_logo)) {
-                        $paymentmethod->external_logo = '';
-                        $changed = true;
-                    }
-
-                    if (!isset($paymentmethod->create_order_on)) {
-                        $paymentmethod->create_order_on = 'success';
-                        $changed = true;
-                    }
-
-                    if (!isset($paymentmethod->bank_selection)) {
-                        $paymentmethod->bank_selection = '';
-                        if ($paymentmethod->id == PaymentMethod::METHOD_INSTORE) {
-                            $paymentmethod->bank_selection = 'dropdown';
+            if (!empty(Configuration::get('PAYNL_FAILOVER_GATEWAY'))) {
+                $resultArray = $savedPaymentMethods;
+            } else {
+                PayHelper::sdkLogin();
+                $paymentmethods = \Paynl\Paymentmethods::getList();
+                $paymentmethods = (array)$paymentmethods;
+                $languages = Language::getLanguages(true);
+                foreach ($savedPaymentMethods as $paymentmethod) {
+                    if (isset($paymentmethods[$paymentmethod->id])) {
+                        # The paymentmethod allready exists in the config. Check if fields are set..
+                                $extMethod = $paymentmethods[$paymentmethod->id];
+                        if (!isset($paymentmethod->min_amount)) {
+                            $paymentmethod->min_amount = isset($extMethod['min_amount']) ? intval($extMethod['min_amount'] / 100) : 0;
+                            $changed = true;
                         }
-                        if ($paymentmethod->id == PaymentMethod::METHOD_IDEAL) {
-                            $paymentmethod->bank_selection = 'radio';
-                        }
-                        $changed = true;
-                    }
 
+                        if (!isset($paymentmethod->max_amount)) {
+                            $paymentmethod->max_amount = isset($extMethod['max_amount']) ? intval($extMethod['max_amount'] / 100) : 0;
+                            $changed = true;
+                        }
+
+                        if (!isset($paymentmethod->description)) {
+                            $paymentmethod->description = isset($extMethod['brand']['public_description']) ? $extMethod['brand']['public_description'] : '';
+                            $changed = true;
+                        }
+
+                        if (!isset($paymentmethod->brand_id)) {
+                            $paymentmethod->brand_id = isset($extMethod['brand']['id']) ? $extMethod['brand']['id'] : '';
+                            $changed = true;
+                        }
+
+                        if (!isset($paymentmethod->limit_countries)) {
+                            $paymentmethod->limit_countries = false;
+                            $changed = true;
+                        }
+
+                        if (!isset($paymentmethod->allowed_countries)) {
+                            $paymentmethod->allowed_countries = [];
+                            $changed = true;
+                        }
+                        if (isset($paymentmethod->allowed_countries) && !is_array($paymentmethod->allowed_countries)) {
+                            $paymentmethod->allowed_countries = [];
+                            $changed = true;
+                        }
+
+                        if (!isset($paymentmethod->limit_carriers)) {
+                            $paymentmethod->limit_carriers = false;
+                            $changed = true;
+                        }
+
+                        if (!isset($paymentmethod->allowed_carriers)) {
+                            $paymentmethod->allowed_carriers = [];
+                            $changed = true;
+                        }
+                        if (isset($paymentmethod->allowed_carriers) && !is_array($paymentmethod->allowed_carriers)) {
+                            $paymentmethod->allowed_carriers = [];
+                            $changed = true;
+                        }
+
+                        if (!isset($paymentmethod->fee_percentage)) {
+                            $paymentmethod->fee_percentage = false;
+                            $changed = true;
+                        }
+
+                        if (!isset($paymentmethod->fee_value)) {
+                            $paymentmethod->fee_value = '';
+                            $changed = true;
+                        }
+
+                        if (!isset($paymentmethod->customer_type)) {
+                            $paymentmethod->customer_type = 'both';
+                            $changed = true;
+                        }
+
+                        if (!isset($paymentmethod->external_logo)) {
+                            $paymentmethod->external_logo = '';
+                            $changed = true;
+                        }
+
+                        if (!isset($paymentmethod->create_order_on)) {
+                            $paymentmethod->create_order_on = 'success';
+                            $changed = true;
+                        }
+
+                        if (!isset($paymentmethod->bank_selection)) {
+                            $paymentmethod->bank_selection = '';
+                            if ($paymentmethod->id == PaymentMethod::METHOD_INSTORE) {
+                                $paymentmethod->bank_selection = 'dropdown';
+                            }
+                            if ($paymentmethod->id == PaymentMethod::METHOD_IDEAL) {
+                                $paymentmethod->bank_selection = 'radio';
+                            }
+                            $changed = true;
+                        }
+
+                        foreach ($languages as $language) {
+                            $key_name = 'name_' . $language['iso_code'];
+                            if (!isset($paymentmethod->$key_name)) {
+                                $paymentmethod->$key_name = '';
+                                $changed = true;
+                            }
+                            $key_description = 'description_' . $language['iso_code'];
+                            if (!isset($paymentmethod->$key_description)) {
+                                $paymentmethod->$key_description = '';
+                                $changed = true;
+                            }
+                        }
+
+                        $resultArray[] = $paymentmethod;
+                        unset($paymentmethods[$paymentmethod->id]);
+                    }
+                }
+
+                # Nieuwe payment methods voorzien van standaard values.
+                foreach ($paymentmethods as $paymentmethod) {
+                    $defaultArray = [
+                        'id' => $paymentmethod['id'],
+                        'name' => empty($paymentmethod['visibleName']) ? $paymentmethod['name'] : $paymentmethod['visibleName'],
+                        'enabled' => false,
+                        'min_amount' => isset($paymentmethod['min_amount']) ? intval($paymentmethod['min_amount'] / 100) : null,
+                        'max_amount' => isset($paymentmethod['max_amount']) ? intval($paymentmethod['max_amount'] / 100) : null,
+                        'description' => isset($paymentmethod['brand']['public_description']) ? $paymentmethod['brand']['public_description'] : '',
+                        'brand_id' => isset($paymentmethod['brand']['id']) ? $paymentmethod['brand']['id'] : '',
+                        'limit_countries' => false,
+                        'allowed_countries' => [],
+                        'limit_carriers' => false,
+                        'allowed_carriers' => [],
+                        'fee_percentage' => false,
+                        'fee_value' => '',
+                        'customer_type' => 'both',
+                        'external_logo' => '',
+                        'create_order_on' => 'success',
+                        'bank_selection' => ''
+                    ];
                     foreach ($languages as $language) {
-                        $key_name = 'name_' . $language['iso_code'];
-                        if (!isset($paymentmethod->$key_name)) {
-                            $paymentmethod->$key_name = '';
-                            $changed = true;
-                        }
-                        $key_description = 'description_' . $language['iso_code'];
-                        if (!isset($paymentmethod->$key_description)) {
-                            $paymentmethod->$key_description = '';
-                            $changed = true;
-                        }
+                        $defaultArray['name_' . $language['iso_code']] = '';
+                        $defaultArray['description_' . $language['iso_code']] = '';
                     }
 
-                    $resultArray[] = $paymentmethod;
-                    unset($paymentmethods[$paymentmethod->id]);
-                }
-            }
-
-            # Nieuwe payment methods voorzien van standaard values.
-            foreach ($paymentmethods as $paymentmethod) {
-                $defaultArray = [
-                    'id' => $paymentmethod['id'],
-                    'name' => empty($paymentmethod['visibleName']) ? $paymentmethod['name'] : $paymentmethod['visibleName'],
-                    'enabled' => false,
-                    'min_amount' => isset($paymentmethod['min_amount']) ? intval($paymentmethod['min_amount'] / 100) : null,
-                    'max_amount' => isset($paymentmethod['max_amount']) ? intval($paymentmethod['max_amount'] / 100) : null,
-                    'description' => isset($paymentmethod['brand']['public_description']) ? $paymentmethod['brand']['public_description'] : '',
-                    'brand_id' => isset($paymentmethod['brand']['id']) ? $paymentmethod['brand']['id'] : '',
-                    'limit_countries' => false,
-                    'allowed_countries' => [],
-                    'limit_carriers' => false,
-                    'allowed_carriers' => [],
-                    'fee_percentage' => false,
-                    'fee_value' => '',
-                    'customer_type' => 'both',
-                    'external_logo' => '',
-                    'create_order_on' => 'success',
-                    'bank_selection' => ''
-                ];
-                foreach ($languages as $language) {
-                    $defaultArray['name_' . $language['iso_code']] = '';
-                    $defaultArray['description_' . $language['iso_code']] = '';
+                    $resultArray[] = (object) $defaultArray;
+                    $changed = true;
                 }
 
-                $resultArray[] = (object) $defaultArray;
-                $changed = true;
-            }
-
-            if ($changed) {
-                Configuration::updateValue('PAYNL_PAYMENTMETHODS', json_encode($resultArray));
-            }
+                if ($changed) {
+                    Configuration::updateValue('PAYNL_PAYMENTMETHODS', json_encode($resultArray));
+                }
+            }            
         } catch (\Exception  $e) {
         }
 

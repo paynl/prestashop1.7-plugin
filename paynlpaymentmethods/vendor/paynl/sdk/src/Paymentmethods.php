@@ -92,17 +92,17 @@ class Paymentmethods
      */
     public static function getList(array $options = array())
     {
-        $api = new Api\GetService();
-        $result = $api->doRequest();       
-       
-        $paymentMethods = self::reorderOutput($result);
- 
-
-        if (isset($options['country'])) {
-            $paymentMethods = self::filterCountry($paymentMethods, $options['country']);
+        try {
+            $api = new Api\GetService();
+            $result = $api->doRequest();
+            $paymentMethods = self::reorderOutput($result);
+            if (isset($options['country'])) {
+                $paymentMethods = self::filterCountry($paymentMethods, $options['country']);
+            }
+            return $paymentMethods;
+        } catch (\Exception $e) {
+            return [];
         }
-
-        return $paymentMethods;
     }
 
     /**
