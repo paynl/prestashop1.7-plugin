@@ -149,3 +149,31 @@
 #pay-version-check {
     margin-top: -5px;
 }
+
+.pay-status {
+    padding: 2px 6px;
+    display: block;
+}
+
+.pay-status span {
+    color: black;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.pay-status span.pay_connect_success {
+    color: #438600;
+}
+
+.pay-status span.pay_connect_failure, .pay-status span.pay_connect_failure a {
+    color: #dd4242;
+}
+
+.pay-status span.pay_connect_empty {
+    color: #dd7536;
+}
+
+.pay-status span a {
+    text-decoration: underline;
+}

@@ -98,4 +98,50 @@ class PayHelper
 
         return $strMessage;
     }
+
+    /**
+     * @param string $object
+     * @return array
+     */
+    public static function checkCredentials($object)
+    {
+
+        $apiToken = Tools::getValue('PAYNL_API_TOKEN', Configuration::get('PAYNL_API_TOKEN'));
+        if (empty($apiToken) && !empty(Configuration::get('PAYNL_API_TOKEN'))) {
+            $apiToken = Configuration::get('PAYNL_API_TOKEN');
+        }
+        $serviceId = Tools::getValue('PAYNL_SERVICE_ID', Configuration::get('PAYNL_SERVICE_ID'));
+
+        $error = '';
+        $status = true;
+        if (!empty($apiToken) && !empty($serviceId)) {
+            try {
+                PayHelper::sdkLogin();
+                \Paynl\Paymentmethods::getList();
+            } catch (\Exception $e) {
+                $error = $e->getMessage();
+            }
+        } elseif (!empty($apiToken) || !empty($serviceId)) {
+            $error = $object->l('API token and SL-code are required.');
+        } else {
+            $status = false;
+        }
+        if (!empty($error)) {
+            switch ($error) {
+                case 'HTTP/1.0 401 Unauthorized':
+                    $error = $object->l('SL-code or API token invalid');
+                    break;
+                case 'PAY-404 - Service not found':
+                    $error = $object->l('SL-code is invalid');
+                    break;
+                case 'PAY-403 - Access denied: Token not valid for this company':
+                    $error = $object->l('SL-code / API token combination invalid');
+                    break;
+                default:
+                    $error = $object->l('Could not authorize');
+            }
+            $status = false;
+        }
+        return ['status' => $status, 'error' => $error];
+    }
 }

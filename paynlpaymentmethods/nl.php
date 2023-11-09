@@ -119,4 +119,13 @@ $_MODULE['<{paynlpaymentmethods}prestashop>admin_featurerequest_39a6ac16fdaa2528
 $_MODULE['<{paynlpaymentmethods}prestashop>admin_featurerequest_11bd854505f9390219b142e5f7abacee'] = 'Verstuurd! Bedankt voor het delen van jouw input.';
 $_MODULE['<{paynlpaymentmethods}prestashop>admin_featurerequest_39ef6665bb3ee1df8b39cecdae2782c9'] = 'E-mail kon niet worden verzonden. Probeer het later opnieuw.';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_1a3faaad87797a9f7044f4f2de56a179'] = 'Suggesties?';
+$_MODULE['<{paynlpaymentmethods}prestashop>payhelper_1a8bea54fe02b5a66d881be81b523b6d'] = 'API token en SL-code zijn verplicht';
+$_MODULE['<{paynlpaymentmethods}prestashop>payhelper_e7e7914b331d9ac2063029c845b0a1c8'] = 'SL-code or API token invalid';
+$_MODULE['<{paynlpaymentmethods}prestashop>payhelper_d9a1aa4ab0c34469c5d1e74b5f1c5457'] = 'ServiceId is onjuist';
+$_MODULE['<{paynlpaymentmethods}prestashop>payhelper_59bac555fff59d1f72d9ac906b22cdb1'] = 'SL-code / API token combinatie onjuist';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_c2d83c99669053df24d7839d313e5983'] = 'Pay. verbinding geslaagd';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_d745bed527a2c88b05d72087b7c3bd92'] = 'Wij ondervinden technische problemen. Kijk op %s voor de laatste updates.';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_1d6ac6ba0c92bee720404ac8f441ca2d'] = 'In het invoerveld \'Failover gateway\' kunt u uw failover gateway instellen.';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_e916b6d1f559188cfaa2fc0bbe61d750'] = 'Pay. verbinding mislukt';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_a2d07836b692b9f4153f7f399307f629'] = 'Pay. niet verbonden';
 // @codingStandardsIgnoreEnd

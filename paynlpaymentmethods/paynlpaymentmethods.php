@@ -1463,12 +1463,7 @@ class PaynlPaymentMethods extends PaymentModule
                 $this->_postErrors[] = $this->l('ServiceId is required');
             }
 
-            if (empty($this->_postErrors)) {
-                $loggedIn = PayHelper::isLoggedIn();
-                if ($loggedIn['status'] == false) {
-                    $this->_postErrors[] = $loggedIn['error'];
-                }
-            }
+
         }
     }
 
@@ -1504,6 +1499,19 @@ class PaynlPaymentMethods extends PaymentModule
      */
     public function renderAccountSettingsForm()
     {
+        $status = PayHelper::checkCredentials($this);
+        $statusHTML = '';
+        if ($status['status'] == 1) {
+            $statusHTML = '<span class="value pay_connect_success">' . $this->l('Pay. successfully connected') . '</span>';
+        } elseif (!empty($status['error'])) {
+            if ($status['error'] == 'Could not authorize') {
+                $statusHTML = '<span class="value pay_connect_failure">' . sprintf($this->l('We are experiencing technical issues. Please check %s for the latest updates.'), '<a href="https://status.pay.nl" target="_BLANK">status.pay.nl</a>') . '<br/>' . $this->l('You can set your failover gateway in the \'Failover gateway\' input field.') . '</span>'; // phpcs:ignore
+            } else {
+                $statusHTML = '<span class="value pay_connect_failure">' . $this->l('Pay. connection failed') . ' (' . $status['error'] . ')' . '</span>';
+            }
+        } else {
+            $statusHTML = '<span class="value pay_connect_empty">' . $this->l('Pay. not connected') . '</span>';
+        }
         $fields_form = array(
             'form' => array(
                 'legend' => array(
@@ -1516,6 +1524,12 @@ class PaynlPaymentMethods extends PaymentModule
                         'label' => $this->l('Version'),
                         'name' => 'PAYNL_VERSION',
                         'desc' => '<span class="version-check"><span id="pay-version-check-current-version">' . $this->version . '</span><span id="pay-version-check-result"></span><button type="button" value="' . $this->version . '" id="pay-version-check" class="btn btn-info">' . $this->l('Check version') . '</button></span>',  // phpcs:ignore
+                    ),
+                    array(
+                        'type' => '',
+                        'label' => $this->l('Status'),
+                        'name' => 'PAYNL_STATUS',
+                        'desc' => '<span class="pay-status">'.$statusHTML.'</span>', // phpcs:ignore
                     ),
                     array(
                         'type' => 'password',
