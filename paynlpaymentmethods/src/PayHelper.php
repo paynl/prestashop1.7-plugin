@@ -27,6 +27,24 @@ class PayHelper
     }
 
     /**
+     * @return boolean
+     */
+    public static function isLoggedIn()
+    {
+        try {
+            PayHelper::sdkLogin();
+            \Paynl\Paymentmethods::getList();
+            return ['status' => true];
+        } catch (\Paynl\Error\Error $e) {
+            $gateway = Tools::getValue('PAYNL_FAILOVER_GATEWAY', Configuration::get('PAYNL_FAILOVER_GATEWAY'));
+            if (!empty($gateway) && str_contains($gateway, 'https://rest-api.achterelkebetaling.nl')) {
+                return ['status' => true];
+            }
+            return ['status' => false, 'error' => $e->getMessage()];
+        }
+    }
+
+    /**
      * @param $exchange
      * @return string
      */
