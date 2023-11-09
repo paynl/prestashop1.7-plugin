@@ -104,14 +104,14 @@ class PayHelper
                 $error = $e->getMessage();
             }
         } elseif (!empty($apiToken) || !empty($serviceId)) {
-            $error = $object->l('Token code, API token and SL-code are required.');
+            $error = $object->l('API token and SL-code are required.');
         } else {
             $status = false;
         }
         if (!empty($error)) {
             switch ($error) {
                 case 'HTTP/1.0 401 Unauthorized':
-                    $error = $object->l('SL-code, API token or token code invalid');
+                    $error = $object->l('SL-code or API token invalid');
                     break;
                 case 'PAY-404 - Service not found':
                     $error = $object->l('SL-code is invalid');

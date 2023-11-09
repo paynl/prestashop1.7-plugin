@@ -1506,7 +1506,8 @@ class PaynlPaymentMethods extends PaymentModule
             $statusHTML = '<span class="value pay_connect_success">' . $this->l('Pay. successfully connected') . '</span>';
         } elseif (!empty($status['error'])) {
             if ($status['error'] == 'Could not authorize') {
-                $statusHTML = '<span class="value pay_connect_failure">' . $this->l('We are experiencing technical issues. Please check ') . '<a href="https://status.pay.nl" target="_BLANK">status.pay.nl</a>' . $this->l(' for the latest updates.') . '<br/>' . $this->l('You can set your failover gateway in the \'Failover gateway\' input field.') . '</span>'; // phpcs:ignore
+                
+                $statusHTML = '<span class="value pay_connect_failure">' . sprintf($this->l('We are experiencing technical issues. Please check %s for the latest updates.'), '<a href="https://status.pay.nl" target="_BLANK">status.pay.nl</a>') . '<br/>' . $this->l('You can set your failover gateway in the \'Failover gateway\' input field.') . '</span>'; // phpcs:ignore
             } else {
                 $statusHTML = '<span class="value pay_connect_failure">' . $this->l('Pay. connection failed') . ' (' . $status['error'] . ')' . '</span>';
             }
