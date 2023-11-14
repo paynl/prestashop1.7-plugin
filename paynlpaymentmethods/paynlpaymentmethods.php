@@ -1385,6 +1385,19 @@ class PaynlPaymentMethods extends PaymentModule
         );
     }
 
+    public function getGateways()
+    {
+        $cores = \Paynl\Config::getCores();
+        $cores_array = array_merge($cores, ['custom' => $this->l('Custom')]);
+
+        $arrResult = [];
+        foreach ($cores_array as $value => $label) {
+            $arrResult[] = ['failover_gateway_id' => $value, 'label' => $label];
+        }
+
+        return $arrResult;
+    }
+
     /**
      * @param integer $payment_option_id
      * @param object $objPaymentMethod
@@ -1479,6 +1492,7 @@ class PaynlPaymentMethods extends PaymentModule
             Configuration::updateValue('PAYNL_SERVICE_ID', Tools::getValue('PAYNL_SERVICE_ID'));
             Configuration::updateValue('PAYNL_TEST_MODE', Tools::getValue('PAYNL_TEST_MODE'));
             Configuration::updateValue('PAYNL_FAILOVER_GATEWAY', Tools::getValue('PAYNL_FAILOVER_GATEWAY'));
+            Configuration::updateValue('PAYNL_CUSTOM_FAILOVER_GATEWAY', Tools::getValue('PAYNL_CUSTOM_FAILOVER_GATEWAY'));
             Configuration::updateValue('PAYNL_EXCHANGE_URL', Tools::getValue('PAYNL_EXCHANGE_URL'));
             Configuration::updateValue('PAYNL_VALIDATION_DELAY', Tools::getValue('PAYNL_VALIDATION_DELAY'));
             Configuration::updateValue('PAYNL_PAYLOGGER', Tools::getValue('PAYNL_PAYLOGGER'));
@@ -1553,9 +1567,20 @@ class PaynlPaymentMethods extends PaymentModule
                         'required' => false
                     ),
                     array(
-                        'type' => 'text',
+                        'type' => 'select',
                         'label' => $this->l('Failover gateway'),
                         'name' => 'PAYNL_FAILOVER_GATEWAY',
+                        'desc' => $this->l('Select the gateway which is use for processing payments'),
+                        'options' => array(
+                            'query' => $this->getGateways(),
+                            'id' => 'failover_gateway_id',
+                            'name' => 'label'
+                        )
+                    ),
+                    array(
+                        'type' => 'text',
+                        'label' => $this->l('Custom failover gateway'),
+                        'name' => 'PAYNL_CUSTOM_FAILOVER_GATEWAY',
                         'desc' => $this->l('Leave this empty unless we at PAY. advice you to fill this in with a gateway we give to you'),
                         'required' => false
                     ),
@@ -1785,6 +1810,7 @@ class PaynlPaymentMethods extends PaymentModule
             'PAYNL_SERVICE_ID' => Tools::getValue('PAYNL_SERVICE_ID', Configuration::get('PAYNL_SERVICE_ID')),
             'PAYNL_TEST_MODE' => Tools::getValue('PAYNL_TEST_MODE', Configuration::get('PAYNL_TEST_MODE')),
             'PAYNL_FAILOVER_GATEWAY' => Tools::getValue('PAYNL_FAILOVER_GATEWAY', Configuration::get('PAYNL_FAILOVER_GATEWAY')),
+            'PAYNL_CUSTOM_FAILOVER_GATEWAY' => Tools::getValue('PAYNL_CUSTOM_FAILOVER_GATEWAY', Configuration::get('PAYNL_CUSTOM_FAILOVER_GATEWAY')),
             'PAYNL_EXCHANGE_URL' => Tools::getValue('PAYNL_EXCHANGE_URL', Configuration::get('PAYNL_EXCHANGE_URL')),
             'PAYNL_VALIDATION_DELAY' => Tools::getValue('PAYNL_VALIDATION_DELAY', Configuration::get('PAYNL_VALIDATION_DELAY')),
             'PAYNL_PAYLOGGER' => $logging,
@@ -1808,7 +1834,7 @@ class PaynlPaymentMethods extends PaymentModule
         $resultArray = array();
         $savedPaymentMethods = json_decode(Configuration::get('PAYNL_PAYMENTMETHODS'));
         try {
-            if (!empty(Configuration::get('PAYNL_FAILOVER_GATEWAY'))) {
+            if (Configuration::get('PAYNL_FAILOVER_GATEWAY') !== 'https://rest-api.pay.nl') {
                 $resultArray = $savedPaymentMethods;
             } else {
                 PayHelper::sdkLogin();

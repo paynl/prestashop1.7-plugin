@@ -11,6 +11,7 @@ use Paynl\Error;
  */
 class Capture extends Transaction
 {
+    protected $version = 12;
     protected $apiTokenRequired = true;
 
     /**
@@ -27,6 +28,11 @@ class Capture extends Transaction
      * @var string
      */
     private $tracktrace;
+
+    /**
+     * @var array
+     */
+    private $products;
 
     /**
      * Set the transactionId
@@ -59,6 +65,16 @@ class Capture extends Transaction
     }
 
     /**
+     * Set the products
+     *
+     * @param array $products
+     */
+    public function setProducts($products)
+    {
+        $this->products = $products;
+    }
+
+    /**
      * @inheritdoc
      * @throws Error\Required TransactionId is required
      */
@@ -76,6 +92,10 @@ class Capture extends Transaction
 
         if(!empty($this->tracktrace)){
             $this->data['tracktrace'] = $this->tracktrace;
+        }
+
+        if (!empty($this->products)) {
+            $this->data['products'] = $this->products;
         }
 
         return parent::getData();

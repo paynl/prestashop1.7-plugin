@@ -8,7 +8,7 @@ use Paynl\Result\Transaction as Result;
 /**
  * Description of Transaction
  *
- * @author Andy Pieters <andy@andypieters.nl>
+ * @author Andy Pieters <andy@pay.nl>
  */
 class Transaction
 {
@@ -222,6 +222,9 @@ class Transaction
             if (isset($options['invoiceAddress']['gender'])) {
                 $invoiceAddress['gender'] = $options['invoiceAddress']['gender'];
             }
+            if (isset($options['invoiceAddress']['regionCode'])) {
+                $invoiceAddress['regionCode'] = $options['invoiceAddress']['regionCode'];
+            }
 
             $enduser['invoiceAddress'] = $invoiceAddress;
         }
@@ -284,6 +287,15 @@ class Transaction
     {
         $api = new Api\Info();
         $api->setTransactionId($transactionId);
+
+        $prefix = (string)substr($transactionId, 0, 2);
+
+        if ($prefix == '51') {
+            \Paynl\Config::setApiBase('https://rest.achterelkebetaling.nl');
+        } elseif ($prefix == '52') {
+            \Paynl\Config::setApiBase('https://rest.payments.nl');
+        }
+
         $result = $api->doRequest();
 
         $result['transactionId'] = $transactionId;
@@ -324,17 +336,14 @@ class Transaction
         $entranceCode = null
     )
     {
-
         $api = new Api\Details();
-
         $api->setTransactionId($transactionId);
 
         if ($entranceCode !== null) {
             $api->setEntranceCode($entranceCode);
         }
-        $result = $api->doRequest();
 
-        return new Result\Details($result);
+        return new Result\Details($api->doRequest());
     }
 
     /**
@@ -509,13 +518,14 @@ class Transaction
      * @param string $transactionId
      * @param string|null $amount
      * @param string|null $tracktrace
+     * @param array|null $products
      * @return bool
      * @throws Error\Api
      * @throws Error\Error
      * @throws Error\Required\ApiToken
      * @throws Error\Required\ServiceId
      */
-    public static function capture($transactionId, $amount = null , $tracktrace = null )
+    public static function capture($transactionId, $amount = null , $tracktrace = null, $products = null)
     {
         $api = new Api\Capture();
 
@@ -525,6 +535,10 @@ class Transaction
 
         if (isset($tracktrace)) {
             $api->setTracktrace($tracktrace);
+        }
+
+        if (!empty($products)) {
+            $api->setProducts($products);
         }
 
         $api->setTransactionId($transactionId);
