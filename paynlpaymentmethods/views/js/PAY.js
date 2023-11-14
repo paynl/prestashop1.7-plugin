@@ -2,7 +2,7 @@ jQuery(document).ready(function () {
     var customFailoverGateway = jQuery("#PAYNL_CUSTOM_FAILOVER_GATEWAY").parents(":eq(1)");
     customFailoverGateway.css("display", "none");
 
-    jQuery("#PAYNL_FAILOVER_GATEWAY").on('change', function() {
+    jQuery("#PAYNL_FAILOVER_GATEWAY").on('change', function () {
         if ($(this).val() == 'custom') {
             customFailoverGateway.css("display", "block");
         } else {
