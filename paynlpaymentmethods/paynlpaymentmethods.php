@@ -1385,6 +1385,9 @@ class PaynlPaymentMethods extends PaymentModule
         );
     }
 
+    /**
+     * @return array
+     */
     public function getGateways()
     {
         $cores = \Paynl\Config::getCores();
@@ -1475,8 +1478,6 @@ class PaynlPaymentMethods extends PaymentModule
             } elseif (!Tools::getValue('PAYNL_SERVICE_ID')) {
                 $this->_postErrors[] = $this->l('ServiceId is required');
             }
-
-
         }
     }
 
