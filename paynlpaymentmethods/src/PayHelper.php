@@ -147,7 +147,11 @@ class PayHelper
         return ['status' => $status, 'error' => $error];
     }
 
-    public static function getFailoverGateway(){
+    /**
+     * @return mixed
+     */
+    public static function getFailoverGateway()
+    {
         $gateway = Tools::getValue('PAYNL_FAILOVER_GATEWAY', Configuration::get('PAYNL_FAILOVER_GATEWAY'));
         if ($gateway == 'custom') {
             $gateway = Tools::getValue('PAYNL_CUSTOM_FAILOVER_GATEWAY', Configuration::get('PAYNL_CUSTOM_FAILOVER_GATEWAY'));
