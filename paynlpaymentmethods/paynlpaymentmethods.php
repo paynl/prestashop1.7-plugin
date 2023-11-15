@@ -917,7 +917,7 @@ class PaynlPaymentMethods extends PaymentModule
      */
     public function getTransaction($transactionId)
     {
-        PayHelper::sdkLogin();
+        PayHelper::sdkLogin(true);
         return \Paynl\Transaction::status($transactionId);
     }
 
@@ -953,7 +953,7 @@ class PaynlPaymentMethods extends PaymentModule
      */
     public function startPayment(Cart $cart, $payment_option_id, $extra_data = array())
     {
-        PayHelper::sdkLogin();
+        PayHelper::sdkLogin(true);
         $currency = new Currency($cart->id_currency);
 /** @var CurrencyCore $currency */
 
@@ -1454,14 +1454,9 @@ class PaynlPaymentMethods extends PaymentModule
             $this->adminDisplayWarning($this->l('Cannot find PAY. SDK, did you install the source code instead of the package?'));
             return false;
         }
-        try {
-            $loggedin = PayHelper::isLoggedIn()['status'];
-        } catch (\Exception  $e) {
-        }
+
         $this->_html .= $this->renderAccountSettingsForm();
-        if ($loggedin) {
-            $this->_html .= $this->renderPaymentMethodsForm();
-        }
+        $this->_html .= $this->renderPaymentMethodsForm();
         $this->_html .= $this->renderFeatureRequest();
 
         return $this->_html;
@@ -1520,7 +1515,7 @@ class PaynlPaymentMethods extends PaymentModule
             $statusHTML = '<span class="value pay_connect_success">' . $this->l('Pay. successfully connected') . '</span>';
         } elseif (!empty($status['error'])) {
             if ($status['error'] == 'Could not authorize') {
-                $statusHTML = '<span class="value pay_connect_failure">' . sprintf($this->l('We are experiencing technical issues. Please check %s for the latest updates.'), '<a href="https://status.pay.nl" target="_BLANK">status.pay.nl</a>') . '<br/>' . $this->l('You can set your failover gateway in the \'Failover gateway\' input field.') . '</span>'; // phpcs:ignore
+                $statusHTML = '<span class="value pay_connect_failure">' . sprintf($this->l('We are experiencing technical issues. Please check %s for the latest updates.'), '<a href="https://status.pay.nl" target="_BLANK">status.pay.nl</a>') . '<br/>' . $this->l('You can set your core in the \'Custom core\' input field.') . '</span>'; // phpcs:ignore
             } else {
                 $statusHTML = '<span class="value pay_connect_failure">' . $this->l('Pay. connection failed') . ' (' . $status['error'] . ')' . '</span>';
             }
@@ -1569,9 +1564,9 @@ class PaynlPaymentMethods extends PaymentModule
                     ),
                     array(
                         'type' => 'select',
-                        'label' => $this->l('Failover gateway'),
+                        'label' => $this->l('Multicore'),
                         'name' => 'PAYNL_FAILOVER_GATEWAY',
-                        'desc' => $this->l('Select the gateway which is use for processing payments'),
+                        'desc' => $this->l('Select the core to be used for processing payments'),
                         'options' => array(
                             'query' => $this->getGateways(),
                             'id' => 'failover_gateway_id',
@@ -1580,9 +1575,9 @@ class PaynlPaymentMethods extends PaymentModule
                     ),
                     array(
                         'type' => 'text',
-                        'label' => $this->l('Custom failover gateway'),
+                        'label' => $this->l('Custom multicore'),
                         'name' => 'PAYNL_CUSTOM_FAILOVER_GATEWAY',
-                        'desc' => $this->l('Leave this empty unless we at PAY. advice you to fill this in with a gateway we give to you'),
+                        'desc' => $this->l('Leave this empty unless Pay. advised otherwise'),
                         'required' => false
                     ),
                     array(

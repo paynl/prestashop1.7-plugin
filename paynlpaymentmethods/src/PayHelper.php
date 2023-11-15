@@ -8,9 +8,10 @@ use Tools;
 class PayHelper
 {
     /**
+     * @param $useMultiCore
      * @return void
      */
-    public static function sdkLogin()
+    public static function sdkLogin($useMultiCore = false)
     {
         $apitoken = Tools::getValue('PAYNL_API_TOKEN', Configuration::get('PAYNL_API_TOKEN'));
         if (empty($apitoken) && !empty(Configuration::get('PAYNL_API_TOKEN'))) {
@@ -18,10 +19,11 @@ class PayHelper
         }
         $serviceId = Tools::getValue('PAYNL_SERVICE_ID', Configuration::get('PAYNL_SERVICE_ID'));
 
-        $gateway = self::getFailoverGateway();
-
-        if (!empty(trim($gateway))) {
-            \Paynl\Config::setApiBase(trim($gateway));
+        if ($useMultiCore) {
+            $gateway = self::getFailoverGateway();
+            if (!empty(trim($gateway))) {
+                \Paynl\Config::setApiBase(trim($gateway));
+            }
         }
         \Paynl\Config::setApiToken($apitoken);
         \Paynl\Config::setServiceId($serviceId);

@@ -6,11 +6,7 @@ jQuery(document).ready(function () {
     }
 
     jQuery("#PAYNL_FAILOVER_GATEWAY").on('change', function () {
-        if ($(this).val() == 'custom') {
-            customFailoverGateway.css("display", "block");
-        } else {
-            customFailoverGateway.css("display", "none");
-        }
+        customFailoverGateway.css("display", ($(this).val() == 'custom' ? "block" : "none"));
     });
 
     jQuery("#PAY-info-button").click(function () {
