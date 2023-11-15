@@ -1469,9 +1469,9 @@ class PaynlPaymentMethods extends PaymentModule
     {
         if (Tools::isSubmit('btnSubmit')) {
             if (!Tools::getValue('PAYNL_API_TOKEN') && empty(Configuration::get('PAYNL_API_TOKEN'))) {
-                $this->_postErrors[] = $this->l('APItoken is required');
+                $this->_postErrors[] = $this->l('API token is required');
             } elseif (!Tools::getValue('PAYNL_SERVICE_ID')) {
-                $this->_postErrors[] = $this->l('ServiceId is required');
+                $this->_postErrors[] = $this->l('Sales location code is required');
             }
         }
     }
