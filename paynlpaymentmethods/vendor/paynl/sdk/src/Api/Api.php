@@ -10,7 +10,7 @@ use Paynl\Helper;
 /**
  * Description of Api
  *
- * @author Andy Pieters <andy@andypieters.nl>
+ * @author Andy Pieters <andy@pay.nl>
  */
 class Api
 {
@@ -48,7 +48,7 @@ class Api
         if ($version === null) {
             $version = $this->version;
         }
-
+      
         $auth = $this->getAuth();
         $data = $this->getData();
         $uri = Config::getApiUrl($endpoint, (int) $version);
@@ -68,7 +68,7 @@ class Api
         $curl->setOpt(CURLOPT_SSL_VERIFYPEER, Config::getVerifyPeer());
 
         $result = $curl->post($uri, $data);
-        
+
         if (isset($result->status) && $result->status === 'FALSE') {
             throw new Error\Api($result->error);
         }      
@@ -90,7 +90,7 @@ class Api
             Helper::requireServiceId();
 
             $this->data['serviceId'] = Config::getServiceId();
-        }       
+        }
         return $this->data;
     }
 
@@ -98,7 +98,7 @@ class Api
      * @return array|null
      * @throws Error\Required\ApiToken
      */
-    private function getAuth()
+    protected function getAuth()
     {
         if (!$this->isApiTokenRequired()) {
             return null;

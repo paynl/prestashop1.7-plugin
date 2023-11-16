@@ -8,19 +8,22 @@ use Tools;
 class PayHelper
 {
     /**
+     * @param $useMultiCore
      * @return void
      */
-    public static function sdkLogin()
+    public static function sdkLogin($useMultiCore = false)
     {
         $apitoken = Tools::getValue('PAYNL_API_TOKEN', Configuration::get('PAYNL_API_TOKEN'));
         if (empty($apitoken) && !empty(Configuration::get('PAYNL_API_TOKEN'))) {
             $apitoken = Configuration::get('PAYNL_API_TOKEN');
         }
         $serviceId = Tools::getValue('PAYNL_SERVICE_ID', Configuration::get('PAYNL_SERVICE_ID'));
-        $gateway = Tools::getValue('PAYNL_FAILOVER_GATEWAY', Configuration::get('PAYNL_FAILOVER_GATEWAY'));
 
-        if (!empty(trim($gateway))) {
-            \Paynl\Config::setApiBase(trim($gateway));
+        if ($useMultiCore) {
+            $gateway = self::getFailoverGateway();
+            if (!empty(trim($gateway))) {
+                \Paynl\Config::setApiBase(trim($gateway));
+            }
         }
         \Paynl\Config::setApiToken($apitoken);
         \Paynl\Config::setServiceId($serviceId);
@@ -36,8 +39,9 @@ class PayHelper
             \Paynl\Paymentmethods::getList();
             return ['status' => true];
         } catch (\Paynl\Error\Error $e) {
-            $gateway = Tools::getValue('PAYNL_FAILOVER_GATEWAY', Configuration::get('PAYNL_FAILOVER_GATEWAY'));
-            if (!empty($gateway) && str_contains($gateway, 'https://rest-api.achterelkebetaling.nl')) {
+            $gateway = self::getFailoverGateway();
+
+            if (!empty($gateway) && str_contains($gateway, 'https://rest.achterelkebetaling.nl')) {
                 return ['status' => true];
             }
             return ['status' => false, 'error' => $e->getMessage()];
@@ -143,5 +147,17 @@ class PayHelper
             $status = false;
         }
         return ['status' => $status, 'error' => $error];
+    }
+
+    /**
+     * @return mixed
+     */
+    public static function getFailoverGateway()
+    {
+        $gateway = Tools::getValue('PAYNL_FAILOVER_GATEWAY', Configuration::get('PAYNL_FAILOVER_GATEWAY'));
+        if ($gateway == 'custom') {
+            $gateway = Tools::getValue('PAYNL_CUSTOM_FAILOVER_GATEWAY', Configuration::get('PAYNL_CUSTOM_FAILOVER_GATEWAY'));
+        }
+        return $gateway;
     }
 }
