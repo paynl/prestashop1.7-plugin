@@ -18,7 +18,7 @@
                             <label>
                                 <input type="radio" name="bank" value="{$bank['id']}">
                                 {if $logoClass != 'noLogo'}  
-                                    <img src="/modules/paynlpaymentmethods/views/images/issuers/qr-{$bank['id']}.png" loading="lazy">
+                                    <img src="/modules/paynlpaymentmethods/views/images/issuers/qr-{$bank['id']}.png" loading="lazy" style="max-width: 50px; max-height: 35px; object-fit: scale-down;">
                                 {/if}  
                                 &nbsp;
                                 <span>{$bank['name']}</span>

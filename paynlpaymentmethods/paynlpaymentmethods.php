@@ -332,11 +332,14 @@ class PaynlPaymentMethods extends PaymentModule
 
                     $transactionId = $orderPayment->transaction_id ?? null;
                     $refundAmount = $params['cancel_amount'] ?? null;
-
-                    PayHelper::sdkLogin();
-                    \Paynl\Transaction::refund($transactionId, $refundAmount, null, null, null, $strCurrency);
-
-                    $this->payLog('Partial Refund', 'Partial Refund (' . $refundAmount . ') success ', $transactionId);
+                    
+                    if (!empty($refundAmount) && $refundAmount > 0) {
+                        PayHelper::sdkLogin();
+                        \Paynl\Transaction::refund($transactionId, $refundAmount, null, null, null, $strCurrency);
+                        $this->payLog('Partial Refund', 'Partial Refund (' . $refundAmount . ') success ', $transactionId);
+                    } else {
+                        $this->payLog('Partial Refund', 'Partial Refund failed (refund amount is empty)', $transactionId);
+                    }
                 } else {
                     throw new Exception('Order has no Payments.');
                 }
