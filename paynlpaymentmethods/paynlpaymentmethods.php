@@ -332,7 +332,6 @@ class PaynlPaymentMethods extends PaymentModule
 
                     $transactionId = $orderPayment->transaction_id ?? null;
                     $refundAmount = $params['cancel_amount'] ?? null;
-                    
                     if (!empty($refundAmount) && $refundAmount > 0) {
                         PayHelper::sdkLogin();
                         \Paynl\Transaction::refund($transactionId, $refundAmount, null, null, null, $strCurrency);
