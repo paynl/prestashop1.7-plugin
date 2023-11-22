@@ -1840,7 +1840,7 @@ class PaynlPaymentMethods extends PaymentModule
                 $paymentmethods = \Paynl\Paymentmethods::getList();
                 $paymentmethods = (array)$paymentmethods;
                 $languages = Language::getLanguages(true);
-                if(is_array($savedPaymentMethods)) {
+                if (is_array($savedPaymentMethods)) {
                     foreach ($savedPaymentMethods as $paymentmethod) {
                         if (isset($paymentmethods[$paymentmethod->id])) {
                             # The paymentmethod allready exists in the config. Check if fields are set..
