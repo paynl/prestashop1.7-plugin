@@ -212,11 +212,11 @@ class PaynlPaymentMethods extends PaymentModule
         $orderPayment = reset($orderPayments);
         $status = 'Check My.pay';
 
-        if (!empty($orderPayments)){
+        if (!empty($orderPayments)) {
             $currency = new Currency($orderPayment->id_currency);
             $currency = $currency->iso_code;
             $transactionId = $orderPayment->transaction_id;
-        } else{
+        } else {
             $currency = '';
             $transactionId = 'Unavailable';
         }
