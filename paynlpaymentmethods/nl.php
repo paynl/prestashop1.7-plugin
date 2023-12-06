@@ -128,4 +128,6 @@ $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_d745bed527a2c88b0
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_1d6ac6ba0c92bee720404ac8f441ca2d'] = 'In het invoerveld \'Failover gateway\' kunt u uw failover gateway instellen.';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_e916b6d1f559188cfaa2fc0bbe61d750'] = 'Pay. verbinding mislukt';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_a2d07836b692b9f4153f7f399307f629'] = 'Pay. niet verbonden';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_cc61945cbbf46721a053467c395c666f'] = 'Terugbetaald';
+
 // @codingStandardsIgnoreEnd
