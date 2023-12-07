@@ -214,9 +214,17 @@ class PaynlPaymentMethods extends PaymentModule
 
         $orderPayments = $order->getOrderPayments();
         $orderPayment = reset($orderPayments);
-        $status = 'unavailable';
-        $currency = new Currency($orderPayment->id_currency);
-        $transactionId = $orderPayment->transaction_id;
+        $status = 'Check My.pay';
+
+        if (!empty($orderPayments)) {
+            $currency = new Currency($orderPayment->id_currency);
+            $currency = $currency->iso_code;
+            $transactionId = $orderPayment->transaction_id;
+        } else {
+            $currency = '';
+            $transactionId = 'Unavailable';
+        }
+
         $payOrderAmount = 0;
         $methodName = 'PAY.';
         try {
