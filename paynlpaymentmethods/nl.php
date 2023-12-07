@@ -128,4 +128,10 @@ $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_d745bed527a2c88b0
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_1d6ac6ba0c92bee720404ac8f441ca2d'] = 'In het invoerveld \'Failover gateway\' kunt u uw failover gateway instellen.';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_e916b6d1f559188cfaa2fc0bbe61d750'] = 'Pay. verbinding mislukt';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_a2d07836b692b9f4153f7f399307f629'] = 'Pay. niet verbonden';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_5b8d9b6e50b6175bb993d59012749d19'] = 'Pay. Kan gedeeltelijke terugbetaling niet verwerken. Probeer het later opnieuw.';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_a06edbeae74c06123799e7f0a6efb2b0'] = 'Pay. succesvol terugbetaald';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_5f14b7d5ab542d6b7247465c0b56862c'] = '(Terugbetalingen kunnen niet snel achter elkaar worden gedaan)';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_f51ea2cb1b551cd5a0d1cb60250cfed5'] = 'Pay. kon de gedeeltelijke terugbetaling niet verwerken. Controleer de status van uw bestelling in de Pay. admin.';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_cc61945cbbf46721a053467c395c666f'] = 'Terugbetaald';
+
 // @codingStandardsIgnoreEnd

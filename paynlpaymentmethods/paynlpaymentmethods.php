@@ -109,8 +109,12 @@ class PaynlPaymentMethods extends PaymentModule
             $this->registerHook('displayPaymentReturn');
         }
 
-        if (!$this->isRegisteredInHook('actionProductCancel')) {
-            $this->registerHook('actionProductCancel');
+        if ($this->isRegisteredInHook('actionProductCancel')) {
+            $this->unregisterHook('actionProductCancel');
+        }
+
+        if (!$this->isRegisteredInHook('actionOrderSlipAdd')) {
+            $this->registerHook('actionOrderSlipAdd');
         }
     }
 
@@ -228,6 +232,7 @@ class PaynlPaymentMethods extends PaymentModule
             $arrTransactionDetails = $transaction->getData();
             $payOrderAmount = $transaction->getPaidAmount();
             $status = $arrTransactionDetails['paymentDetails']['stateName'];
+            $amoutRefunded = $arrTransactionDetails['paymentDetails']['refundAmount'] / 100;
             $profileId = $transaction->getPaymentProfileId();
             $methodName = PaymentMethod::getName($transactionId, $profileId);
             $showCaptureButton = $transaction->isAuthorized();
@@ -241,14 +246,20 @@ class PaynlPaymentMethods extends PaymentModule
 
         $amountFormatted = number_format($order->total_paid, 2, ',', '.');
         $amountPayFormatted = number_format($payOrderAmount, 2, ',', '.');
+        $amountFormattedRefunded = number_format($amoutRefunded, 2, ',', '.');
+        $amountFormattedRefundable = number_format($order->total_paid - $amoutRefunded, 2, ',', '.');
+
         $this->context->smarty->assign(array(
         'lang' => $this->getMultiLang(),
         'this_version'    => $this->version,
         'PrestaOrderId' => $orderId,
         'amountFormatted' => $amountFormatted,
         'amountPayFormatted' => $amountPayFormatted,
+        'amountFormattedRefunded' => $amountFormattedRefunded,
+        'amountFormattedRefundable' => $amountFormattedRefundable,
         'amount' => $order->total_paid,
-        'currency' => $currency,
+        'amoutRefunded' => $amoutRefunded,
+        'currency' => $currency->iso_code,
         'pay_orderid' => $transactionId,
         'status' => $status,
         'method' => $methodName,
@@ -322,35 +333,39 @@ class PaynlPaymentMethods extends PaymentModule
      * @param array $params
      * @return void
      */
-    public function hookActionProductCancel($params)
+    public function hookActionOrderSlipAdd(array $params)
     {
-        if ($params['action'] == CancellationActionType::PARTIAL_REFUND && $params['order']->module == 'paynlpaymentmethods') {
+        if ($params['order']->module == 'paynlpaymentmethods') {
             try {
-                $cartId = $params['order']->id_cart ?? null;
-                $orderId = Order::getIdByCartId($cartId);
-                $order = new Order($orderId);
-
+                $order = $params['order'];
+                $productList = $params['productList'];
                 $orderPayments = $order->getOrderPayments();
                 $orderPayment = reset($orderPayments);
-
                 if (!empty($orderPayment)) {
-                    $currencyId = $orderPayment->id_currency;
-                    $currency = new Currency($currencyId);
-                    $strCurrency = $currency->iso_code;
-
-                    $transactionId = $orderPayment->transaction_id ?? null;
-                    $refundAmount = $params['cancel_amount'] ?? null;
-
-                    PayHelper::sdkLogin();
-                    \Paynl\Transaction::refund($transactionId, $refundAmount, null, null, null, $strCurrency);
-
-                    $this->payLog('Partial Refund', 'Partial Refund (' . $refundAmount . ') success ', $transactionId);
-                } else {
-                    throw new Exception('Order has no Payments.');
+                    $refundAmount = 0;
+                    foreach ($productList as $key => $product) {
+                        if (!empty($product['amount']) && $product['amount'] > 0) {
+                            $refundAmount += $product['amount'];
+                        }
+                    }
+                    if ($refundAmount > 0) {
+                        $currencyId = $orderPayment->id_currency;
+                        $currency = new Currency($currencyId);
+                        $strCurrency = $currency->iso_code;
+                        $transactionId = $orderPayment->transaction_id ?? null;
+                        PayHelper::sdkLogin();
+                        \Paynl\Transaction::refund($transactionId, $refundAmount, null, null, null, $strCurrency);
+                        $this->payLog('Partial Refund', 'Partial Refund (' . $refundAmount . ') success ', $transactionId);
+                        $this->get('session')->getFlashBag()->add('success', $this->l('Pay. successfully refunded ') . '(' . $refundAmount . ').');
+                    }
                 }
             } catch (Exception $e) {
                 $this->payLog('Partial Refund', 'Partial Refund failed (' . $e->getMessage() . ') ');
-                throw new Exception($this->l('Pay. Could not process Partial Refund please try again later.'));
+                $friendlyMessage = null;
+                if ($e->getMessage() == 'PAY-14 - Refund too fast ') {
+                    $friendlyMessage = $this->l('(Refunds can\'t be done in quick succession)');
+                }
+                $this->get('session')->getFlashBag()->add('error', $this->l('Pay. could not process partial refund, please check the status of your order in the Pay. admin. ') . $friendlyMessage);
             }
         }
         return;
@@ -376,6 +391,7 @@ class PaynlPaymentMethods extends PaymentModule
         $lang['capturing'] = $this->l('Processing');
         $lang['currency'] = $this->l('Currency');
         $lang['amount'] = $this->l('Amount');
+        $lang['refunded'] = $this->l('Refunded');
         $lang['invalidamount'] = $this->l('Invalid amount');
         $lang['succesfully_refunded'] = $this->l('Succesfully refunded');
         $lang['succesfully_captured'] = $this->l('Succesfully captured');
