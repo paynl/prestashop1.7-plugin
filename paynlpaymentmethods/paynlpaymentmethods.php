@@ -224,6 +224,7 @@ class PaynlPaymentMethods extends PaymentModule
             $arrTransactionDetails = $transaction->getData();
             $payOrderAmount = $transaction->getPaidAmount();
             $status = $arrTransactionDetails['paymentDetails']['stateName'];
+            $amoutRefunded = $arrTransactionDetails['paymentDetails']['refundAmount'] / 100;
             $profileId = $transaction->getPaymentProfileId();
             $methodName = PaymentMethod::getName($transactionId, $profileId);
             $showCaptureButton = $transaction->isAuthorized();
@@ -237,13 +238,19 @@ class PaynlPaymentMethods extends PaymentModule
 
         $amountFormatted = number_format($order->total_paid, 2, ',', '.');
         $amountPayFormatted = number_format($payOrderAmount, 2, ',', '.');
+        $amountFormattedRefunded = number_format($amoutRefunded, 2, ',', '.');
+        $amountFormattedRefundable = number_format($order->total_paid - $amoutRefunded, 2, ',', '.');
+
         $this->context->smarty->assign(array(
         'lang' => $this->getMultiLang(),
         'this_version'    => $this->version,
         'PrestaOrderId' => $orderId,
         'amountFormatted' => $amountFormatted,
         'amountPayFormatted' => $amountPayFormatted,
+        'amountFormattedRefunded' => $amountFormattedRefunded,
+        'amountFormattedRefundable' => $amountFormattedRefundable,
         'amount' => $order->total_paid,
+        'amoutRefunded' => $amoutRefunded,
         'currency' => $currency->iso_code,
         'pay_orderid' => $transactionId,
         'status' => $status,
@@ -376,6 +383,7 @@ class PaynlPaymentMethods extends PaymentModule
         $lang['capturing'] = $this->l('Processing');
         $lang['currency'] = $this->l('Currency');
         $lang['amount'] = $this->l('Amount');
+        $lang['refunded'] = $this->l('Refunded');
         $lang['invalidamount'] = $this->l('Invalid amount');
         $lang['succesfully_refunded'] = $this->l('Succesfully refunded');
         $lang['succesfully_captured'] = $this->l('Succesfully captured');

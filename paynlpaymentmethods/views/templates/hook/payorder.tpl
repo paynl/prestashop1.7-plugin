@@ -35,13 +35,15 @@
         <div class="labelvalue">{$currency} {$amountFormatted}</div>
         <div class="label">{$lang.amount} (PAY.)</div>
         <div class="labelvalue">EUR {$amountPayFormatted}</div>
+        <div class="label">{$lang.refunded} (PAY.)</div>
+        <div class="labelvalue">EUR {$amountFormattedRefunded}</div>
     </div>
     <div>
         <hr>
         {if $showRefundButton eq true}
             <div class="payOption" id="refund-div" style="display: inline-block">
                 <div class="label">{$lang.amount_to_refund} ({$currency}) :
-                    <input type="text" placeholder="0,00" value="{$amountFormatted}" id="pay-refund-amount"
+                    <input type="text" placeholder="0,00" value="{$amountFormattedRefundable}" id="pay-refund-amount"
                            class="fixed-width-sm" style="display: inline;margin-right:10px"/>
                 </div>
                 <button type="button" id="pay-refund-button" class="btn btn-danger" style="display: inline">{$lang.refund_button}</button>

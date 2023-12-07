@@ -132,4 +132,6 @@ $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_5b8d9b6e50b6175bb
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_a06edbeae74c06123799e7f0a6efb2b0'] = 'Pay. succesvol terugbetaald';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_5f14b7d5ab542d6b7247465c0b56862c'] = '(Terugbetalingen kunnen niet snel achter elkaar worden gedaan)';
 $_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_f51ea2cb1b551cd5a0d1cb60250cfed5'] = 'Pay. kon de gedeeltelijke terugbetaling niet verwerken. Controleer de status van uw bestelling in de Pay. admin.';
+$_MODULE['<{paynlpaymentmethods}prestashop>paynlpaymentmethods_cc61945cbbf46721a053467c395c666f'] = 'Terugbetaald';
+
 // @codingStandardsIgnoreEnd
