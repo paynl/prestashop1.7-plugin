@@ -177,3 +177,13 @@
 .pay-status span a {
     text-decoration: underline;
 }
+
+.bootstrap .prestashop-switch label{
+    padding-left: 50px;
+}
+
+.bootstrap .prestashop-switch .slide-button{
+    left: 5px;
+    top: 50%;
+    transform: translate(0, -50%);
+}
