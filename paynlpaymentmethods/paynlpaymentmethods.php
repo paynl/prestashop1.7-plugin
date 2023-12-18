@@ -348,6 +348,15 @@ class PaynlPaymentMethods extends PaymentModule
                             $refundAmount += $product['amount'];
                         }
                     }
+                    $cancelProduct = Tools::getValue('cancel_product');
+                    $partialRefundShipping = Tools::getValue('partialRefundShippingCost');
+                    if (isset($cancelProduct['shipping']) && $cancelProduct['shipping'] === '1') {
+                        $refundAmount += $order->total_shipping;
+                    } elseif (isset($cancelProduct['shipping_amount']) && $cancelProduct['shipping_amount'] !== '0') {
+                        $refundAmount += $cancelProduct['shipping_amount'];
+                    } elseif ($partialRefundShipping && $partialRefundShipping !== '0') {
+                        $refundAmount += $partialRefundShipping;
+                    }
                     if ($refundAmount > 0) {
                         $currencyId = $orderPayment->id_currency;
                         $currency = new Currency($currencyId);
