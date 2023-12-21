@@ -917,12 +917,13 @@ class PaynlPaymentMethods extends PaymentModule
                       '. CartTotalPrice: ' . $cartTotalPrice .
                       '. paymentMethodName: ' . $paymentMethodName .
                       '. profileId: ' . $profileId .
-                      '. AmountPaid : ' . $amountPaid, $cartId, $transactionId);
-                            $this->validateOrder((int)$cartId, $iOrderState, $amountPaid, $paymentMethodName, null, array('transaction_id' => $transactionId), null, false, $cart->secure_key);
-                            $orderId = Order::getIdByCartId($cartId);
-                            $order = new Order($orderId);
-                            $message = "Validated order (" . $order->reference . ") with status: " . $orderStateName;
-                            $this->payLog('processPayment', 'Order created. Amount: ' . $order->getTotalPaid(), $cartId, $transactionId);
+                      '. AmountPaid : ' .  $transaction->getPaidAmount(), $cartId, $transactionId);
+
+                    $this->validateOrder((int)$cartId, $iOrderState,  $transaction->getPaidAmount(), $paymentMethodName, null, array('transaction_id' => $transactionId), null, false, $cart->secure_key);
+                    $orderId = Order::getIdByCartId($cartId);
+                    $order = new Order($orderId);
+                    $message = "Validated order (" . $order->reference . ") with status: " . $orderStateName;
+                    $this->payLog('processPayment', 'Order created. Amount: ' . $order->getTotalPaid(), $cartId, $transactionId);
                 } catch (Exception $ex) {
                     $this->payLog('processPayment', 'Could not validate(create) order.', $cartId, $transactionId);
                     $message = "Could not validate order, error: " . $ex->getMessage();
