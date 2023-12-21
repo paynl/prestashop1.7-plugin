@@ -841,15 +841,7 @@ class PaynlPaymentMethods extends PaymentModule
         $cart = new Cart((int)$cartId);
         $this->context->cart = $cart;
         $cartTotalPrice = (version_compare(_PS_VERSION_, '1.7.7.0', '>=')) ? $cart->getCartTotalPrice() : $this->getCartTotalPrice($cart);
-        $arrPayAmounts = array($transaction->getCurrencyAmount(), $transaction->getPaidCurrencyAmount(), $transaction->getPaidAmount());
-        $amountPaid = in_array(round($cartTotalPrice, 2), $arrPayAmounts) ? $cartTotalPrice : null;
-        if (is_null($amountPaid)) {
-            if (in_array(round($cart->getOrderTotal(), 2), $arrPayAmounts)) {
-                $amountPaid = $cart->getOrderTotal();
-            } elseif (in_array(round($cart->getOrderTotal(false), 2), $arrPayAmounts)) {
-                $amountPaid = $cart->getOrderTotal(false);
-            }
-        }
+        $amountPaid = $transaction->getPaidAmount();
 
         $this->payLog('processPayment (order)', 'getOrderTotal: ' . $cart->getOrderTotal() . ' getOrderTotal(false): ' . $cart->getOrderTotal(false) . '. cartTotalPrice: ' . $cartTotalPrice . ' - ' . print_r($arrPayAmounts, true), $cartId, $transactionId); // phpcs:ignore
         if ($orderId) {
@@ -898,7 +890,7 @@ class PaynlPaymentMethods extends PaymentModule
                 }
 
                 $orderPayment->save();
-        # In case of banktransfer the total_paid_real isn't set, we're doing that now.
+                # In case of bank-transfer the total_paid_real isn't set, we're doing that now.
                 if ($iOrderState == $this->statusPaid && $order->total_paid_real == 0) {
                     $order->total_paid_real = $orderPayment->amount;
                     $order->save();
@@ -917,9 +909,9 @@ class PaynlPaymentMethods extends PaymentModule
                       '. CartTotalPrice: ' . $cartTotalPrice .
                       '. paymentMethodName: ' . $paymentMethodName .
                       '. profileId: ' . $profileId .
-                      '. AmountPaid : ' .  $transaction->getPaidAmount(), $cartId, $transactionId);
+                      '. AmountPaid : ' .  $amountPaid, $cartId, $transactionId);
 
-                    $this->validateOrder((int)$cartId, $iOrderState,  $transaction->getPaidAmount(), $paymentMethodName, null, array('transaction_id' => $transactionId), null, false, $cart->secure_key);
+                    $this->validateOrder((int)$cartId, $iOrderState, $amountPaid, $paymentMethodName, null, array('transaction_id' => $transactionId), null, false, $cart->secure_key);
                     $orderId = Order::getIdByCartId($cartId);
                     $order = new Order($orderId);
                     $message = "Validated order (" . $order->reference . ") with status: " . $orderStateName;
@@ -933,7 +925,6 @@ class PaynlPaymentMethods extends PaymentModule
                 if ($transaction->isCanceled()) {
                     $message = "Status updated to CANCELED";
                 }
-
                 $this->payLog('processPayment 3', 'OrderStateName:' . $orderStateName . '. iOrderState: ' . $iOrderState . '. iState:' . $iState, $cartId, $transactionId);
             }
         }
