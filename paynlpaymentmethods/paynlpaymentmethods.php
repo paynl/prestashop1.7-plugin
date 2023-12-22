@@ -843,7 +843,7 @@ class PaynlPaymentMethods extends PaymentModule
         $cartTotalPrice = (version_compare(_PS_VERSION_, '1.7.7.0', '>=')) ? $cart->getCartTotalPrice() : $this->getCartTotalPrice($cart);
         $amountPaid = $transaction->getPaidAmount();
 
-        $this->payLog('processPayment (order)', 'getOrderTotal: ' . $cart->getOrderTotal() . ' getOrderTotal(false): ' . $cart->getOrderTotal(false) . '. cartTotalPrice: ' . $cartTotalPrice . ' - ' . print_r($arrPayAmounts, true), $cartId, $transactionId); // phpcs:ignore
+        $this->payLog('processPayment (order)', 'getOrderTotal: ' . $cart->getOrderTotal() . ' getOrderTotal(false): ' . $cart->getOrderTotal(false) . '. cartTotalPrice: ' . $cartTotalPrice, $cartId, $transactionId); // phpcs:ignore
         if ($orderId) {
             $order = new Order($orderId);
             $this->payLog('processPayment (order)', 'orderStateName:' . $orderStateName . '. iOrderState: ' . $iOrderState . '. ' .
@@ -873,6 +873,10 @@ class PaynlPaymentMethods extends PaymentModule
                     }
                 }
                 if (empty($orderPayment)) {
+                    if (!$transaction->isPaid()) {
+                        $message = 'Ignoring not paid order';
+                        return;
+                    }
                     $orderPayment = new OrderPayment();
                     $orderPayment->order_reference = $order->reference;
                 }
@@ -897,7 +901,7 @@ class PaynlPaymentMethods extends PaymentModule
                 }
             }
 
-                    $this->updateOrderHistory($order->id, $iOrderState, $cartId, $transactionId);
+            $this->updateOrderHistory($order->id, $iOrderState, $cartId, $transactionId);
             $message = "Updated order (" . $order->reference . ") to: " . $orderStateName;
         } else {
             $iState = !empty($arrPayData['paymentDetails']['state']) ? $arrPayData['paymentDetails']['state'] : null;
