@@ -929,7 +929,7 @@ class PaynlPaymentMethods extends PaymentModule
                 if ($transaction->isCanceled()) {
                     $message = "Status updated to CANCELED";
                 }
-                $this->payLog('processPayment 3', 'OrderStateName:' . $orderStateName . '. iOrderState: ' . $iOrderState . '. iState:' . $iState, $cartId, $transactionId);
+                $this->payLog('processPayment', 'OrderStateName:' . $orderStateName . '. iOrderState: ' . $iOrderState . '. iState:' . $iState, $cartId, $transactionId);
             }
         }
 
