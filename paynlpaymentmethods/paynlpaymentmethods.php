@@ -842,6 +842,9 @@ class PaynlPaymentMethods extends PaymentModule
         $this->context->cart = $cart;
         $cartTotalPrice = (version_compare(_PS_VERSION_, '1.7.7.0', '>=')) ? $cart->getCartTotalPrice() : $this->getCartTotalPrice($cart);
         $amountPaid = $transaction->getPaidAmount();
+        if ($transaction->isAuthorized()) {
+            $amountPaid = $transaction->getAmount();
+        }
 
         $this->payLog('processPayment (order)', 'getOrderTotal: ' . $cart->getOrderTotal() . ' getOrderTotal(false): ' . $cart->getOrderTotal(false) . '. cartTotalPrice: ' . $cartTotalPrice, $cartId, $transactionId); // phpcs:ignore
         if ($orderId) {
