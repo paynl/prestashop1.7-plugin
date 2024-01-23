@@ -2022,7 +2022,7 @@ class PaynlPaymentMethods extends PaymentModule
     public function renderPaymentMethodsForm()
     {
 
-        $this->context->controller->addJs($this->_path . 'views/js/jquery-ui/jquery-ui.js');
+        $this->context->controller->addJs($this->_path . 'views/js/jquery-ui/jquery-ui.min.js');
         $this->context->controller->addCss($this->_path . 'css/admin.css');
         $this->smarty->assign(array(
             'available_countries' => $this->getCountries(),
@@ -2041,7 +2041,7 @@ class PaynlPaymentMethods extends PaymentModule
      */
     public function renderFeatureRequest()
     {
-        $this->context->controller->addJs($this->_path . 'views/js/jquery-ui/jquery-ui.js');
+        $this->context->controller->addJs($this->_path . 'views/js/jquery-ui/jquery-ui.min.js');
         $this->context->controller->addCss($this->_path . 'css/admin.css');
         $this->smarty->assign(array(
             'ajaxURL' => $this->context->link->getModuleLink($this->name, 'ajax', array(), true),
