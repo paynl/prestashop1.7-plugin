@@ -128,4 +128,24 @@ class Transaction
     {
         Db::getInstance()->delete('pay_processing', 'payOrderId = "' . $payOrderId . '"');
     }
+
+    public static function updatePaymentMethod($transactionId, $orderId, $paymentOptionId)
+    {
+        $db = Db::getInstance();
+
+        // Update Pay. transaction table
+        $sql = "UPDATE `" . _DB_PREFIX_ . "pay_transactions` SET `payment_option_id` = '" . Db::getInstance()->escape($paymentOptionId) . "', `updated_at` = now() WHERE `" . _DB_PREFIX_ . "pay_transactions`.`transaction_id` = '" . Db::getInstance()->escape($transactionId) . "';";
+        $db->execute($sql);
+
+        // Lookup new payment method name id
+        $paymentOption = PaymentMethod::getName($transactionId, $paymentOptionId);
+
+        // Update prestashop payment table
+        $sql = "UPDATE `" . _DB_PREFIX_ . "order_payment` SET `payment_method` = '" . Db::getInstance()->escape($paymentOption) . "' WHERE `" . _DB_PREFIX_ . "order_payment`.`transaction_id` = '" . Db::getInstance()->escape($transactionId) . "';";
+        $db->execute($sql);
+
+        // Update prestashop order table
+        $sql = "UPDATE `" . _DB_PREFIX_ . "orders` SET `payment` = '" . Db::getInstance()->escape($paymentOption) . "' WHERE `" . _DB_PREFIX_ . "orders`.`id_order` = '" . Db::getInstance()->escape($orderId) . "';";
+        $db->execute($sql);
+    }
 }
