@@ -907,7 +907,7 @@ class PaynlPaymentMethods extends PaymentModule
                 $dbTransactionId = $dbTransaction['payment_option_id'];
                 if ($profileId != $dbTransactionId && Configuration::get('PAYNL_AUTO_FOLLOW_PAYMENT_METHOD')) {
                     Transaction::updatePaymentMethod($transactionId, $orderId, $profileId);
-                    $this->payLog('processPayment (follow payment method)', $transactionId . ' - When processing the order:' . $orderId . '. the original payment method id: ' . $dbTransactionId . '. was changed to:' . $profileId);
+                    $this->payLog('processPayment (follow payment method)', $transactionId . ' - When processing the order:' . $orderId . '. the original payment method id: ' . $dbTransactionId . '. was changed to:' . $profileId); // phpcs:ignore
                 }
             }
 
@@ -1758,7 +1758,7 @@ class PaynlPaymentMethods extends PaymentModule
                         'type' => 'switch',
                         'label' => $this->l('Follow payment method'),
                         'name' => 'PAYNL_AUTO_FOLLOW_PAYMENT_METHOD',
-                        'desc' => $this->l('This will ensure the order is updated with the actual payment method used to complete the order. This can differ from the payment method initially selected.'),
+                        'desc' => $this->l('This will ensure the order is updated with the actual payment method used to complete the order. This can differ from the payment method initially selected.'), // phpcs:ignore
                         'values' => array(
                             array(
                                 'id' => 'active_on',

@@ -12,12 +12,12 @@ class Transaction
     /**
      * Adds the transaction to the pay_transactions table
      *
-     * @param int $transaction_id
-     * @param int $cart_id
-     * @param int $customer_id
-     * @param int $payment_option_id
+     * @param integer $transaction_id
+     * @param integer $cart_id
+     * @param integer $customer_id
+     * @param integer $payment_option_id
      * @param float $amount
-     *      
+     *
      */
     public static function addTransaction($transaction_id, $cart_id, $customer_id, $payment_option_id, $amount)
     {
@@ -50,8 +50,7 @@ class Transaction
     }
 
     /**
-     * Returns the transaction based on transaction_id from the pay_transactions table
-     *
+     *  Returns the transaction based on transaction_id from the pay_transactions table
      * @param $transaction_id
      * @return array
      */
@@ -64,9 +63,13 @@ class Transaction
 
     /**
      * @param $transactionId
-     * @param null $amount
-     * @param null $strCurrency
+     * @param $amount
+     * @param $strCurrency
      * @return array
+     * @throws \Paynl\Error\Api
+     * @throws \Paynl\Error\Error
+     * @throws \Paynl\Error\Required\ApiToken
+     * @throws \Paynl\Error\Required\ServiceId
      */
     public static function doRefund($transactionId, $amount = null, $strCurrency = null)
     {
@@ -82,6 +85,15 @@ class Transaction
         return array('result' => $result, 'data' => $refundResult);
     }
 
+    /**
+     * @param $transactionId
+     * @param $amount
+     * @return array
+     * @throws \Paynl\Error\Api
+     * @throws \Paynl\Error\Error
+     * @throws \Paynl\Error\Required\ApiToken
+     * @throws \Paynl\Error\Required\ServiceId
+     */
     public static function doCapture($transactionId, $amount = null)
     {
         try {
@@ -118,34 +130,41 @@ class Transaction
             $result = array();
         }
 
-       return is_array($result) ? $result : array();
+        return is_array($result) ? $result : array();
     }
 
     /**
      * @param $payOrderId
+     * @return void
      */
     public static function removeProcessing($payOrderId)
     {
         Db::getInstance()->delete('pay_processing', 'payOrderId = "' . $payOrderId . '"');
     }
 
+    /**
+     * @param $transactionId
+     * @param $orderId
+     * @param $paymentOptionId
+     * @return void
+     */
     public static function updatePaymentMethod($transactionId, $orderId, $paymentOptionId)
     {
         $db = Db::getInstance();
 
         // Update Pay. transaction table
-        $sql = "UPDATE `" . _DB_PREFIX_ . "pay_transactions` SET `payment_option_id` = '" . Db::getInstance()->escape($paymentOptionId) . "', `updated_at` = now() WHERE `" . _DB_PREFIX_ . "pay_transactions`.`transaction_id` = '" . Db::getInstance()->escape($transactionId) . "';";
+        $sql = "UPDATE `" . _DB_PREFIX_ . "pay_transactions` SET `payment_option_id` = '" . Db::getInstance()->escape($paymentOptionId) . "', `updated_at` = now() WHERE `" . _DB_PREFIX_ . "pay_transactions`.`transaction_id` = '" . Db::getInstance()->escape($transactionId) . "';"; // phpcs:ignore
         $db->execute($sql);
 
         // Lookup new payment method name id
         $paymentOption = PaymentMethod::getName($transactionId, $paymentOptionId);
 
         // Update prestashop payment table
-        $sql = "UPDATE `" . _DB_PREFIX_ . "order_payment` SET `payment_method` = '" . Db::getInstance()->escape($paymentOption) . "' WHERE `" . _DB_PREFIX_ . "order_payment`.`transaction_id` = '" . Db::getInstance()->escape($transactionId) . "';";
+        $sql = "UPDATE `" . _DB_PREFIX_ . "order_payment` SET `payment_method` = '" . Db::getInstance()->escape($paymentOption) . "' WHERE `" . _DB_PREFIX_ . "order_payment`.`transaction_id` = '" . Db::getInstance()->escape($transactionId) . "';"; // phpcs:ignore
         $db->execute($sql);
 
         // Update prestashop order table
-        $sql = "UPDATE `" . _DB_PREFIX_ . "orders` SET `payment` = '" . Db::getInstance()->escape($paymentOption) . "' WHERE `" . _DB_PREFIX_ . "orders`.`id_order` = '" . Db::getInstance()->escape($orderId) . "';";
+        $sql = "UPDATE `" . _DB_PREFIX_ . "orders` SET `payment` = '" . Db::getInstance()->escape($paymentOption) . "' WHERE `" . _DB_PREFIX_ . "orders`.`id_order` = '" . Db::getInstance()->escape($orderId) . "';"; // phpcs:ignore
         $db->execute($sql);
     }
 }
