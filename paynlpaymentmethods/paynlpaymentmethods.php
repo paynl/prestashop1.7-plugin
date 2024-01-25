@@ -896,11 +896,9 @@ class PaynlPaymentMethods extends PaymentModule
                     $orderPayment->id_currency = $order->id_currency;
                 }
 
-                $orderPayment->save();
                 # In case of bank-transfer the total_paid_real isn't set, we're doing that now.
                 if ($iOrderState == $this->statusPaid && $order->total_paid_real == 0) {
                     $order->total_paid_real = $orderPayment->amount;
-                    $order->save();
                 }
 
                 $dbTransaction = Transaction::get($transactionId);
@@ -910,13 +908,13 @@ class PaynlPaymentMethods extends PaymentModule
                     $paymentOption = PaymentMethod::getName($transactionId, $profileId);
 
                     $order->payment = $paymentOption;
-                    $order->save();
-
                     $orderPayment->payment_method = $paymentOption;
-                    $orderPayment->save();
 
                     $this->payLog('processPayment (follow payment method)', $transactionId . ' - When processing order: ' . $orderId . ' the original payment method id: ' . $dbTransactionId . ' was changed to: ' . $profileId); // phpcs:ignore
                 }
+
+                $order->save();
+                $orderPayment->save();
             }
 
             $this->updateOrderHistory($order->id, $iOrderState, $cartId, $transactionId);
