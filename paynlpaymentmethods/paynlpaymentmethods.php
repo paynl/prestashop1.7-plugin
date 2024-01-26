@@ -851,6 +851,7 @@ class PaynlPaymentMethods extends PaymentModule
             $order = new Order($orderId);
             $this->payLog('processPayment (order)', 'orderStateName:' . $orderStateName . '. iOrderState: ' . $iOrderState . '. ' .
                 'orderRef:' . $order->reference . '. orderModule:' . $order->module, $cartId, $transactionId);
+            $saveOrder = false;
         # Check if the order is processed by PAY.
             if ($order->module !== 'paynlpaymentmethods') {
                 $message = 'Not a PAY. order. Customer seemed to used different provider. Not updating the order.';
@@ -899,6 +900,7 @@ class PaynlPaymentMethods extends PaymentModule
                 # In case of bank-transfer the total_paid_real isn't set, we're doing that now.
                 if ($iOrderState == $this->statusPaid && $order->total_paid_real == 0) {
                     $order->total_paid_real = $orderPayment->amount;
+                    $saveOrder = true;
                 }
 
                 $dbTransaction = Transaction::get($transactionId);
@@ -910,10 +912,13 @@ class PaynlPaymentMethods extends PaymentModule
                     $order->payment = $paymentOption;
                     $orderPayment->payment_method = $paymentOption;
 
+                    $saveOrder = true;
                     $this->payLog('processPayment (follow payment method)', $transactionId . ' - When processing order: ' . $orderId . ' the original payment method id: ' . $dbTransactionId . ' was changed to: ' . $profileId); // phpcs:ignore
                 }
 
-                $order->save();
+                if ($saveOrder){
+                    $order->save();
+                }
                 $orderPayment->save();
             }
 
