@@ -916,7 +916,7 @@ class PaynlPaymentMethods extends PaymentModule
                     $this->payLog('processPayment (follow payment method)', $transactionId . ' - When processing order: ' . $orderId . ' the original payment method id: ' . $dbTransactionId . ' was changed to: ' . $profileId); // phpcs:ignore
                 }
 
-                if ($saveOrder){
+                if ($saveOrder) {
                     $order->save();
                 }
                 $orderPayment->save();
