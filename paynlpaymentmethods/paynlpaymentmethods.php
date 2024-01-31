@@ -357,16 +357,21 @@ class PaynlPaymentMethods extends PaymentModule
                     } elseif ($partialRefundShipping && $partialRefundShipping !== '0') {
                         $refundAmount += $partialRefundShipping;
                     }
-                    if ($refundAmount > 0) {
+
                         $currencyId = $orderPayment->id_currency;
                         $currency = new Currency($currencyId);
                         $strCurrency = $currency->iso_code;
                         $transactionId = $orderPayment->transaction_id ?? null;
+                    if (!empty($refundAmount) && $refundAmount > 0) {
                         PayHelper::sdkLogin();
                         \Paynl\Transaction::refund($transactionId, $refundAmount, null, null, null, $strCurrency);
                         $this->payLog('Partial Refund', 'Partial Refund (' . $refundAmount . ') success ', $transactionId);
                         $this->get('session')->getFlashBag()->add('success', $this->l('Pay. successfully refunded ') . '(' . $refundAmount . ').');
+                    } else {
+                        $this->payLog('Partial Refund', 'Partial Refund failed (refund amount is empty)', $transactionId);
                     }
+                } else {
+                    throw new Exception('Order has no Payments.');
                 }
             } catch (Exception $e) {
                 $this->payLog('Partial Refund', 'Partial Refund failed (' . $e->getMessage() . ') ');
