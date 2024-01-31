@@ -81,18 +81,22 @@ class PaynlPaymentMethodsAjaxModuleFrontController extends ModuleFrontController
      */
     public function processRefund($prestaorderid, $amount, $cartId, $transactionId, $strCurrency, $module)
     {
-        $module->payLog('Refund', 'Trying to refund ' . $amount . ' ' . $strCurrency . ' on prestashop-orderid ' . $prestaorderid, $cartId, $transactionId);
-        $arrRefundResult = Transaction::doRefund($transactionId, $amount, $strCurrency);
-        $refundResult = $arrRefundResult['data'];
-        if ($arrRefundResult['result']) {
-            $arrResult = $refundResult->getData();
-            $amountRefunded = !empty($arrResult['amountRefunded']) ? $arrResult['amountRefunded'] : '';
-            $desc = !empty($arrResult['description']) ? $arrResult['description'] : 'empty';
-            $module->payLog('Refund', 'Refund success, result message: ' . $desc, $cartId, $transactionId);
-            $this->returnResponse(true, $amountRefunded, 'succesfully_refunded ' . $strCurrency . ' ' . $amount);
-        } else {
-            $module->payLog('Refund', 'Refund failed: ' . $refundResult, $cartId, $transactionId);
-            $this->returnResponse(false, 0, 'could_not_process_refund');
+        try {
+            $module->payLog('Refund', 'Trying to refund ' . $amount . ' ' . $strCurrency . ' on prestashop-orderid ' . $prestaorderid, $cartId, $transactionId);
+            $arrRefundResult = Transaction::doRefund($transactionId, $amount, $strCurrency);
+            $refundResult = $arrRefundResult['data'];
+            if ($arrRefundResult['result']) {
+                $arrResult = $refundResult->getData();
+                $amountRefunded = !empty($arrResult['amountRefunded']) ? $arrResult['amountRefunded'] : '';
+                $desc = !empty($arrResult['description']) ? $arrResult['description'] : 'empty';
+                $module->payLog('Refund', 'Refund success, result message: ' . $desc, $cartId, $transactionId);
+                $this->returnResponse(true, $amountRefunded, 'succesfully_refunded ' . $strCurrency . ' ' . $amount);
+            } else {
+                throw new Exception('Could not process refund.');
+            }
+        } catch (\Exception $e) {
+            $module->payLog('Refund', 'Refund failed: ' . $e->getMessage(), $cartId, $transactionId);
+            $this->returnResponse(false, 0, $e->getMessage());
         }
     }
 

@@ -1,23 +1,23 @@
 <?php
 
-
 namespace PaynlPaymentMethods\PrestaShop;
 
 use Db;
 use DbQuery;
 
+/**
+ * @phpcs:disable Squiz.Commenting.FunctionComment.TypeHintMissing
+ */
 class Transaction
 {
-
     /**
      * Adds the transaction to the pay_transactions table
-     *
-     * @param int $transaction_id
-     * @param int $cart_id
-     * @param int $customer_id
-     * @param int $payment_option_id
-     * @param float $amount
-     *      
+     * @param $transaction_id
+     * @param $cart_id
+     * @param $customer_id
+     * @param $payment_option_id
+     * @param $amount
+     * @return void
      */
     public static function addTransaction($transaction_id, $cart_id, $customer_id, $payment_option_id, $amount)
     {
@@ -35,23 +35,21 @@ class Transaction
     }
 
     /**
-     * Adds the pinnterminal hash to the transaction, this is required for the instore option
-     *
-     * @param int $transaction_id
-     * @param string $hash
-     *      
+     *  Adds the pinnterminal hash to the transaction, this is required for the instore option
+     * @param $transaction_id
+     * @param $hash
+     * @return void
      */
     public static function addTransactionHash($transaction_id, $hash)
     {
         $db = Db::getInstance();
 
-        $sql = "UPDATE `" . _DB_PREFIX_ . "pay_transactions` SET `hash` = '" . Db::getInstance()->escape($hash) . "', `updated_at` = now() WHERE `" . _DB_PREFIX_ . "pay_transactions`.`transaction_id` = '" . Db::getInstance()->escape($transaction_id) . "';";
+        $sql = "UPDATE `" . _DB_PREFIX_ . "pay_transactions` SET `hash` = '" . Db::getInstance()->escape($hash) . "', `updated_at` = now() WHERE `" . _DB_PREFIX_ . "pay_transactions`.`transaction_id` = '" . Db::getInstance()->escape($transaction_id) . "';"; // phpcs:ignore
         $db->execute($sql);
     }
 
     /**
-     * Returns the transaction based on transaction_id from the pay_transactions table
-     *
+     *  Returns the transaction based on transaction_id from the pay_transactions table
      * @param $transaction_id
      * @return array
      */
@@ -64,9 +62,13 @@ class Transaction
 
     /**
      * @param $transactionId
-     * @param null $amount
-     * @param null $strCurrency
+     * @param $amount
+     * @param $strCurrency
      * @return array
+     * @throws \Paynl\Error\Api
+     * @throws \Paynl\Error\Error
+     * @throws \Paynl\Error\Required\ApiToken
+     * @throws \Paynl\Error\Required\ServiceId
      */
     public static function doRefund($transactionId, $amount = null, $strCurrency = null)
     {
@@ -82,6 +84,15 @@ class Transaction
         return array('result' => $result, 'data' => $refundResult);
     }
 
+    /**
+     * @param $transactionId
+     * @param $amount
+     * @return array
+     * @throws \Paynl\Error\Api
+     * @throws \Paynl\Error\Error
+     * @throws \Paynl\Error\Required\ApiToken
+     * @throws \Paynl\Error\Required\ServiceId
+     */
     public static function doCapture($transactionId, $amount = null)
     {
         try {
@@ -118,14 +129,30 @@ class Transaction
             $result = array();
         }
 
-       return is_array($result) ? $result : array();
+        return is_array($result) ? $result : array();
     }
 
     /**
      * @param $payOrderId
+     * @return void
      */
     public static function removeProcessing($payOrderId)
     {
         Db::getInstance()->delete('pay_processing', 'payOrderId = "' . $payOrderId . '"');
+    }
+
+    /**
+     * @param $transactionId
+     * @param $orderId
+     * @param $paymentOptionId
+     * @return void
+     */
+    public static function updatePaymentMethod($transactionId, $paymentOptionId)
+    {
+        $db = Db::getInstance();
+
+        // Update Pay. transaction table
+        $sql = "UPDATE `" . _DB_PREFIX_ . "pay_transactions` SET `payment_option_id` = '" . Db::getInstance()->escape($paymentOptionId) . "', `updated_at` = now() WHERE `" . _DB_PREFIX_ . "pay_transactions`.`transaction_id` = '" . Db::getInstance()->escape($transactionId) . "';"; // phpcs:ignore
+        $db->execute($sql);
     }
 }
