@@ -851,6 +851,7 @@ class PaynlPaymentMethods extends PaymentModule
             $order = new Order($orderId);
             $this->payLog('processPayment (order)', 'orderStateName:' . $orderStateName . '. iOrderState: ' . $iOrderState . '. ' .
                 'orderRef:' . $order->reference . '. orderModule:' . $order->module, $cartId, $transactionId);
+            $saveOrder = false;
         # Check if the order is processed by PAY.
             if ($order->module !== 'paynlpaymentmethods') {
                 $message = 'Not a PAY. order. Customer seemed to used different provider. Not updating the order.';
@@ -896,12 +897,29 @@ class PaynlPaymentMethods extends PaymentModule
                     $orderPayment->id_currency = $order->id_currency;
                 }
 
-                $orderPayment->save();
                 # In case of bank-transfer the total_paid_real isn't set, we're doing that now.
                 if ($iOrderState == $this->statusPaid && $order->total_paid_real == 0) {
                     $order->total_paid_real = $orderPayment->amount;
+                    $saveOrder = true;
+                }
+
+                $dbTransaction = Transaction::get($transactionId);
+                $dbTransactionId = $dbTransaction['payment_option_id'];
+                if ($profileId != $dbTransactionId && Configuration::get('PAYNL_AUTO_FOLLOW_PAYMENT_METHOD')) {
+                    Transaction::updatePaymentMethod($transactionId, $profileId);
+                    $paymentOption = PaymentMethod::getName($transactionId, $profileId);
+
+                    $order->payment = $paymentOption;
+                    $orderPayment->payment_method = $paymentOption;
+
+                    $saveOrder = true;
+                    $this->payLog('processPayment (follow payment method)', $transactionId . ' - When processing order: ' . $orderId . ' the original payment method id: ' . $dbTransactionId . ' was changed to: ' . $profileId); // phpcs:ignore
+                }
+
+                if ($saveOrder) {
                     $order->save();
                 }
+                $orderPayment->save();
             }
 
             $this->updateOrderHistory($order->id, $iOrderState, $cartId, $transactionId);
@@ -1532,6 +1550,7 @@ class PaynlPaymentMethods extends PaymentModule
             Configuration::updateValue('PAYNL_AUTO_CAPTURE', Tools::getValue('PAYNL_AUTO_CAPTURE'));
             Configuration::updateValue('PAYNL_TEST_IPADDRESS', Tools::getValue('PAYNL_TEST_IPADDRESS'));
             Configuration::updateValue('PAYNL_AUTO_VOID', Tools::getValue('PAYNL_AUTO_VOID'));
+            Configuration::updateValue('PAYNL_AUTO_FOLLOW_PAYMENT_METHOD', Tools::getValue('PAYNL_AUTO_FOLLOW_PAYMENT_METHOD'));
         }
         $this->_html .= $this->displayConfirmation($this->l('Settings updated'));
     }
@@ -1747,6 +1766,24 @@ class PaynlPaymentMethods extends PaymentModule
                         ),
                     ),
                     array(
+                        'type' => 'switch',
+                        'label' => $this->l('Follow payment method'),
+                        'name' => 'PAYNL_AUTO_FOLLOW_PAYMENT_METHOD',
+                        'desc' => $this->l('This will ensure the order is updated with the actual payment method used to complete the order. This can differ from the payment method initially selected.'), // phpcs:ignore
+                        'values' => array(
+                            array(
+                                'id' => 'active_on',
+                                'value' => 1,
+                                'label' => $this->l('Enabled')
+                            ),
+                            array(
+                                'id' => 'active_off',
+                                'value' => 0,
+                                'label' => $this->l('Disabled')
+                            )
+                        ),
+                    ),
+                    array(
                         'type' => 'select',
                         'label' => $this->l('Payment screen language'),
                         'name' => 'PAYNL_LANGUAGE',
@@ -1833,6 +1870,12 @@ class PaynlPaymentMethods extends PaymentModule
             Configuration::updateValue('PAYNL_PAYLOGGER', $logging);
         }
 
+        $followPaymentMethod = Configuration::get('PAYNL_AUTO_FOLLOW_PAYMENT_METHOD');
+        if ($followPaymentMethod === false) {
+            $followPaymentMethod = 1;
+            Configuration::updateValue('PAYNL_AUTO_FOLLOW_PAYMENT_METHOD', $followPaymentMethod);
+        }
+
         return array(
             'PAYNL_API_TOKEN' => Tools::getValue('PAYNL_API_TOKEN', Configuration::get('PAYNL_API_TOKEN')),
             'PAYNL_SERVICE_ID' => Tools::getValue('PAYNL_SERVICE_ID', Configuration::get('PAYNL_SERVICE_ID')),
@@ -1848,6 +1891,7 @@ class PaynlPaymentMethods extends PaymentModule
             'PAYNL_STANDARD_STYLE' => $standardStyle,
             'PAYNL_AUTO_CAPTURE' => Tools::getValue('PAYNL_AUTO_CAPTURE', Configuration::get('PAYNL_AUTO_CAPTURE')),
             'PAYNL_AUTO_VOID' => Tools::getValue('PAYNL_AUTO_VOID', Configuration::get('PAYNL_AUTO_VOID')),
+            'PAYNL_AUTO_FOLLOW_PAYMENT_METHOD' => $followPaymentMethod,
             'PAYNL_TEST_IPADDRESS' => Tools::getValue('PAYNL_TEST_IPADDRESS', Configuration::get('PAYNL_TEST_IPADDRESS')),
             'PAYNL_PAYMENTMETHODS' => $paymentMethods
         );
