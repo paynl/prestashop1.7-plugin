@@ -65,7 +65,7 @@ class PaynlPaymentMethods extends PaymentModule
     {
         $this->name = 'paynlpaymentmethods';
         $this->tab = 'payments_gateways';
-        $this->version = '4.17.0';
+        $this->version = '4.17.1';
         $this->payLogEnabled = null;
         $this->ps_versions_compliancy = array('min' => '1.7', 'max' => _PS_VERSION_);
         $this->author = 'PAY.';
@@ -105,10 +105,6 @@ class PaynlPaymentMethods extends PaymentModule
             $this->unregisterHook('paymentReturn');
         }
 
-        if (!$this->isRegisteredInHook('displayPaymentReturn')) {
-            $this->registerHook('displayPaymentReturn');
-        }
-
         if ($this->isRegisteredInHook('actionProductCancel')) {
             $this->unregisterHook('actionProductCancel');
         }
@@ -139,7 +135,6 @@ class PaynlPaymentMethods extends PaymentModule
         if (
             !parent::install()
             || !$this->registerHook('paymentOptions')
-            || !$this->registerHook('displayPaymentReturn')
             || !$this->registerHook('displayAdminOrder')
             || !$this->registerHook('actionAdminControllerSetMedia')
             || !$this->registerHook('displayHeader')
@@ -226,13 +221,14 @@ class PaynlPaymentMethods extends PaymentModule
         }
 
         $payOrderAmount = 0;
+        $amountRefunded = 0;
         $methodName = 'PAY.';
         try {
             $transaction = $this->getTransaction($transactionId);
             $arrTransactionDetails = $transaction->getData();
             $payOrderAmount = $transaction->getPaidAmount();
             $status = $arrTransactionDetails['paymentDetails']['stateName'];
-            $amoutRefunded = $arrTransactionDetails['paymentDetails']['refundAmount'] / 100;
+            $amountRefunded = $arrTransactionDetails['paymentDetails']['refundAmount'] / 100;
             $profileId = $transaction->getPaymentProfileId();
             $methodName = PaymentMethod::getName($transactionId, $profileId);
             $showCaptureButton = $transaction->isAuthorized();
@@ -242,12 +238,13 @@ class PaynlPaymentMethods extends PaymentModule
             $showRefundButton = false;
             $showCaptureButton = false;
             $showCaptureRemainingButton = false;
+            $this->payLog('Pay. Panel', 'Unable to load Pay panel correctly, error: ' . $exception->getMessage(), $cartId, $transactionId);
         }
 
         $amountFormatted = number_format($order->total_paid, 2, ',', '.');
         $amountPayFormatted = number_format($payOrderAmount, 2, ',', '.');
-        $amountFormattedRefunded = number_format($amoutRefunded, 2, ',', '.');
-        $amountFormattedRefundable = number_format($order->total_paid - $amoutRefunded, 2, ',', '.');
+        $amountFormattedRefunded = number_format($amountRefunded, 2, ',', '.');
+        $amountFormattedRefundable = number_format($order->total_paid - $amountRefunded, 2, ',', '.');
 
         $this->context->smarty->assign(array(
         'lang' => $this->getMultiLang(),
@@ -258,8 +255,8 @@ class PaynlPaymentMethods extends PaymentModule
         'amountFormattedRefunded' => $amountFormattedRefunded,
         'amountFormattedRefundable' => $amountFormattedRefundable,
         'amount' => $order->total_paid,
-        'amoutRefunded' => $amoutRefunded,
-        'currency' => $currency->iso_code,
+        'amountRefunded' => $amountRefunded,
+        'currency' => $currency,
         'pay_orderid' => $transactionId,
         'status' => $status,
         'method' => $methodName,
