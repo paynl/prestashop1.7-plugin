@@ -1595,11 +1595,12 @@ class PaynlPaymentMethods extends PaymentModule
                         'desc' => '<span class="pay-status">'.$statusHTML.'</span>', // phpcs:ignore
                     ),
                     array(
-                        'type' => 'password',
+                        'type' => 'text',
                         'label' => $this->l('API-token'),
                         'name' => 'PAYNL_API_TOKEN',
                         'desc' => $this->l('You can find your API-token ') . '<a href="https://admin.pay.nl/company/tokens">' . $this->l('here') . '</a>' . $this->l(', not registered at PAY? Sign up ') . '<a href="https://www.pay.nl/en?register">' . $this->l('here') . '</a>', // phpcs:ignore
-                        'required' => true
+                        'required' => true,
+                        'class' => 'obscuredInput'
                     ),
                     array(
                         'type' => 'text',
