@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => 'paynl/paynlpaymentmethods',
-        'pretty_version' => 'dev-master',
-        'version' => 'dev-master',
-        'reference' => '2ea4f7686143fcff725a9296fdb2b55b6d956cfe',
+        'pretty_version' => '1.0.0+no-version-set',
+        'version' => '1.0.0.0',
+        'reference' => NULL,
         'type' => 'prestashop-module',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -11,9 +11,9 @@
     ),
     'versions' => array(
         'paynl/paynlpaymentmethods' => array(
-            'pretty_version' => 'dev-master',
-            'version' => 'dev-master',
-            'reference' => '2ea4f7686143fcff725a9296fdb2b55b6d956cfe',
+            'pretty_version' => '1.0.0+no-version-set',
+            'version' => '1.0.0.0',
+            'reference' => NULL,
             'type' => 'prestashop-module',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -29,9 +29,9 @@
             'dev_requirement' => false,
         ),
         'php-curl-class/php-curl-class' => array(
-            'pretty_version' => '8.5.0',
-            'version' => '8.5.0.0',
-            'reference' => '2b387e3ef1c8a1d6116a1459c0e3e71643f86806',
+            'pretty_version' => '9.19.2',
+            'version' => '9.19.2.0',
+            'reference' => 'c41efeb4ea2dc3cf8f90f8f967b0fcf45a41e294',
             'type' => 'library',
             'install_path' => __DIR__ . '/../php-curl-class/php-curl-class',
             'aliases' => array(),

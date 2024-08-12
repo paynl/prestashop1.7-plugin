@@ -57,6 +57,8 @@ class PaynlPaymentMethods extends PaymentModule
     private $statusCanceled;
     private $paymentMethods;
     private $payLogEnabled;
+    private int $is_eu_compatible;
+    private array $fields_form;
 
     /**
      * Constructor.
