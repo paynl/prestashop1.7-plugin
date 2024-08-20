@@ -11,16 +11,25 @@
     "authors": [
         {
             "name": "Zach Borboa"
+        },
+        {
+            "name": "Contributors",
+            "homepage": "https://github.com/php-curl-class/php-curl-class/graphs/contributors"
         }
     ],
     "require": {
-        "php": ">=5.3",
+        "php": ">=7.0",
         "ext-curl": "*"
     },
     "require-dev": {
+        "dealerdirect/phpcodesniffer-composer-installer": "*",
         "ext-gd": "*",
+        "friendsofphp/php-cs-fixer": "*",
+        "phpcompatibility/php-compatibility": "dev-develop",
+        "phpcsstandards/phpcsutils": "@alpha",
         "phpunit/phpunit": "*",
-        "squizlabs/php_codesniffer": "*"
+        "squizlabs/php_codesniffer": "*",
+        "vimeo/psalm": ">=0.3.63"
     },
     "suggest": {
         "ext-mbstring": "*"
@@ -28,6 +37,17 @@
     "autoload": {
         "psr-4": {
             "Curl\\": "src/Curl/"
+        }
+    },
+    "autoload-dev": {
+        "files": [
+            "./tests/Helper.php",
+            "./tests/User.php"
+        ]
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
         }
     }
 }

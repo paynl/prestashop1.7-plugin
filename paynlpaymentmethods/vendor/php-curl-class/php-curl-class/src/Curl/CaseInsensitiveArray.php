@@ -1,12 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Curl;
 
+/**
+ * @psalm-suppress MissingTemplateParam
+ */
 class CaseInsensitiveArray implements \ArrayAccess, \Countable, \Iterator
 {
-
     /**
-     * @var mixed[] Data storage with lower-case keys
+     * @var mixed[] Data storage with lowercase keys.
+     *
      * @see offsetSet()
      * @see offsetExists()
      * @see offsetUnset()
@@ -16,30 +21,33 @@ class CaseInsensitiveArray implements \ArrayAccess, \Countable, \Iterator
      * @see next()
      * @see key()
      */
-    private $data = array();
+    private $data = [];
 
     /**
-     * @var string[] Case-Sensitive keys.
+     * @var string[] Case-sensitive keys.
+     *
      * @see offsetSet()
      * @see offsetUnset()
      * @see key()
      */
-    private $keys = array();
+    private $keys = [];
 
     /**
      * Construct
      *
-     * Allow creating either an empty Array, or convert an existing Array to a
-     * Case-Insensitive Array.  (Caution: Data may be lost when converting Case-
-     * Sensitive Arrays to Case-Insensitive Arrays)
+     * Allow creating an empty array or converting an existing array to a
+     * case-insensitive array. Caution: Data may be lost when converting
+     * case-sensitive arrays to case-insensitive arrays.
      *
-     * @param mixed[] $initial (optional) Existing Array to convert.
-     *
+     * @param  mixed[]              $initial (optional) Existing array to convert.
      * @return CaseInsensitiveArray
-     *
-     * @access public
      */
-    public function __construct(array $initial = null)
+    // TODO: Use a nullable type declaration when supported versions >= PHP 7.1.
+    //   Trying to use the nullable type declaration on PHP 7.0:
+    //     public function __construct(?array $initial = null)
+    //   results in:
+    //     ParseError: syntax error, unexpected '?', expecting variable (T_VARIABLE)
+    public function __construct($initial = null)
     {
         if ($initial !== null) {
             foreach ($initial as $key => $value) {
@@ -51,19 +59,16 @@ class CaseInsensitiveArray implements \ArrayAccess, \Countable, \Iterator
     /**
      * Offset Set
      *
-     * Set data at a specified Offset.  Converts the offset to lower-case, and
-     * stores the Case-Sensitive Offset and the Data at the lower-case indexes
-     * in $this->keys and @this->data.
+     * Set data at a specified offset. Converts the offset to lowercase, and
+     * stores the case-sensitive offset and the data at the lowercase indexes in
+     * $this->keys and @this->data.
      *
-     * @see https://secure.php.net/manual/en/arrayaccess.offseteset.php
-     *
-     * @param string $offset The offset to store the data at (case-insensitive).
-     * @param mixed $value The data to store at the specified offset.
-     *
+     * @param  string $offset The offset to store the data at (case-insensitive).
+     * @param  mixed  $value  The data to store at the specified offset.
      * @return void
-     *
-     * @access public
+     * @see https://secure.php.net/manual/en/arrayaccess.offsetset.php
      */
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset, $value)
     {
         if ($offset === null) {
@@ -78,17 +83,14 @@ class CaseInsensitiveArray implements \ArrayAccess, \Countable, \Iterator
     /**
      * Offset Exists
      *
-     * Checks if the Offset exists in data storage.  The index is looked up with
-     * the lower-case version of the provided offset.
+     * Checks if the offset exists in data storage. The index is looked up with
+     * the lowercase version of the provided offset.
      *
+     * @param  string $offset Offset to check
+     * @return bool   If the offset exists.
      * @see https://secure.php.net/manual/en/arrayaccess.offsetexists.php
-     *
-     * @param string $offset Offset to check
-     *
-     * @return bool If the offset exists.
-     *
-     * @access public
      */
+    #[\ReturnTypeWillChange]
     public function offsetExists($offset)
     {
         return (bool) array_key_exists(strtolower($offset), $this->data);
@@ -98,16 +100,13 @@ class CaseInsensitiveArray implements \ArrayAccess, \Countable, \Iterator
      * Offset Unset
      *
      * Unsets the specified offset. Converts the provided offset to lowercase,
-     * and unsets the Case-Sensitive Key, as well as the stored data.
+     * and unsets the case-sensitive key, as well as the stored data.
      *
-     * @see https://secure.php.net/manual/en/arrayaccess.offsetunset.php
-     *
-     * @param string $offset The offset to unset.
-     *
+     * @param  string $offset The offset to unset.
      * @return void
-     *
-     * @access public
+     * @see https://secure.php.net/manual/en/arrayaccess.offsetunset.php
      */
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         $offsetlower = strtolower($offset);
@@ -119,33 +118,27 @@ class CaseInsensitiveArray implements \ArrayAccess, \Countable, \Iterator
      * Offset Get
      *
      * Return the stored data at the provided offset. The offset is converted to
-     * lowercase and the lookup is done on the Data store directly.
+     * lowercase and the lookup is done on the data store directly.
      *
+     * @param  string $offset Offset to lookup.
+     * @return mixed  The data stored at the offset.
      * @see https://secure.php.net/manual/en/arrayaccess.offsetget.php
-     *
-     * @param string $offset Offset to lookup.
-     *
-     * @return mixed The data stored at the offset.
-     *
-     * @access public
      */
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         $offsetlower = strtolower($offset);
-        return isset($this->data[$offsetlower]) ? $this->data[$offsetlower] : null;
+        return $this->data[$offsetlower] ?? null;
     }
 
     /**
      * Count
      *
-     * @see https://secure.php.net/manual/en/countable.count.php
-     *
      * @param void
-     *
-     * @return int The number of elements stored in the Array.
-     *
-     * @access public
+     * @return int The number of elements stored in the array.
+     * @see https://secure.php.net/manual/en/countable.count.php
      */
+    #[\ReturnTypeWillChange]
     public function count()
     {
         return (int) count($this->data);
@@ -154,14 +147,11 @@ class CaseInsensitiveArray implements \ArrayAccess, \Countable, \Iterator
     /**
      * Current
      *
-     * @see https://secure.php.net/manual/en/iterator.current.php
-     *
      * @param void
-     *
      * @return mixed Data at the current position.
-     *
-     * @access public
+     * @see https://secure.php.net/manual/en/iterator.current.php
      */
+    #[\ReturnTypeWillChange]
     public function current()
     {
         return current($this->data);
@@ -170,14 +160,11 @@ class CaseInsensitiveArray implements \ArrayAccess, \Countable, \Iterator
     /**
      * Next
      *
-     * @see https://secure.php.net/manual/en/iterator.next.php
-     *
      * @param void
-     *
      * @return void
-     *
-     * @access public
+     * @see https://secure.php.net/manual/en/iterator.next.php
      */
+    #[\ReturnTypeWillChange]
     public function next()
     {
         next($this->data);
@@ -186,45 +173,37 @@ class CaseInsensitiveArray implements \ArrayAccess, \Countable, \Iterator
     /**
      * Key
      *
-     * @see https://secure.php.net/manual/en/iterator.key.php
-     *
      * @param void
-     *
-     * @return mixed Case-Sensitive key at current position.
-     *
-     * @access public
+     * @return mixed Case-sensitive key at current position.
+     * @see https://secure.php.net/manual/en/iterator.key.php
      */
+    #[\ReturnTypeWillChange]
     public function key()
     {
         $key = key($this->data);
-        return isset($this->keys[$key]) ? $this->keys[$key] : $key;
+        return $this->keys[$key] ?? $key;
     }
 
     /**
      * Valid
      *
-     * @see https://secure.php.net/manual/en/iterator.valid.php
-     *
      * @return bool If the current position is valid.
-     *
-     * @access public
+     * @see https://secure.php.net/manual/en/iterator.valid.php
      */
+    #[\ReturnTypeWillChange]
     public function valid()
     {
-        return (bool) !(key($this->data) === null);
+        return (bool) (key($this->data) !== null);
     }
 
     /**
      * Rewind
      *
-     * @see https://secure.php.net/manual/en/iterator.rewind.php
-     *
      * @param void
-     *
      * @return void
-     *
-     * @access public
+     * @see https://secure.php.net/manual/en/iterator.rewind.php
      */
+    #[\ReturnTypeWillChange]
     public function rewind()
     {
         reset($this->data);

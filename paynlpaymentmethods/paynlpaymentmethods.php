@@ -57,6 +57,8 @@ class PaynlPaymentMethods extends PaymentModule
     private $statusCanceled;
     private $paymentMethods;
     private $payLogEnabled;
+    private int $is_eu_compatible;
+    private array $fields_form;
 
     /**
      * Constructor.
@@ -65,7 +67,7 @@ class PaynlPaymentMethods extends PaymentModule
     {
         $this->name = 'paynlpaymentmethods';
         $this->tab = 'payments_gateways';
-        $this->version = '4.17.2';
+        $this->version = '4.17.3';
         $this->payLogEnabled = null;
         $this->ps_versions_compliancy = array('min' => '1.7', 'max' => _PS_VERSION_);
         $this->author = 'PAY.';

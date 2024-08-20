@@ -21,8 +21,8 @@ echo $curl->response;
 Safer:
 
 ```php
-function is_allowed_url($url, $allowed_url_schemes = array('http', 'https')) {
-    $valid_url = filter_var($url, FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED | FILTER_FLAG_HOST_REQUIRED) !== false;
+function is_allowed_url($url, $allowed_url_schemes = ['http', 'https']) {
+    $valid_url = filter_var($url, FILTER_VALIDATE_URL) !== false;
     if ($valid_url) {
         $scheme = parse_url($url, PHP_URL_SCHEME);
         return in_array($scheme, $allowed_url_schemes, true);
@@ -35,12 +35,31 @@ $url = $_GET['url'];
 if (!is_allowed_url($url)) {
     die('Unsafe url detected.');
 }
+
+$curl = new Curl();
+$curl->setProtocols(CURLPROTO_HTTPS);
+$curl->setRedirectProtocols(CURLPROTO_HTTPS);
+$curl->get($url);
 ```
 
 ### Url may point to internal urls
 
 * Url may point to internal urls including those behind a firewall (e.g. http://192.168.0.1/ or ftp://192.168.0.1/). Use
   a whitelist to allow certain urls rather than a blacklist.
+
+* Use `Curl::setProtocols()` and `Curl::setRedirectProtocols()` to restrict allowed protocols.
+
+```php
+// Allow only HTTPS protocols.
+$curl->setProtocols(CURLPROTO_HTTPS);
+$curl->setRedirectProtocols(CURLPROTO_HTTPS);
+```
+
+```php
+// Allow HTTPS and HTTP protocols.
+$curl->setProtocols(CURLPROTO_HTTPS | CURLPROTO_HTTP);
+$curl->setRedirectProtocols(CURLPROTO_HTTPS | CURLPROTO_HTTP);
+```
 
 ### Request data may refer to system files
 
@@ -54,9 +73,9 @@ $ curl https://www.example.com/upload_photo.php --data "photo=@/etc/passwd"
 ```php
 // upload_photo.php
 $curl = new Curl();
-$curl->post('http://www.anotherwebsite.com/', array(
+$curl->post('http://www.anotherwebsite.com/', [
     'photo' => $_POST['photo'], // DANGER!
-));
+]);
 ```
 
 ### Unsafe response with redirection enabled
