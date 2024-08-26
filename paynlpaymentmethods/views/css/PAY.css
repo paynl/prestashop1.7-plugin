@@ -187,3 +187,30 @@
     top: 50%;
     transform: translate(0, -50%);
 }
+
+#module_form .obscuredInput {
+    text-security: disc;
+    -webkit-text-security: disc;
+    -moz-text-security: disc;
+    padding-right: 38px;
+}
+
+#module_form .obscuredInput.display {
+    text-security: none;
+    -webkit-text-security: none;
+    -moz-text-security: none;
+}
+
+#module_form .obscuredDisplayShow {
+    position: absolute;
+    right: 5px;
+    top: 0;
+    cursor: pointer;
+    background-image: url(/modules/paynlpaymentmethods/views/images/showPasswordIcon.png);
+    height: 39px;
+    width: 50px;
+    display: block;
+    background-repeat: no-repeat;
+    background-size: 30px 35px;
+    background-position: center center;
+}

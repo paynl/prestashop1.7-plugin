@@ -241,4 +241,16 @@ jQuery(document).ready(function () {
             }, 750);
         
     });
+
+    jQuery('.obscuredInput').each(function () {
+        button = jQuery('<a class="obscuredDisplayShow"></a>');
+        button.click(function () {
+            toggleObscured(this);
+        });
+        jQuery(this).parent().append(button);
+    })
+    
+    function toggleObscured (element) {
+        jQuery(element).parent().find('.obscuredInput').toggleClass('display');
+    }
 });
