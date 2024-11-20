@@ -38,7 +38,8 @@ class PaynlPaymentMethodsFinishModuleFrontController extends ModuleFrontControll
     private $order = null;
     private $payOrderId = null;
     private $orderStatusId = null;
-    private $paymentSessionId = null;
+    private $paymentSessionId = null;    
+    private $paymentProfileId = null;
 /**
    * @see FrontController::postProcess()
    * @return void
@@ -64,6 +65,7 @@ class PaynlPaymentMethodsFinishModuleFrontController extends ModuleFrontControll
             $transactionData = $transaction->getData();
             $ppid = !empty($transactionData['paymentDetails']['paymentOptionId']) ? $transactionData['paymentDetails']['paymentOptionId'] : null;
             $stateName = !empty($transactionData['paymentDetails']['stateName']) ? $transactionData['paymentDetails']['stateName'] : 'unknown';
+            $this->paymentProfileId = $transactionData['paymentDetails']['paymentProfileId'] ?? 0;
         } catch (Exception $e) {
             $module->payLog('finishPostProcess', 'Could not retrieve transaction', null, $transactionId);
             return;
@@ -105,7 +107,7 @@ class PaynlPaymentMethodsFinishModuleFrontController extends ModuleFrontControll
                 $this->errors[] = $this->module->l('The payment has been denied', 'finish');
                 $this->redirectWithNotifications('index.php?controller=order&step=1');
             } elseif ($transaction->isCanceled()) {
-                if (!empty($orderId)) {
+                if (!empty($orderId) || $this->paymentProfileId == '138') {
                     $this->createNewCart($cartId);
                 }
                 $this->errors[] = $this->module->l('The payment has been canceled', 'finish');
