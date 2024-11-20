@@ -49,7 +49,7 @@ class PaynlPaymentMethodsAjaxModuleFrontController extends ModuleFrontController
     }
 
     /**
-     * @return bool
+     * @return boolean
      */
     private function isAdminSessionValid()
     {
