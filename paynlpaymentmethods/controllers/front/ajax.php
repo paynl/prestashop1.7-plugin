@@ -35,6 +35,34 @@ class PaynlPaymentMethodsAjaxModuleFrontController extends ModuleFrontController
     /**
      * @return void
      */
+    public function init()
+    {
+        parent::init();
+
+        if (!$this->isAdminSessionValid()) {
+            header('HTTP/1.1 403 Forbidden');
+
+            $this->errors[] = $this->module->l('Access Denied: You do not have permission to access this page.');
+            $this->redirectWithNotifications('index.php');
+            exit;
+        }
+    }
+
+    /**
+     * @return boolean
+     */
+    private function isAdminSessionValid()
+    {
+        $cookie = new Cookie('psAdmin');
+        if (isset($cookie->id_employee)) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * @return void
+     */
     public function initContent()
     {
         $calltype = Tools::getValue('calltype');
