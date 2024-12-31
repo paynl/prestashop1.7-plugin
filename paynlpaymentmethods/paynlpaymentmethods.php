@@ -844,10 +844,15 @@ class PaynlPaymentMethods extends PaymentModule
         $paymentMethodName = PaymentMethod::getName($transactionId, $profileId);
         $cart = new Cart((int)$cartId);
         $this->context->cart = $cart;
-        $cartTotalPrice = (version_compare(_PS_VERSION_, '1.7.7.0', '>=')) ? $cart->getCartTotalPrice() : $this->getCartTotalPrice($cart);
-        $amountPaid = $transaction->getPaidAmount();
-        if ($transaction->isAuthorized()) {
-            $amountPaid = $transaction->getAmount();
+        $cartTotalPrice = (version_compare(_PS_VERSION_, '1.7.7.0', '>=')) ? $cart->getCartTotalPrice() : $this->getCartTotalPrice($cart);        
+        $arrPayAmounts = array($transaction->getPaidAmount(), $transaction->getAmount(), $transaction->getCurrencyAmount(), $transaction->getPaidCurrencyAmount());
+        $amountPaid = in_array(round($cartTotalPrice, 2), $arrPayAmounts) ? $cartTotalPrice : null;
+        if (is_null($amountPaid)) {
+            if (in_array(round($cart->getOrderTotal(), 2), $arrPayAmounts)) {
+                $amountPaid = $cart->getOrderTotal();
+            } elseif (in_array(round($cart->getOrderTotal(false), 2), $arrPayAmounts)) {
+                $amountPaid = $cart->getOrderTotal(false);
+            }
         }
 
         $this->payLog('processPayment (order)', 'getOrderTotal: ' . $cart->getOrderTotal() . ' getOrderTotal(false): ' . $cart->getOrderTotal(false) . '. cartTotalPrice: ' . $cartTotalPrice, $cartId, $transactionId); // phpcs:ignore
