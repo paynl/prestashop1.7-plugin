@@ -41,10 +41,9 @@ class PaynlPaymentMethodsAjaxModuleFrontController extends ModuleFrontController
 
         if (!$this->isAdminSessionValid()) {
             header('HTTP/1.1 403 Forbidden');
-
             $this->errors[] = $this->module->l('Access Denied: You do not have permission to access this page.');
             $this->redirectWithNotifications('index.php');
-            exit;
+            exit();
         }
     }
 
