@@ -747,16 +747,15 @@ class PaynlPaymentMethods extends PaymentModule
         $paymentOptions = array();
         $paymentOptionText = null;
         $paymentDropdownText = null;
-        $type = 'dropdown';
+        
         if ($payment_option_id == PaymentMethod::METHOD_IDEAL) {
-            PayHelper::sdkLogin();
-            $paymentOptions = \Paynl\Paymentmethods::getBanks($payment_option_id);
-            $paymentOptionText = $this->l('Please select your bank');
-            $paymentDropdownText = $this->l('Choose your bank');
-
-            $type = 'radio';
-            $objPaymentMethod = $this->getPaymentMethod($payment_option_id);
-            if (!empty($objPaymentMethod->bank_selection)) {
+            $type = 'off';
+            $objPaymentMethod = $this->getPaymentMethod($payment_option_id);       
+            if (!empty($objPaymentMethod->bank_selection) && $objPaymentMethod->bank_selection != 'off') {
+                PayHelper::sdkLogin();
+                $paymentOptions = \Paynl\Paymentmethods::getBanks($payment_option_id);
+                $paymentOptionText = $this->l('Please select your bank');
+                $paymentDropdownText = $this->l('Choose your bank');            
                 $type = $objPaymentMethod->bank_selection;
             }
         }
@@ -2007,7 +2006,7 @@ class PaynlPaymentMethods extends PaymentModule
                                     $paymentmethod->bank_selection = 'dropdown';
                                 }
                                 if ($paymentmethod->id == PaymentMethod::METHOD_IDEAL) {
-                                    $paymentmethod->bank_selection = 'radio';
+                                    $paymentmethod->bank_selection = 'off';
                                 }
                                 $changed = true;
                             }
