@@ -747,9 +747,9 @@ class PaynlPaymentMethods extends PaymentModule
         $paymentOptions = array();
         $paymentOptionText = null;
         $paymentDropdownText = null;
+        $type = 'off';
         
-        if ($payment_option_id == PaymentMethod::METHOD_IDEAL) {
-            $type = 'off';
+        if ($payment_option_id == PaymentMethod::METHOD_IDEAL) {            
             $objPaymentMethod = $this->getPaymentMethod($payment_option_id);       
             if (!empty($objPaymentMethod->bank_selection) && $objPaymentMethod->bank_selection != 'off') {
                 PayHelper::sdkLogin();
