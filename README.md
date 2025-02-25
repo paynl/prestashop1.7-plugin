@@ -31,7 +31,7 @@ Bank Transfer | Cartasi | GivaCard |           SprayPay           | Przelewy24 |
 
 # Requirements
 
-    PHP 7.0 or higher
+    PHP 7.4 or higher
     Tested up to PrestaShop 1.7.8.4
     Tested up to PrestaShop 8.1
 
