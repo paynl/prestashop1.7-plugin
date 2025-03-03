@@ -1952,7 +1952,7 @@ class PaynlPaymentMethods extends PaymentModule
                                 $changed = true;
                             }
 
-                            if (!isset($paymentmethod->allowed_countries)) {
+                            if (!isset($paymentmethod->allowed_countries) || is_null($paymentmethod->allowed_countries)) {
                                 $paymentmethod->allowed_countries = [];
                                 $changed = true;
                             }
@@ -1966,7 +1966,7 @@ class PaynlPaymentMethods extends PaymentModule
                                 $changed = true;
                             }
 
-                            if (!isset($paymentmethod->allowed_carriers)) {
+                            if (!isset($paymentmethod->allowed_carriers) || is_null($paymentmethod->allowed_countries)) {
                                 $paymentmethod->allowed_carriers = [];
                                 $changed = true;
                             }
