@@ -1952,7 +1952,7 @@ class PaynlPaymentMethods extends PaymentModule
                                 $changed = true;
                             }
 
-                            if (!isset($paymentmethod->allowed_countries) || is_null($paymentmethod->allowed_countries)) {
+                            if (!isset($paymentmethod->allowed_countries)) {
                                 $paymentmethod->allowed_countries = [];
                                 $changed = true;
                             }
@@ -1966,7 +1966,7 @@ class PaynlPaymentMethods extends PaymentModule
                                 $changed = true;
                             }
 
-                            if (!isset($paymentmethod->allowed_carriers) || is_null($paymentmethod->allowed_countries)) {
+                            if (!isset($paymentmethod->allowed_carriers)) {
                                 $paymentmethod->allowed_carriers = [];
                                 $changed = true;
                             }
@@ -2078,8 +2078,8 @@ class PaynlPaymentMethods extends PaymentModule
         $this->context->controller->addJs($this->_path . 'views/js/jquery-ui/jquery-ui.min.js');
         $this->context->controller->addCss($this->_path . 'css/admin.css');
         $this->smarty->assign(array(
-            'available_countries' => $this->getCountries(),
-            'available_carriers' => $this->getCarriers(),
+            'available_countries' => $this->getCountries() ?? [],
+            'available_carriers' => $this->getCarriers() ?? [],
             'image_url' => $this->_path . 'views/images/',
             'languages' => Language::getLanguages(true),
             'paymentmethods' => (array) $this->getPaymentMethodsCombined(),
