@@ -67,7 +67,7 @@ class PaynlPaymentMethods extends PaymentModule
     {
         $this->name = 'paynlpaymentmethods';
         $this->tab = 'payments_gateways';
-        $this->version = '4.17.8';
+        $this->version = '4.17.9';
         $this->payLogEnabled = null;
         $this->ps_versions_compliancy = array('min' => '1.7', 'max' => _PS_VERSION_);
         $this->author = 'PAY.';
@@ -2078,8 +2078,8 @@ class PaynlPaymentMethods extends PaymentModule
         $this->context->controller->addJs($this->_path . 'views/js/jquery-ui/jquery-ui.min.js');
         $this->context->controller->addCss($this->_path . 'css/admin.css');
         $this->smarty->assign(array(
-            'available_countries' => $this->getCountries(),
-            'available_carriers' => $this->getCarriers(),
+            'available_countries' => $this->getCountries() ?? [],
+            'available_carriers' => $this->getCarriers() ?? [],
             'image_url' => $this->_path . 'views/images/',
             'languages' => Language::getLanguages(true),
             'paymentmethods' => (array) $this->getPaymentMethodsCombined(),
